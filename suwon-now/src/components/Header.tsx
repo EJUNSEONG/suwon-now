@@ -2,7 +2,7 @@ function Header() {
   return (
     <header>
       <div className="logo">
-        <h1>SUWON NOW</h1>
+        <h1>SUWON PLAY</h1>
       </div>
 
       <nav>
