@@ -18,6 +18,7 @@ body,
 body {
   background: #f5f5f5;
   overflow-x: hidden;
+  font-family: Arial, sans-serif;
 }
 
 /* ===========================
@@ -37,8 +38,6 @@ header {
   border-bottom: 1px solid #e5e5e5;
 }
 
-/* 로고 */
-
 .logo {
   flex-shrink: 0;
 }
@@ -55,8 +54,6 @@ header {
   white-space: nowrap;
 }
 
-/* 메뉴 */
-
 nav {
   flex: 1;
 
@@ -65,7 +62,6 @@ nav {
   align-items: center;
 
   gap: 14px;
-
   margin-left: 40px;
 }
 
@@ -74,17 +70,17 @@ nav a {
 
   padding: 12px 24px;
 
-  text-align: center;
-  text-decoration: none;
-
   color: #333;
-  font-size: 17px;
-  font-weight: 600;
-
   background: white;
 
   border: 1px solid #d9d9d9;
   border-radius: 10px;
+
+  text-align: center;
+  text-decoration: none;
+
+  font-size: 17px;
+  font-weight: 600;
 
   transition: 0.25s;
 }
@@ -104,70 +100,235 @@ main {
 }
 
 /* ===========================
-   Hero
+   Hero Section
 =========================== */
 
-.hero {
+.hero-section {
   width: 100%;
-  min-height: 550px;
+  padding-bottom: 20px;
+  background: #f5f5f5;
+}
+
+/* ===========================
+   Hero Slider
+=========================== */
+
+.hero-slider {
+  position: relative;
+
+  width: 100%;
+  height: 500px;
+
+  overflow: hidden;
+
+  background: #111;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: #111;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.8s ease;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+
+  margin: 0 auto;
+  padding: 0 80px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  color: white;
+  text-align: center;
+}
+
+.hero-category {
+  display: inline-block;
+
+  margin-bottom: 16px;
+
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.hero-content h2 {
+  max-width: 850px;
+
+  margin: 0 0 18px;
+
+  color: white;
+
+  font-size: 52px;
+  line-height: 1.2;
+
+  word-break: keep-all;
+}
+
+.hero-content p {
+  max-width: 720px;
+
+  margin: 0;
+
+  color: white;
+
+  font-size: 19px;
+  line-height: 1.7;
+
+  word-break: keep-all;
+}
+
+/* ===========================
+   Hero 버튼
+=========================== */
+
+.hero-buttons {
+  width: 100%;
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  padding: 60px 24px;
+  gap: 16px;
 
-  text-align: center;
-  color: white;
-
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  margin-top: 10px;
 }
 
-.hero-content {
-  width: 100%;
-  max-width: 1200px;
-}
+.hero-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-.hero h2 {
-  margin-bottom: 24px;
+  min-width: 190px;
+  padding: 15px 26px;
 
-  color: white;
+  color: #0a3655;
+  background: #8fd3ff;
 
-  font-size: clamp(34px, 4vw, 60px);
-  line-height: 1.2;
-  font-weight: 800;
+  border: 1px solid #8fd3ff;
+  border-radius: 12px;
 
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
   white-space: nowrap;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
 }
 
-.hero p {
-  max-width: 900px;
-  margin: 0 auto 35px;
-
-  color: white;
-
-  font-size: 22px;
-  line-height: 1.6;
+.hero-button:hover {
+  background: #66c2ff;
+  transform: translateY(-3px);
 }
 
-.hero button {
-  padding: 16px 35px;
+/* ===========================
+   Hero 화살표
+=========================== */
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+
+  transform: translateY(-50%);
+
+  width: 46px;
+  height: 46px;
+
+  color: #111;
+  background: rgba(255, 255, 255, 0.78);
 
   border: none;
-  border-radius: 10px;
+  border-radius: 50%;
 
-  background: white;
-  color: #1976d2;
-
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 32px;
+  line-height: 1;
 
   cursor: pointer;
-  transition: 0.3s;
 }
 
-.hero button:hover {
-  transform: translateY(-3px);
+.hero-arrow-left {
+  left: 22px;
+}
+
+.hero-arrow-right {
+  right: 22px;
+}
+
+/* ===========================
+   Hero 슬라이드 점
+=========================== */
+
+.hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 5;
+
+  display: flex;
+  gap: 10px;
+
+  transform: translateX(-50%);
+}
+
+.hero-dots button {
+  width: 10px;
+  height: 10px;
+
+  padding: 0;
+
+  background: rgba(255, 255, 255, 0.5);
+
+  border: none;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.hero-dots button.active {
+  width: 28px;
+
+  background: white;
+
+  border-radius: 999px;
 }
 
 /* ===========================
@@ -185,8 +346,8 @@ main {
 
   nav {
     justify-content: flex-start;
-    gap: 10px;
 
+    gap: 10px;
     margin-left: 24px;
 
     overflow-x: auto;
@@ -199,16 +360,26 @@ main {
 
   nav a {
     min-width: 88px;
+
     padding: 10px 18px;
+
     font-size: 16px;
   }
 
-  .hero {
-    min-height: 500px;
+  .hero-slider {
+    height: 480px;
   }
 
-  .hero p {
-    font-size: 19px;
+  .hero-content {
+    padding: 0 65px;
+  }
+
+  .hero-content h2 {
+    font-size: 45px;
+  }
+
+  .hero-content p {
+    font-size: 18px;
   }
 }
 
@@ -247,6 +418,11 @@ main {
     gap: 10px;
 
     overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
   }
 
   nav a {
@@ -261,42 +437,55 @@ main {
     border-radius: 9px;
   }
 
-  .hero {
-    min-height: calc(100vh - 135px);
-
-    padding: 50px 20px;
+  .hero-slider {
+    height: 460px;
   }
 
   .hero-content {
-    max-width: 100%;
+    padding: 0 55px;
   }
 
-  .hero h2 {
-    margin-bottom: 22px;
-
-    font-size: 38px;
-    line-height: 1.25;
-
-    white-space: normal;
-    word-break: keep-all;
+  .hero-category {
+    margin-bottom: 12px;
+    font-size: 12px;
   }
 
-  .hero p {
-    margin-bottom: 30px;
-
-    font-size: 18px;
-    line-height: 1.7;
-
-    word-break: keep-all;
+  .hero-content h2 {
+    font-size: 35px;
   }
 
-  .hero button {
-    width: 100%;
-    max-width: 280px;
+  .hero-content p {
+    font-size: 16px;
+  }
 
-    padding: 15px 24px;
+  .hero-buttons {
+    width: calc(100% - 40px);
+    margin: 10px auto 0;
+    gap: 10px;
+  }
 
-    font-size: 17px;
+  .hero-button {
+    flex: 1;
+
+    min-width: 0;
+    padding: 13px 12px;
+
+    font-size: 14px;
+  }
+
+  .hero-arrow {
+    width: 40px;
+    height: 40px;
+
+    font-size: 27px;
+  }
+
+  .hero-arrow-left {
+    left: 12px;
+  }
+
+  .hero-arrow-right {
+    right: 12px;
   }
 }
 
@@ -317,17 +506,275 @@ main {
     font-size: 14px;
   }
 
-  .hero {
-    min-height: calc(100vh - 128px);
-
-    padding: 45px 18px;
+  .hero-slider {
+    height: 430px;
   }
 
-  .hero h2 {
+  .hero-content {
+    padding: 0 42px;
+  }
+
+  .hero-content h2 {
+    font-size: 30px;
+  }
+
+  .hero-content p {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .hero-buttons {
+    width: calc(100% - 50px);
+
+    flex-direction: column;
+
+    margin-top: 100px;
+  }
+
+  .hero-button {
+    width: 100%;
+  }
+}
+/* ===========================
+   THIS WEEK
+=========================== */
+
+.this-week-section {
+  width: 100%;
+  padding: 80px 24px 100px;
+  background: #ffffff;
+}
+
+.section-inner {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.section-label {
+  display: inline-block;
+  margin-bottom: 8px;
+
+  color: #168de2;
+
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.section-heading h2 {
+  margin-bottom: 10px;
+
+  color: #111;
+
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+.section-heading p {
+  color: #666;
+
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.section-more {
+  flex-shrink: 0;
+
+  padding: 12px 18px;
+
+  color: #1976d2;
+  background: #edf7ff;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+
+  transition: 0.25s;
+}
+
+.section-more:hover {
+  background: #dcefff;
+  transform: translateY(-2px);
+}
+
+/* 카드 */
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.event-card {
+  overflow: hidden;
+
+  background: white;
+
+  border: 1px solid #e7e7e7;
+  border-radius: 18px;
+
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+}
+
+.event-image {
+  position: relative;
+
+  width: 100%;
+  height: 210px;
+
+  background-color: #111;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.event-category {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+
+  padding: 7px 11px;
+
+  color: white;
+  background: rgba(0, 0, 0, 0.72);
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.event-info {
+  padding: 20px;
+}
+
+.event-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.event-date strong {
+  color: #1976d2;
+  font-size: 15px;
+}
+
+.event-date span {
+  color: #888;
+  font-size: 14px;
+}
+
+.event-info h3 {
+  margin-bottom: 10px;
+
+  color: #171717;
+
+  font-size: 21px;
+  line-height: 1.35;
+
+  word-break: keep-all;
+}
+
+.event-info p {
+  margin-bottom: 20px;
+
+  color: #777;
+
+  font-size: 14px;
+}
+
+.event-detail-button {
+  width: 100%;
+
+  padding: 12px 16px;
+
+  color: #0a3655;
+  background: #b8e4ff;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.event-detail-button:hover {
+  color: white;
+  background: #4db4f5;
+}
+
+/* ===========================
+   THIS WEEK 태블릿
+=========================== */
+
+@media (max-width: 1024px) {
+  .event-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ===========================
+   THIS WEEK 모바일
+=========================== */
+
+@media (max-width: 768px) {
+  .this-week-section {
+    padding: 60px 18px 80px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+
+    margin-bottom: 28px;
+  }
+
+  .section-heading h2 {
     font-size: 34px;
   }
 
-  .hero p {
-    font-size: 17px;
+  .section-heading p {
+    font-size: 15px;
+  }
+
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-image {
+    height: 230px;
+  }
+
+  .section-more {
+    align-self: flex-start;
   }
 }
