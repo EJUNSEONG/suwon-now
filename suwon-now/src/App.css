@@ -778,3 +778,440 @@ main {
     align-self: flex-start;
   }
 }
+
+/* ========================================
+   SUWON PLAY ADMIN
+======================================== */
+
+.admin-page {
+  min-height: calc(100vh - 90px);
+  background: #f6f8fb;
+  padding: 60px 24px 100px;
+}
+
+.admin-container {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+/* 상단 영역 */
+
+.admin-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+.admin-label {
+  display: inline-block;
+  margin-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #1769d2;
+}
+
+.admin-top h1 {
+  margin: 0 0 10px;
+
+  font-size: 38px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.admin-top p {
+  margin: 0;
+
+  font-size: 15px;
+  color: #6b7280;
+}
+
+/* 새 일정 등록 버튼 */
+
+.admin-add-button {
+  border: none;
+  border-radius: 10px;
+
+  padding: 14px 22px;
+
+  background: #1769d2;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.admin-add-button:hover {
+  transform: translateY(-2px);
+  background: #0f58b5;
+}
+
+/* ========================================
+   요약 카드
+======================================== */
+
+.admin-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+
+  margin-bottom: 35px;
+}
+
+.admin-summary-card {
+  background: white;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  padding: 22px 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-summary-card span {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.admin-summary-card strong {
+  font-size: 30px;
+  color: #111827;
+}
+
+/* ========================================
+   일정 목록
+======================================== */
+
+.admin-list-section {
+  background: white;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  padding: 30px;
+}
+
+.admin-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-bottom: 22px;
+
+  border-bottom: 1px solid #eeeeee;
+}
+
+.admin-list-heading h2 {
+  margin: 0 0 6px;
+
+  font-size: 22px;
+  color: #111827;
+}
+
+.admin-list-heading p {
+  margin: 0;
+
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* 데이터가 없을 때 */
+
+.admin-empty {
+  text-align: center;
+
+  padding: 70px 20px;
+}
+
+.admin-empty h3 {
+  margin: 0 0 8px;
+
+  font-size: 18px;
+  color: #374151;
+}
+
+.admin-empty p {
+  margin: 0;
+
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* ========================================
+   일정 등록 팝업
+======================================== */
+
+.admin-modal-overlay {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 1000;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 30px;
+}
+
+.admin-modal {
+  width: min(680px, 100%);
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* 팝업 상단 */
+
+.admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  padding: 28px 30px 22px;
+
+  border-bottom: 1px solid #eeeeee;
+}
+
+.admin-modal-header h2 {
+  margin: 0;
+
+  font-size: 26px;
+  color: #111827;
+}
+
+.admin-modal-close {
+  width: 36px;
+  height: 36px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #f3f4f6;
+
+  font-size: 25px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.admin-modal-close:hover {
+  background: #e5e7eb;
+}
+
+/* ========================================
+   등록 Form
+======================================== */
+
+.admin-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  padding: 28px 30px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-form-full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+
+  padding: 12px 13px;
+
+  background: white;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus,
+.admin-form-group textarea:focus {
+  border-color: #1769d2;
+
+  box-shadow:
+    0 0 0 3px rgba(23, 105, 210, 0.1);
+}
+
+.admin-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* 파일 선택 */
+
+.admin-form-group input[type="file"] {
+  background: #f9fafb;
+}
+
+/* 공개 설정 */
+
+.admin-publish {
+  padding: 15px 0 0;
+}
+
+.admin-publish label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-publish input {
+  width: 17px;
+  height: 17px;
+
+  accent-color: #1769d2;
+}
+
+/* ========================================
+   팝업 하단 버튼
+======================================== */
+
+.admin-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding: 20px 30px 26px;
+
+  border-top: 1px solid #eeeeee;
+}
+
+.admin-cancel-button,
+.admin-submit-button {
+  padding: 12px 20px;
+
+  border-radius: 9px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.admin-cancel-button {
+  border: 1px solid #d1d5db;
+
+  background: white;
+  color: #374151;
+}
+
+.admin-submit-button {
+  border: none;
+
+  background: #1769d2;
+  color: white;
+}
+
+.admin-submit-button:hover {
+  background: #0f58b5;
+}
+
+/* ========================================
+   모바일
+======================================== */
+
+@media (max-width: 768px) {
+
+  .admin-page {
+    padding: 35px 16px 70px;
+  }
+
+  .admin-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-top h1 {
+    font-size: 30px;
+  }
+
+  .admin-add-button {
+    width: 100%;
+  }
+
+  .admin-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-list-section {
+    padding: 22px 18px;
+  }
+
+  .admin-modal-overlay {
+    padding: 15px;
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr;
+
+    padding: 22px 20px;
+  }
+
+  .admin-form-full {
+    grid-column: auto;
+  }
+
+  .admin-modal-header {
+    padding: 22px 20px;
+  }
+
+  .admin-modal-footer {
+    padding: 18px 20px 22px;
+  }
+
+}
