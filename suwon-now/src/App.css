@@ -1215,3 +1215,134 @@ main {
   }
 
 }
+
+/* =========================
+   ADMIN LOGIN
+========================= */
+
+.admin-login-container {
+  min-height: calc(100vh - 90px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 20px;
+  padding: 42px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+}
+
+.admin-login-card h1 {
+  margin: 8px 0 10px;
+  font-size: 30px;
+}
+
+.admin-login-description {
+  margin: 0 0 30px;
+  color: #777;
+  line-height: 1.6;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-login-form .admin-form-group {
+  width: 100%;
+}
+
+.admin-login-form input {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.admin-login-error {
+  margin: -5px 0 0;
+  font-size: 14px;
+  color: #e5484d;
+}
+
+.admin-login-button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #111;
+  color: #fff;
+}
+
+.admin-login-button:hover {
+  opacity: 0.85;
+}
+
+.admin-login-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-top-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-logout-button {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-logout-button:hover {
+  background: #f5f5f5;
+}
+
+@media (max-width: 768px) {
+  .admin-login-card {
+    padding: 30px 22px;
+  }
+
+  .admin-top-buttons {
+    width: 100%;
+  }
+
+  .admin-logout-button,
+  .admin-add-button {
+    flex: 1;
+  }
+}
+.admin-reset-button {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #555555;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-reset-button:hover {
+  background: #f7f7f7;
+}
+
+.admin-reset-success {
+  margin: -5px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #16803c;
+}

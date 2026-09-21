@@ -1,5 +1,6 @@
 import Home from "./pages/Home";
 import Admin from "./pages/Admin";
+import ResetPassword from "./pages/ResetPassword";
 import "./App.css";
 
 function App() {
@@ -7,6 +8,10 @@ function App() {
 
   if (path === "/admin") {
     return <Admin />;
+  }
+
+  if (path === "/reset-password") {
+    return <ResetPassword />;
   }
 
   return <Home />;
