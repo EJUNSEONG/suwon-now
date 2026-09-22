@@ -2938,3 +2938,32 @@ header nav {
   justify-content: flex-end;
   align-items: center;
 }
+/* =========================================
+   THIS MONTH 배경 / 정렬 수정
+========================================= */
+
+.this-month-section {
+  background: #fff;
+}
+
+/* 모바일 */
+@media (max-width: 650px) {
+  .this-month-section {
+    background: #fff;
+    padding: 70px 0 75px;
+  }
+
+  .this-month-section .section-inner {
+    width: auto;
+    margin: 0 24px;
+  }
+
+  .this-month-section .section-heading {
+    margin: 0;
+  }
+
+  .this-month-section .month-calendar {
+    width: 100%;
+    margin-top: 32px;
+  }
+}
