@@ -2913,4 +2913,28 @@
 
 .this-week-slider .event-detail-button {
   margin-top: auto;
+}/* =========================================
+   HEADER 메뉴 오른쪽 정렬
+========================================= */
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header .logo {
+  flex-shrink: 0;
+}
+
+header .logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+header nav {
+  margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
