@@ -2622,3 +2622,272 @@
     font-size: 22px;
   }
 }
+/* =========================================
+   THIS MONTH
+========================================= */
+
+.this-month-section {
+  padding: 90px 0 110px;
+  background: #f7f7f7;
+}
+
+.month-calendar {
+  margin-top: 42px;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.month-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 28px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.month-calendar-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #111;
+}
+
+.month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+}
+
+.month-weekdays > div {
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+}
+
+.month-weekdays > div:first-child {
+  color: #e34a4a;
+}
+
+.month-weekdays > div:last-child {
+  color: #3d68c8;
+}
+
+.month-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.month-day {
+  position: relative;
+  min-width: 0;
+  min-height: 150px;
+  padding: 12px;
+  border-right: 1px solid #ececec;
+  border-bottom: 1px solid #ececec;
+  background: #fff;
+}
+
+.month-day:nth-child(7n) {
+  border-right: none;
+}
+
+.month-day-empty {
+  background: #fafafa;
+}
+
+.month-day-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 9px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+}
+
+.month-day:nth-child(7n + 1)
+  .month-day-number {
+  color: #e34a4a;
+}
+
+.month-day:nth-child(7n)
+  .month-day-number {
+  color: #3d68c8;
+}
+
+.month-day-today
+  .month-day-number {
+  background: #111;
+  color: #fff !important;
+}
+
+.month-day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.month-event {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 6px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.month-event-category {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  opacity: 0.65;
+}
+
+.month-event-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.month-event-sports {
+  background: #edf3ff;
+  color: #2857b8;
+}
+
+.month-event-performance {
+  background: #f5efff;
+  color: #7042a8;
+}
+
+.month-event-festival {
+  background: #fff3df;
+  color: #9a6016;
+}
+
+.month-event-popup {
+  background: #edf8f2;
+  color: #28724b;
+}
+
+.month-more-events {
+  padding-left: 5px;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+}
+
+.month-loading {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #777;
+}
+
+/* =========================================
+   THIS MONTH - TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+  .this-month-section {
+    padding: 75px 0 90px;
+  }
+
+  .month-calendar {
+    margin-top: 32px;
+  }
+
+  .month-day {
+    min-height: 125px;
+    padding: 9px;
+  }
+
+  .month-event {
+    padding: 5px;
+  }
+
+  .month-event-category {
+    display: none;
+  }
+}
+
+/* =========================================
+   THIS MONTH - MOBILE
+========================================= */
+
+@media (max-width: 650px) {
+
+  .this-month-section {
+    padding: 60px 0 75px;
+  }
+
+  .month-calendar {
+    margin-top: 25px;
+    border-radius: 12px;
+  }
+
+  .month-calendar-header {
+    padding: 18px 15px;
+  }
+
+  .month-calendar-header h3 {
+    font-size: 19px;
+  }
+
+  .month-weekdays > div {
+    padding: 10px 2px;
+    font-size: 11px;
+  }
+
+  .month-day {
+    min-height: 90px;
+    padding: 6px 4px;
+  }
+
+  .month-day-number {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 5px;
+    font-size: 11px;
+  }
+
+  .month-day-events {
+    gap: 3px;
+  }
+
+  .month-event {
+    display: block;
+    padding: 4px;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+
+  .month-event-category {
+    display: none;
+  }
+
+  .month-event-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .month-more-events {
+    font-size: 9px;
+  }
+}

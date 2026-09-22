@@ -8,7 +8,11 @@ type EventItem = {
   created_at: string;
   title: string;
   category: string;
+
+  event_type: "short" | "long";
   event_date: string;
+  end_date: string | null;
+
   event_time: string | null;
   place: string | null;
   description: string | null;
@@ -57,8 +61,14 @@ function Admin() {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("sports");
+
+  const [eventType, setEventType] =
+    useState<"short" | "long">("short");
+
   const [eventDate, setEventDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [eventTime, setEventTime] = useState("");
+
   const [place, setPlace] = useState("");
   const [description, setDescription] = useState("");
   const [ticketUrl, setTicketUrl] = useState("");
@@ -82,9 +92,6 @@ function Admin() {
 
   // ========================================
   // 삭제 모달
-  // deleteMode:
-  // single = 개별 삭제
-  // multiple = 선택 삭제
   // ========================================
 
   const [deleteMode, setDeleteMode] =
@@ -244,8 +251,12 @@ function Admin() {
   const resetEventForm = () => {
     setTitle("");
     setCategory("sports");
+
+    setEventType("short");
     setEventDate("");
+    setEndDate("");
     setEventTime("");
+
     setPlace("");
     setDescription("");
     setTicketUrl("");
@@ -287,7 +298,10 @@ function Admin() {
 
     setTitle(event.title);
     setCategory(event.category);
+
+    setEventType(event.event_type ?? "short");
     setEventDate(event.event_date);
+    setEndDate(event.end_date ?? "");
 
     setEventTime(
       event.event_time
@@ -343,7 +357,28 @@ function Admin() {
     }
 
     if (!eventDate) {
-      setSubmitError("날짜를 선택해주세요.");
+      setSubmitError(
+        eventType === "long"
+          ? "시작일을 선택해주세요."
+          : "날짜를 선택해주세요."
+      );
+      return;
+    }
+
+    if (eventType === "long" && !endDate) {
+      setSubmitError(
+        "장기 일정은 종료일을 선택해주세요."
+      );
+      return;
+    }
+
+    if (
+      eventType === "long" &&
+      endDate < eventDate
+    ) {
+      setSubmitError(
+        "종료일은 시작일과 같거나 이후로 설정해주세요."
+      );
       return;
     }
 
@@ -435,7 +470,15 @@ function Admin() {
       const eventData = {
         title: title.trim(),
         category,
+
+        event_type: eventType,
         event_date: eventDate,
+
+        end_date:
+          eventType === "long"
+            ? endDate
+            : null,
+
         event_time: eventTime || null,
         place: place.trim() || null,
         description: description.trim() || null,
@@ -723,7 +766,6 @@ function Admin() {
         return;
       }
 
-      // 선택 일정의 Storage 이미지 경로
       const imagePaths =
         selectedEvents
           .map((event) =>
@@ -734,7 +776,6 @@ function Admin() {
               path !== null
           );
 
-      // 이미지 일괄 삭제
       if (imagePaths.length > 0) {
         const { error: storageError } =
           await supabase.storage
@@ -761,7 +802,7 @@ function Admin() {
   };
 
   // ========================================
-  // 이번 주 일정 수
+  // 이번 주 단기 일정 수
   // ========================================
 
   const getThisWeekCount = () => {
@@ -803,6 +844,11 @@ function Admin() {
     );
 
     return events.filter((event) => {
+      // 장기 일정은 THIS WEEK에서 제외
+      if (event.event_type === "long") {
+        return false;
+      }
+
       const eventDateObject =
         new Date(
           `${event.event_date}T00:00:00`
@@ -991,6 +1037,7 @@ function Admin() {
         <div className="admin-container">
 
           {/* 상단 */}
+
           <section className="admin-top">
             <div>
               <span className="admin-label">
@@ -1028,6 +1075,7 @@ function Admin() {
           </section>
 
           {/* 통계 */}
+
           <section className="admin-summary">
 
             <div className="admin-summary-card">
@@ -1068,6 +1116,7 @@ function Admin() {
           </section>
 
           {/* 등록된 일정 */}
+
           <section className="admin-list-section">
 
             <div className="admin-list-heading">
@@ -1082,9 +1131,7 @@ function Admin() {
               </div>
             </div>
 
-            {/* ==================================
-                다중 선택 관리 영역
-            ================================== */}
+            {/* 다중 선택 */}
 
             {events.length > 0 && (
               <div className="admin-bulk-toolbar">
@@ -1167,6 +1214,7 @@ function Admin() {
                     >
 
                       {/* 체크박스 */}
+
                       <label className="admin-event-checkbox">
                         <input
                           type="checkbox"
@@ -1180,6 +1228,7 @@ function Admin() {
                       </label>
 
                       {/* 이미지 */}
+
                       {event.image_url && (
                         <div
                           className="admin-event-thumbnail"
@@ -1191,6 +1240,7 @@ function Admin() {
                       )}
 
                       {/* 정보 */}
+
                       <div className="admin-event-main">
 
                         <div className="admin-event-meta">
@@ -1199,6 +1249,12 @@ function Admin() {
                             {getCategoryName(
                               event.category
                             )}
+                          </span>
+
+                          <span>
+                            {event.event_type === "long"
+                              ? "장기 일정"
+                              : "단기 일정"}
                           </span>
 
                           <span>
@@ -1214,8 +1270,21 @@ function Admin() {
                         </h3>
 
                         <p>
-                          {formatEventDate(
-                            event.event_date
+                          {event.event_type === "long" &&
+                          event.end_date ? (
+                            <>
+                              {formatEventDate(
+                                event.event_date
+                              )}
+                              {" ~ "}
+                              {formatEventDate(
+                                event.end_date
+                              )}
+                            </>
+                          ) : (
+                            formatEventDate(
+                              event.event_date
+                            )
                           )}
 
                           {event.event_time &&
@@ -1231,6 +1300,7 @@ function Admin() {
                       </div>
 
                       {/* 버튼 */}
+
                       <div className="admin-event-actions">
 
                         <button
@@ -1313,6 +1383,7 @@ function Admin() {
             <div className="admin-form">
 
               {/* 제목 */}
+
               <div className="admin-form-group admin-form-full">
                 <label>
                   일정 제목 *
@@ -1329,6 +1400,7 @@ function Admin() {
               </div>
 
               {/* 카테고리 */}
+
               <div className="admin-form-group">
                 <label>
                   카테고리 *
@@ -1360,27 +1432,92 @@ function Admin() {
                 </select>
               </div>
 
-              {/* 날짜 */}
+              {/* 일정 유형 */}
+
               <div className="admin-form-group">
                 <label>
-                  날짜 *
+                  일정 유형 *
+                </label>
+
+                <select
+                  value={eventType}
+                  onChange={(e) => {
+                    const type =
+                      e.target.value as
+                        | "short"
+                        | "long";
+
+                    setEventType(type);
+
+                    if (type === "short") {
+                      setEndDate("");
+                    }
+                  }}
+                >
+                  <option value="short">
+                    단기 일정
+                  </option>
+
+                  <option value="long">
+                    장기 일정
+                  </option>
+                </select>
+              </div>
+
+              {/* 날짜 / 시작일 */}
+
+              <div className="admin-form-group">
+                <label>
+                  {eventType === "long"
+                    ? "시작일 *"
+                    : "날짜 *"}
                 </label>
 
                 <input
                   type="date"
                   value={eventDate}
-                  onChange={(e) =>
-                    setEventDate(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => {
+                    const newDate =
+                      e.target.value;
+
+                    setEventDate(newDate);
+
+                    if (
+                      endDate &&
+                      endDate < newDate
+                    ) {
+                      setEndDate("");
+                    }
+                  }}
                 />
               </div>
 
+              {/* 장기 일정 종료일 */}
+
+              {eventType === "long" && (
+                <div className="admin-form-group">
+                  <label>
+                    종료일 *
+                  </label>
+
+                  <input
+                    type="date"
+                    value={endDate}
+                    min={eventDate || undefined}
+                    onChange={(e) =>
+                      setEndDate(
+                        e.target.value
+                      )
+                    }
+                  />
+                </div>
+              )}
+
               {/* 시간 */}
+
               <div className="admin-form-group">
                 <label>
-                  시간
+                  시작 시간
                 </label>
 
                 <input
@@ -1395,6 +1532,7 @@ function Admin() {
               </div>
 
               {/* 장소 */}
+
               <div className="admin-form-group">
                 <label>
                   장소
@@ -1413,6 +1551,7 @@ function Admin() {
               </div>
 
               {/* 이미지 */}
+
               <div className="admin-form-group admin-form-full">
 
                 <label>
@@ -1488,6 +1627,7 @@ function Admin() {
               </div>
 
               {/* 설명 */}
+
               <div className="admin-form-group admin-form-full">
                 <label>
                   상세 설명
@@ -1506,6 +1646,7 @@ function Admin() {
               </div>
 
               {/* 링크 */}
+
               <div className="admin-form-group admin-form-full">
                 <label>
                   예매 / 공식 링크
@@ -1524,6 +1665,7 @@ function Admin() {
               </div>
 
               {/* 공개 */}
+
               <div className="admin-form-full admin-publish">
                 <label>
 

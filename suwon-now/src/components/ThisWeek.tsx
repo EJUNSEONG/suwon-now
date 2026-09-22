@@ -5,7 +5,11 @@ type EventItem = {
   id: number;
   title: string;
   category: string;
+
+  event_type: "short" | "long";
   event_date: string;
+  end_date: string | null;
+
   event_time: string | null;
   place: string | null;
   description: string | null;
@@ -21,7 +25,7 @@ function ThisWeek() {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   // ========================================
-  // 이번 주 일정 불러오기
+  // 이번 주 단기 일정 불러오기
   // ========================================
 
   useEffect(() => {
@@ -33,44 +37,92 @@ function ThisWeek() {
       const diff = day === 0 ? -6 : 1 - day;
 
       const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() + diff);
-      startOfWeek.setHours(0, 0, 0, 0);
 
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      startOfWeek.setDate(
+        today.getDate() + diff
+      );
+
+      startOfWeek.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const endOfWeek =
+        new Date(startOfWeek);
+
+      endOfWeek.setDate(
+        startOfWeek.getDate() + 6
+      );
+
+      // ====================================
+      // YYYY-MM-DD 형식 변환
+      // ====================================
 
       const formatDate = (date: Date) => {
-        const year = date.getFullYear();
+        const year =
+          date.getFullYear();
 
-        const month = String(
-          date.getMonth() + 1
-        ).padStart(2, "0");
+        const month =
+          String(
+            date.getMonth() + 1
+          ).padStart(2, "0");
 
-        const dateDay = String(
-          date.getDate()
-        ).padStart(2, "0");
+        const dateDay =
+          String(
+            date.getDate()
+          ).padStart(2, "0");
 
         return `${year}-${month}-${dateDay}`;
       };
 
-      const { data, error } = await supabase
-        .from("events")
-        .select("*")
-        .gte(
-          "event_date",
-          formatDate(startOfWeek)
-        )
-        .lte(
-          "event_date",
-          formatDate(endOfWeek)
-        )
-        .eq("is_published", true)
-        .order("event_date", {
-          ascending: true,
-        })
-        .order("event_time", {
-          ascending: true,
-        });
+      // ====================================
+      // Supabase 일정 조회
+      //
+      // 1. 이번 주 시작일 ~ 종료일
+      // 2. 공개 일정
+      // 3. 단기 일정만 표시
+      // ====================================
+
+      const { data, error } =
+        await supabase
+          .from("events")
+          .select("*")
+
+          .gte(
+            "event_date",
+            formatDate(startOfWeek)
+          )
+
+          .lte(
+            "event_date",
+            formatDate(endOfWeek)
+          )
+
+          .eq(
+            "is_published",
+            true
+          )
+
+          .eq(
+            "event_type",
+            "short"
+          )
+
+          .order(
+            "event_date",
+            {
+              ascending: true,
+            }
+          )
+
+          .order(
+            "event_time",
+            {
+              ascending: true,
+            }
+          );
 
       if (error) {
         console.error(
@@ -114,6 +166,7 @@ function ThisWeek() {
 
   // ========================================
   // 슬라이드 이동
+  //
   // 카드 한 개씩 이동
   // PC / 태블릿 / 모바일 자동 대응
   // ========================================
@@ -123,7 +176,8 @@ function ThisWeek() {
   ) => {
     if (!sliderRef.current) return;
 
-    const container = sliderRef.current;
+    const container =
+      sliderRef.current;
 
     const firstCard =
       container.querySelector(
@@ -136,12 +190,16 @@ function ThisWeek() {
     const cardWidth =
       firstCard.offsetWidth;
 
-    // CSS에 설정된 gap 값 자동 확인
+    // CSS에 설정된 gap 값
     const styles =
-      window.getComputedStyle(container);
+      window.getComputedStyle(
+        container
+      );
 
     const gap =
-      parseFloat(styles.columnGap) || 0;
+      parseFloat(
+        styles.columnGap
+      ) || 0;
 
     // 카드 1개 + 간격만큼 이동
     const scrollAmount =
@@ -168,7 +226,9 @@ function ThisWeek() {
     >
       <div className="section-inner">
 
-        {/* 상단 제목 */}
+        {/* ==================================
+            상단 제목
+        ================================== */}
 
         <div className="section-heading">
 
@@ -186,8 +246,10 @@ function ThisWeek() {
             </p>
           </div>
 
+          {/* 전체 일정 페이지 */}
+
           <a
-            href="#this-month"
+            href="/schedule"
             className="section-more"
           >
             전체 일정 보기 →
@@ -195,12 +257,16 @@ function ThisWeek() {
 
         </div>
 
-        {/* 일정 */}
+        {/* ==================================
+            일정
+        ================================== */}
 
         {loading ? (
+
           <p>
             일정을 불러오는 중입니다.
           </p>
+
         ) : events.length > 0 ? (
 
           <div className="this-week-slider-wrapper">
