@@ -38,18 +38,27 @@ function Admin() {
   const [eventsLoading, setEventsLoading] = useState(false);
 
   // ========================================
-  // 모달 / 수정 상태
+  // 등록 / 수정 모달
   // ========================================
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // null = 새 일정 등록
-  // 숫자 = 해당 일정 수정
   const [editingEventId, setEditingEventId] =
     useState<number | null>(null);
 
-  // 수정할 때 기존 이미지 유지용
   const [existingImageUrl, setExistingImageUrl] =
     useState<string | null>(null);
+
+  // ========================================
+  // 삭제 모달
+  // ========================================
+  const [deleteTarget, setDeleteTarget] =
+    useState<EventItem | null>(null);
+
+  const [deleteLoading, setDeleteLoading] =
+    useState(false);
+
+  const [deleteError, setDeleteError] =
+    useState("");
 
   // ========================================
   // 일정 입력값
@@ -63,13 +72,17 @@ function Admin() {
   const [ticketUrl, setTicketUrl] = useState("");
   const [isPublished, setIsPublished] = useState(true);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] =
+    useState<File | null>(null);
 
   // ========================================
   // 저장 상태
   // ========================================
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [submitLoading, setSubmitLoading] =
+    useState(false);
+
+  const [submitError, setSubmitError] =
+    useState("");
 
   // ========================================
   // 로그인 상태 확인
@@ -88,9 +101,11 @@ function Admin() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
 
     return () => {
       subscription.unsubscribe();
@@ -109,7 +124,7 @@ function Admin() {
   }, [session]);
 
   // ========================================
-  // Supabase 일정 불러오기
+  // 일정 불러오기
   // ========================================
   const fetchEvents = async () => {
     setEventsLoading(true);
@@ -117,11 +132,19 @@ function Admin() {
     const { data, error } = await supabase
       .from("events")
       .select("*")
-      .order("event_date", { ascending: true })
-      .order("event_time", { ascending: true });
+      .order("event_date", {
+        ascending: true,
+      })
+      .order("event_time", {
+        ascending: true,
+      });
 
     if (error) {
-      console.error("일정 불러오기 오류:", error);
+      console.error(
+        "일정 불러오기 오류:",
+        error
+      );
+
       setEventsLoading(false);
       return;
     }
@@ -139,7 +162,9 @@ function Admin() {
     e.preventDefault();
 
     if (!email || !password) {
-      setLoginError("이메일과 비밀번호를 입력해주세요.");
+      setLoginError(
+        "이메일과 비밀번호를 입력해주세요."
+      );
       return;
     }
 
@@ -147,13 +172,18 @@ function Admin() {
     setLoginError("");
     setResetMessage("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    const { error } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
     if (error) {
-      console.error("로그인 오류:", error);
+      console.error(
+        "로그인 오류:",
+        error
+      );
+
       setLoginError(error.message);
     }
 
@@ -165,7 +195,9 @@ function Admin() {
   // ========================================
   const handlePasswordReset = async () => {
     if (!email) {
-      setLoginError("먼저 관리자 이메일을 입력해주세요.");
+      setLoginError(
+        "먼저 관리자 이메일을 입력해주세요."
+      );
       return;
     }
 
@@ -184,7 +216,11 @@ function Admin() {
       );
 
     if (error) {
-      console.error("비밀번호 재설정 오류:", error);
+      console.error(
+        "비밀번호 재설정 오류:",
+        error
+      );
+
       setLoginError(error.message);
       return;
     }
@@ -223,7 +259,7 @@ function Admin() {
   };
 
   // ========================================
-  // 새 일정 등록 모달 열기
+  // 새 일정 등록
   // ========================================
   const handleOpenNewEvent = () => {
     resetEventForm();
@@ -243,7 +279,9 @@ function Admin() {
   // ========================================
   // 수정 모달 열기
   // ========================================
-  const handleEditEvent = (event: EventItem) => {
+  const handleEditEvent = (
+    event: EventItem
+  ) => {
     setEditingEventId(event.id);
 
     setTitle(event.title);
@@ -257,22 +295,29 @@ function Admin() {
     );
 
     setPlace(event.place ?? "");
-    setDescription(event.description ?? "");
-    setTicketUrl(event.ticket_url ?? "");
-    setIsPublished(event.is_published);
+    setDescription(
+      event.description ?? ""
+    );
+    setTicketUrl(
+      event.ticket_url ?? ""
+    );
 
-    setExistingImageUrl(event.image_url);
+    setIsPublished(
+      event.is_published
+    );
 
-    // 새로운 이미지는 아직 선택하지 않은 상태
+    setExistingImageUrl(
+      event.image_url
+    );
+
     setImageFile(null);
-
     setSubmitError("");
 
     setIsModalOpen(true);
   };
 
   // ========================================
-  // Storage URL에서 파일 경로 추출
+  // Storage 파일 경로 추출
   // ========================================
   const getStorageFilePath = (
     imageUrl: string | null
@@ -284,15 +329,17 @@ function Admin() {
     const marker =
       "/storage/v1/object/public/event-images/";
 
-    const markerIndex = imageUrl.indexOf(marker);
+    const markerIndex =
+      imageUrl.indexOf(marker);
 
     if (markerIndex === -1) {
       return null;
     }
 
-    const filePath = imageUrl.substring(
-      markerIndex + marker.length
-    );
+    const filePath =
+      imageUrl.substring(
+        markerIndex + marker.length
+      );
 
     return decodeURIComponent(filePath);
   };
@@ -302,12 +349,16 @@ function Admin() {
   // ========================================
   const handleSubmitEvent = async () => {
     if (!title.trim()) {
-      setSubmitError("일정 제목을 입력해주세요.");
+      setSubmitError(
+        "일정 제목을 입력해주세요."
+      );
       return;
     }
 
     if (!eventDate) {
-      setSubmitError("날짜를 선택해주세요.");
+      setSubmitError(
+        "날짜를 선택해주세요."
+      );
       return;
     }
 
@@ -315,15 +366,15 @@ function Admin() {
     setSubmitError("");
 
     try {
-      // 수정이면 기존 이미지 유지
-      // 새 일정이면 null
       let imageUrl: string | null =
         existingImageUrl;
 
-      let newUploadedFileName: string | null = null;
+      let newUploadedFileName:
+        | string
+        | null = null;
 
       // ====================================
-      // 새로운 이미지가 선택된 경우
+      // 새 이미지가 선택된 경우
       // ====================================
       if (imageFile) {
         const allowedTypes = [
@@ -332,7 +383,11 @@ function Admin() {
           "image/webp",
         ];
 
-        if (!allowedTypes.includes(imageFile.type)) {
+        if (
+          !allowedTypes.includes(
+            imageFile.type
+          )
+        ) {
           setSubmitError(
             "이미지는 JPG, PNG, WebP 형식만 업로드할 수 있습니다."
           );
@@ -341,8 +396,10 @@ function Admin() {
           return;
         }
 
-        // 최대 5MB
-        if (imageFile.size > 5 * 1024 * 1024) {
+        if (
+          imageFile.size >
+          5 * 1024 * 1024
+        ) {
           setSubmitError(
             "이미지 용량은 5MB 이하로 업로드해주세요."
           );
@@ -360,7 +417,6 @@ function Admin() {
         const fileName =
           `${Date.now()}-${crypto.randomUUID()}.${fileExtension}`;
 
-        // Storage 업로드
         const { error: uploadError } =
           await supabase.storage
             .from("event-images")
@@ -388,43 +444,54 @@ function Admin() {
           return;
         }
 
-        newUploadedFileName = fileName;
+        newUploadedFileName =
+          fileName;
 
-        // 공개 URL 생성
-        const { data: publicUrlData } =
-          supabase.storage
-            .from("event-images")
-            .getPublicUrl(fileName);
+        const {
+          data: publicUrlData,
+        } = supabase.storage
+          .from("event-images")
+          .getPublicUrl(fileName);
 
-        imageUrl = publicUrlData.publicUrl;
+        imageUrl =
+          publicUrlData.publicUrl;
       }
 
       // ====================================
-      // DB에 저장할 데이터
+      // DB 데이터
       // ====================================
       const eventData = {
         title: title.trim(),
         category,
         event_date: eventDate,
-        event_time: eventTime || null,
-        place: place.trim() || null,
+        event_time:
+          eventTime || null,
+        place:
+          place.trim() || null,
         description:
           description.trim() || null,
         image_url: imageUrl,
         ticket_url:
           ticketUrl.trim() || null,
-        is_published: isPublished,
+        is_published:
+          isPublished,
       };
 
       // ====================================
-      // 기존 일정 수정
+      // 일정 수정
       // ====================================
-      if (editingEventId !== null) {
-        const { error: updateError } =
-          await supabase
-            .from("events")
-            .update(eventData)
-            .eq("id", editingEventId);
+      if (
+        editingEventId !== null
+      ) {
+        const {
+          error: updateError,
+        } = await supabase
+          .from("events")
+          .update(eventData)
+          .eq(
+            "id",
+            editingEventId
+          );
 
         if (updateError) {
           console.error(
@@ -432,9 +499,9 @@ function Admin() {
             updateError
           );
 
-          // 새 이미지를 올렸는데 DB 수정 실패한 경우
-          // 새 이미지 다시 삭제
-          if (newUploadedFileName) {
+          if (
+            newUploadedFileName
+          ) {
             await supabase.storage
               .from("event-images")
               .remove([
@@ -451,8 +518,7 @@ function Admin() {
           return;
         }
 
-        // 이미지가 실제로 교체된 경우
-        // 기존 Storage 이미지 삭제
+        // 기존 이미지 삭제
         if (
           imageFile &&
           existingImageUrl
@@ -463,9 +529,13 @@ function Admin() {
             );
 
           if (oldFilePath) {
-            const { error: removeError } =
+            const {
+              error: removeError,
+            } =
               await supabase.storage
-                .from("event-images")
+                .from(
+                  "event-images"
+                )
                 .remove([
                   oldFilePath,
                 ]);
@@ -478,20 +548,17 @@ function Admin() {
             }
           }
         }
-
-        alert("일정이 수정되었습니다.");
       }
 
       // ====================================
       // 새 일정 등록
       // ====================================
       else {
-        const { error: insertError } =
-          await supabase
-            .from("events")
-            .insert([
-              eventData,
-            ]);
+        const {
+          error: insertError,
+        } = await supabase
+          .from("events")
+          .insert([eventData]);
 
         if (insertError) {
           console.error(
@@ -499,9 +566,9 @@ function Admin() {
             insertError
           );
 
-          // DB 저장 실패 시
-          // 방금 올린 이미지 삭제
-          if (newUploadedFileName) {
+          if (
+            newUploadedFileName
+          ) {
             await supabase.storage
               .from("event-images")
               .remove([
@@ -517,11 +584,8 @@ function Admin() {
           setSubmitLoading(false);
           return;
         }
-
-        alert("일정이 등록되었습니다.");
       }
 
-      // 관리자 목록 다시 불러오기
       await fetchEvents();
 
       setSubmitLoading(false);
@@ -543,74 +607,107 @@ function Admin() {
   };
 
   // ========================================
-  // 일정 삭제
+  // 삭제 모달 열기
   // ========================================
-  const handleDeleteEvent = async (
+  const handleDeleteEvent = (
     event: EventItem
   ) => {
-    const confirmed = window.confirm(
-      `"${event.title}" 일정을 정말 삭제하시겠습니까?`
-    );
+    setDeleteError("");
+    setDeleteTarget(event);
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  // ========================================
+  // 삭제 모달 닫기
+  // ========================================
+  const closeDeleteModal = () => {
+    if (deleteLoading) return;
 
-    // 우선 DB에서 삭제
-    const { error: deleteError } =
-      await supabase
+    setDeleteTarget(null);
+    setDeleteError("");
+  };
+
+  // ========================================
+  // 실제 일정 삭제
+  // ========================================
+  const confirmDeleteEvent =
+    async () => {
+      if (!deleteTarget) return;
+
+      setDeleteLoading(true);
+      setDeleteError("");
+
+      const event =
+        deleteTarget;
+
+      // DB에서 삭제
+      const {
+        error: deleteEventError,
+      } = await supabase
         .from("events")
         .delete()
         .eq("id", event.id);
 
-    if (deleteError) {
-      console.error(
-        "일정 삭제 오류:",
-        deleteError
-      );
-
-      alert("일정 삭제에 실패했습니다.");
-      return;
-    }
-
-    // 일정에 이미지가 있으면
-    // Storage에서도 삭제
-    if (event.image_url) {
-      const filePath =
-        getStorageFilePath(
-          event.image_url
+      if (deleteEventError) {
+        console.error(
+          "일정 삭제 오류:",
+          deleteEventError
         );
 
-      if (filePath) {
-        const { error: imageDeleteError } =
-          await supabase.storage
-            .from("event-images")
-            .remove([
-              filePath,
-            ]);
+        setDeleteError(
+          "일정 삭제에 실패했습니다."
+        );
 
-        if (imageDeleteError) {
-          console.warn(
-            "이미지 삭제 오류:",
-            imageDeleteError
+        setDeleteLoading(false);
+        return;
+      }
+
+      // Storage 이미지 삭제
+      if (event.image_url) {
+        const filePath =
+          getStorageFilePath(
+            event.image_url
           );
+
+        if (filePath) {
+          const {
+            error:
+              imageDeleteError,
+          } =
+            await supabase.storage
+              .from(
+                "event-images"
+              )
+              .remove([
+                filePath,
+              ]);
+
+          if (
+            imageDeleteError
+          ) {
+            console.warn(
+              "이미지 삭제 오류:",
+              imageDeleteError
+            );
+          }
         }
       }
-    }
 
-    alert("일정이 삭제되었습니다.");
+      await fetchEvents();
 
-    await fetchEvents();
-  };
+      setDeleteLoading(false);
+      setDeleteTarget(null);
+      setDeleteError("");
+    };
 
   // ========================================
   // 이번 주 일정 수
-  // 월요일 ~ 일요일
   // ========================================
   const getThisWeekCount = () => {
-    const today = new Date();
+    const today =
+      new Date();
 
-    const day = today.getDay();
+    const day =
+      today.getDay();
 
     const diff =
       day === 0
@@ -645,17 +742,21 @@ function Admin() {
       999
     );
 
-    return events.filter((event) => {
-      const eventDateObject =
-        new Date(
-          `${event.event_date}T00:00:00`
-        );
+    return events.filter(
+      (event) => {
+        const eventDateObject =
+          new Date(
+            `${event.event_date}T00:00:00`
+          );
 
-      return (
-        eventDateObject >= startOfWeek &&
-        eventDateObject <= endOfWeek
-      );
-    }).length;
+        return (
+          eventDateObject >=
+            startOfWeek &&
+          eventDateObject <=
+            endOfWeek
+        );
+      }
+    ).length;
   };
 
   // ========================================
@@ -688,14 +789,17 @@ function Admin() {
   const formatEventDate = (
     dateString: string
   ) => {
-    const [year, month, day] =
-      dateString.split("-");
+    const [
+      year,
+      month,
+      day,
+    ] = dateString.split("-");
 
     return `${year}.${month}.${day}`;
   };
 
   // ========================================
-  // 인증 확인 중
+  // 인증 확인
   // ========================================
   if (authLoading) {
     return (
@@ -704,13 +808,11 @@ function Admin() {
 
         <main className="admin-page">
           <div className="admin-container">
-
             <div className="admin-empty">
               <h3>
                 관리자 정보를 확인하고 있습니다.
               </h3>
             </div>
-
           </div>
         </main>
       </>
@@ -726,9 +828,7 @@ function Admin() {
         <Header />
 
         <main className="admin-page">
-
           <div className="admin-login-container">
-
             <div className="admin-login-card">
 
               <span className="admin-label">
@@ -740,17 +840,16 @@ function Admin() {
               </h1>
 
               <p className="admin-login-description">
-                일정 관리를 위해 관리자 계정으로
-                로그인해주세요.
+                일정 관리를 위해 관리자 계정으로 로그인해주세요.
               </p>
 
               <form
                 className="admin-login-form"
-                onSubmit={handleLogin}
+                onSubmit={
+                  handleLogin
+                }
               >
-
                 <div className="admin-form-group">
-
                   <label>
                     이메일
                   </label>
@@ -765,11 +864,9 @@ function Admin() {
                       )
                     }
                   />
-
                 </div>
 
                 <div className="admin-form-group">
-
                   <label>
                     비밀번호
                   </label>
@@ -784,7 +881,6 @@ function Admin() {
                       )
                     }
                   />
-
                 </div>
 
                 {loginError && (
@@ -802,7 +898,9 @@ function Admin() {
                 <button
                   type="submit"
                   className="admin-login-button"
-                  disabled={loginLoading}
+                  disabled={
+                    loginLoading
+                  }
                 >
                   {loginLoading
                     ? "로그인 중..."
@@ -818,13 +916,10 @@ function Admin() {
                 >
                   비밀번호 재설정
                 </button>
-
               </form>
 
             </div>
-
           </div>
-
         </main>
       </>
     );
@@ -838,14 +933,11 @@ function Admin() {
       <Header />
 
       <main className="admin-page">
-
         <div className="admin-container">
 
           {/* 상단 */}
           <section className="admin-top">
-
             <div>
-
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
@@ -855,10 +947,8 @@ function Admin() {
               </h1>
 
               <p>
-                경기·공연·축제·팝업 일정을
-                등록하고 관리할 수 있습니다.
+                경기·공연·축제·팝업 일정을 등록하고 관리할 수 있습니다.
               </p>
-
             </div>
 
             <div className="admin-top-buttons">
@@ -866,7 +956,9 @@ function Admin() {
               <button
                 type="button"
                 className="admin-logout-button"
-                onClick={handleLogout}
+                onClick={
+                  handleLogout
+                }
               >
                 로그아웃
               </button>
@@ -882,14 +974,12 @@ function Admin() {
               </button>
 
             </div>
-
           </section>
 
           {/* 통계 */}
           <section className="admin-summary">
 
             <div className="admin-summary-card">
-
               <span>
                 전체 일정
               </span>
@@ -897,11 +987,9 @@ function Admin() {
               <strong>
                 {events.length}
               </strong>
-
             </div>
 
             <div className="admin-summary-card">
-
               <span>
                 공개 일정
               </span>
@@ -914,11 +1002,9 @@ function Admin() {
                   ).length
                 }
               </strong>
-
             </div>
 
             <div className="admin-summary-card">
-
               <span>
                 이번 주 일정
               </span>
@@ -926,7 +1012,6 @@ function Admin() {
               <strong>
                 {getThisWeekCount()}
               </strong>
-
             </div>
 
           </section>
@@ -935,164 +1020,143 @@ function Admin() {
           <section className="admin-list-section">
 
             <div className="admin-list-heading">
-
               <div>
-
                 <h2>
                   등록된 일정
                 </h2>
 
                 <p>
-                  SUWON PLAY에 등록된 일정을
-                  관리합니다.
+                  SUWON PLAY에 등록된 일정을 관리합니다.
                 </p>
-
               </div>
-
             </div>
 
             {eventsLoading ? (
-
               <div className="admin-empty">
-
                 <h3>
                   일정을 불러오고 있습니다.
                 </h3>
-
               </div>
-
             ) : events.length === 0 ? (
-
               <div className="admin-empty">
-
                 <h3>
                   등록된 일정이 없습니다.
                 </h3>
 
                 <p>
-                  새 일정 등록 버튼을 눌러
-                  첫 일정을 등록해보세요.
+                  새 일정 등록 버튼을 눌러 첫 일정을 등록해보세요.
                 </p>
-
               </div>
-
             ) : (
-
               <div className="admin-event-list">
 
-                {events.map((event) => (
+                {events.map(
+                  (event) => (
+                    <div
+                      className="admin-event-item"
+                      key={event.id}
+                    >
 
-                  <div
-                    className="admin-event-item"
-                    key={event.id}
-                  >
+                      {/* 썸네일 */}
+                      {event.image_url && (
+                        <div
+                          className="admin-event-thumbnail"
+                          style={{
+                            backgroundImage:
+                              `url(${event.image_url})`,
+                          }}
+                        />
+                      )}
 
-                    {/* 이미지 미리보기 */}
-                    {event.image_url && (
+                      {/* 일정 정보 */}
+                      <div className="admin-event-main">
 
-                      <div
-                        className="admin-event-thumbnail"
-                        style={{
-                          backgroundImage:
-                            `url(${event.image_url})`,
-                        }}
-                      />
+                        <div className="admin-event-meta">
 
-                    )}
+                          <span className="admin-event-category">
+                            {getCategoryName(
+                              event.category
+                            )}
+                          </span>
 
-                    <div className="admin-event-main">
+                          <span>
+                            {event.is_published
+                              ? "공개"
+                              : "비공개"}
+                          </span>
 
-                      <div className="admin-event-meta">
+                        </div>
 
-                        <span className="admin-event-category">
-                          {getCategoryName(
-                            event.category
+                        <h3>
+                          {event.title}
+                        </h3>
+
+                        <p>
+                          {formatEventDate(
+                            event.event_date
                           )}
-                        </span>
 
-                        <span>
-                          {event.is_published
-                            ? "공개"
-                            : "비공개"}
-                        </span>
+                          {event.event_time &&
+                            ` · ${event.event_time.slice(
+                              0,
+                              5
+                            )}`}
+
+                          {event.place &&
+                            ` · ${event.place}`}
+                        </p>
 
                       </div>
 
-                      <h3>
-                        {event.title}
-                      </h3>
+                      {/* 버튼 */}
+                      <div className="admin-event-actions">
 
-                      <p>
+                        <button
+                          type="button"
+                          className="admin-edit-button"
+                          onClick={() =>
+                            handleEditEvent(
+                              event
+                            )
+                          }
+                        >
+                          수정
+                        </button>
 
-                        {formatEventDate(
-                          event.event_date
-                        )}
+                        <button
+                          type="button"
+                          className="admin-delete-button"
+                          onClick={() =>
+                            handleDeleteEvent(
+                              event
+                            )
+                          }
+                        >
+                          삭제
+                        </button>
 
-                        {event.event_time &&
-                          ` · ${event.event_time.slice(
-                            0,
-                            5
-                          )}`}
-
-                        {event.place &&
-                          ` · ${event.place}`}
-
-                      </p>
-
-                    </div>
-
-                    <div className="admin-event-actions">
-
-                      <button
-                        type="button"
-                        className="admin-edit-button"
-                        onClick={() =>
-                          handleEditEvent(
-                            event
-                          )
-                        }
-                      >
-                        수정
-                      </button>
-
-                      <button
-                        type="button"
-                        className="admin-delete-button"
-                        onClick={() =>
-                          handleDeleteEvent(
-                            event
-                          )
-                        }
-                      >
-                        삭제
-                      </button>
+                      </div>
 
                     </div>
-
-                  </div>
-
-                ))}
+                  )
+                )}
 
               </div>
-
             )}
 
           </section>
 
         </div>
-
       </main>
 
-      {/* ====================================
+      {/* ========================================
           등록 / 수정 모달
-      ==================================== */}
+      ======================================== */}
       {isModalOpen && (
-
         <div
           className="admin-modal-overlay"
           onClick={closeModal}
         >
-
           <div
             className="admin-modal"
             onClick={(e) =>
@@ -1100,46 +1164,41 @@ function Admin() {
             }
           >
 
-            {/* 모달 상단 */}
             <div className="admin-modal-header">
 
               <div>
-
                 <span className="admin-label">
-
                   {editingEventId !== null
                     ? "EDIT EVENT"
                     : "NEW EVENT"}
-
                 </span>
 
                 <h2>
-
                   {editingEventId !== null
                     ? "일정 수정"
                     : "새 일정 등록"}
-
                 </h2>
-
               </div>
 
               <button
                 type="button"
                 className="admin-modal-close"
-                onClick={closeModal}
-                disabled={submitLoading}
+                onClick={
+                  closeModal
+                }
+                disabled={
+                  submitLoading
+                }
               >
                 ×
               </button>
 
             </div>
 
-            {/* 폼 */}
             <div className="admin-form">
 
               {/* 제목 */}
               <div className="admin-form-group admin-form-full">
-
                 <label>
                   일정 제목 *
                 </label>
@@ -1154,12 +1213,10 @@ function Admin() {
                     )
                   }
                 />
-
               </div>
 
               {/* 카테고리 */}
               <div className="admin-form-group">
-
                 <label>
                   카테고리 *
                 </label>
@@ -1172,7 +1229,6 @@ function Admin() {
                     )
                   }
                 >
-
                   <option value="sports">
                     스포츠
                   </option>
@@ -1188,14 +1244,11 @@ function Admin() {
                   <option value="popup">
                     팝업
                   </option>
-
                 </select>
-
               </div>
 
               {/* 날짜 */}
               <div className="admin-form-group">
-
                 <label>
                   날짜 *
                 </label>
@@ -1209,12 +1262,10 @@ function Admin() {
                     )
                   }
                 />
-
               </div>
 
               {/* 시간 */}
               <div className="admin-form-group">
-
                 <label>
                   시간
                 </label>
@@ -1228,12 +1279,10 @@ function Admin() {
                     )
                   }
                 />
-
               </div>
 
               {/* 장소 */}
               <div className="admin-form-group">
-
                 <label>
                   장소
                 </label>
@@ -1248,7 +1297,6 @@ function Admin() {
                     )
                   }
                 />
-
               </div>
 
               {/* 이미지 */}
@@ -1258,14 +1306,14 @@ function Admin() {
                   대표 이미지
                 </label>
 
-                {/* 수정 중 기존 이미지 */}
                 {editingEventId !== null &&
                   existingImageUrl && (
-
                     <div className="admin-current-image">
 
                       <img
-                        src={existingImageUrl}
+                        src={
+                          existingImageUrl
+                        }
                         alt="현재 대표 이미지"
                       />
 
@@ -1274,7 +1322,6 @@ function Admin() {
                       </p>
 
                     </div>
-
                   )}
 
                 <input
@@ -1282,62 +1329,69 @@ function Admin() {
                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                   onChange={(e) => {
                     const file =
-                      e.target.files?.[0] ??
+                      e.target
+                        .files?.[0] ??
                       null;
 
-                    setImageFile(file);
+                    setImageFile(
+                      file
+                    );
                   }}
                 />
 
                 {imageFile && (
-
                   <p
                     style={{
-                      marginTop: "8px",
-                      fontSize: "13px",
-                      color: "#555",
+                      marginTop:
+                        "8px",
+                      fontSize:
+                        "13px",
+                      color:
+                        "#555",
                     }}
                   >
-                    새 이미지: {imageFile.name}
+                    새 이미지:{" "}
+                    {imageFile.name}
                   </p>
-
                 )}
 
                 <p
                   style={{
-                    marginTop: "7px",
-                    fontSize: "12px",
-                    color: "#999",
-                    lineHeight: "1.5",
+                    marginTop:
+                      "7px",
+                    fontSize:
+                      "12px",
+                    color:
+                      "#999",
+                    lineHeight:
+                      "1.5",
                   }}
                 >
-                  인스타그램용 1080×1350 이미지를
-                  그대로 사용할 수 있습니다.
+                  인스타그램용 1080×1350 이미지를 그대로 사용할 수 있습니다.
                   JPG, PNG, WebP · 최대 5MB
                 </p>
 
                 {editingEventId !== null &&
                   existingImageUrl &&
                   !imageFile && (
-
                     <p
                       style={{
-                        marginTop: "3px",
-                        fontSize: "12px",
-                        color: "#777",
+                        marginTop:
+                          "3px",
+                        fontSize:
+                          "12px",
+                        color:
+                          "#777",
                       }}
                     >
-                      새 이미지를 선택하지 않으면
-                      기존 이미지가 유지됩니다.
+                      새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.
                     </p>
-
                   )}
 
               </div>
 
-              {/* 상세 설명 */}
+              {/* 설명 */}
               <div className="admin-form-group admin-form-full">
-
                 <label>
                   상세 설명
                 </label>
@@ -1345,19 +1399,19 @@ function Admin() {
                 <textarea
                   placeholder="일정에 대한 설명을 입력하세요."
                   rows={4}
-                  value={description}
+                  value={
+                    description
+                  }
                   onChange={(e) =>
                     setDescription(
                       e.target.value
                     )
                   }
                 />
-
               </div>
 
               {/* 링크 */}
               <div className="admin-form-group admin-form-full">
-
                 <label>
                   예매 / 공식 링크
                 </label>
@@ -1372,20 +1426,20 @@ function Admin() {
                     )
                   }
                 />
-
               </div>
 
-              {/* 공개 여부 */}
+              {/* 공개 */}
               <div className="admin-form-full admin-publish">
-
                 <label>
-
                   <input
                     type="checkbox"
-                    checked={isPublished}
+                    checked={
+                      isPublished
+                    }
                     onChange={(e) =>
                       setIsPublished(
-                        e.target.checked
+                        e.target
+                          .checked
                       )
                     }
                   />
@@ -1393,34 +1447,30 @@ function Admin() {
                   <span>
                     웹사이트에 공개하기
                   </span>
-
                 </label>
-
               </div>
 
-              {/* 오류 */}
               {submitError && (
-
                 <div className="admin-form-full">
-
                   <p className="admin-login-error">
                     {submitError}
                   </p>
-
                 </div>
-
               )}
 
             </div>
 
-            {/* 하단 */}
             <div className="admin-modal-footer">
 
               <button
                 type="button"
                 className="admin-cancel-button"
-                onClick={closeModal}
-                disabled={submitLoading}
+                onClick={
+                  closeModal
+                }
+                disabled={
+                  submitLoading
+                }
               >
                 취소
               </button>
@@ -1431,23 +1481,99 @@ function Admin() {
                 onClick={
                   handleSubmitEvent
                 }
-                disabled={submitLoading}
+                disabled={
+                  submitLoading
+                }
               >
-
                 {submitLoading
                   ? "저장 중..."
                   : editingEventId !== null
                     ? "수정 완료"
                     : "일정 등록"}
-
               </button>
 
             </div>
 
           </div>
-
         </div>
+      )}
 
+      {/* ========================================
+          삭제 확인 모달
+      ======================================== */}
+      {deleteTarget && (
+        <div
+          className="delete-modal-overlay"
+          onClick={
+            closeDeleteModal
+          }
+        >
+          <div
+            className="delete-modal"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            <div className="delete-modal-icon">
+              !
+            </div>
+
+            <h2>
+              일정 삭제
+            </h2>
+
+            <p className="delete-modal-description">
+              <strong>
+                {deleteTarget.title}
+              </strong>
+              {" "}일정을 정말 삭제하시겠습니까?
+            </p>
+
+            <p className="delete-modal-warning">
+              삭제한 일정은 복구할 수 없습니다.
+            </p>
+
+            {deleteError && (
+              <p className="delete-modal-error">
+                {deleteError}
+              </p>
+            )}
+
+            <div className="delete-modal-buttons">
+
+              <button
+                type="button"
+                className="delete-cancel-button"
+                disabled={
+                  deleteLoading
+                }
+                onClick={
+                  closeDeleteModal
+                }
+              >
+                취소
+              </button>
+
+              <button
+                type="button"
+                className="delete-confirm-button"
+                disabled={
+                  deleteLoading
+                }
+                onClick={
+                  confirmDeleteEvent
+                }
+              >
+                {deleteLoading
+                  ? "삭제 중..."
+                  : "삭제하기"}
+              </button>
+
+            </div>
+
+          </div>
+        </div>
       )}
 
     </>

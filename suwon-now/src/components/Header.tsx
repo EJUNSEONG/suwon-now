@@ -2,15 +2,22 @@ function Header() {
   return (
     <header>
       <div className="logo">
-        <h1>SUWON PLAY</h1>
+        <a
+          href="/"
+          style={{
+            textDecoration: "none",
+          }}
+        >
+          <h1>SUWON PLAY</h1>
+        </a>
       </div>
 
       <nav>
-        <a href="#">홈</a>
-        <a href="#">경기</a>
-        <a href="#">공연</a>
-        <a href="#">축제</a>
-        <a href="#">팝업</a>
+        <a href="/">홈</a>
+        <a href="/#sports">경기</a>
+        <a href="/#performance">공연</a>
+        <a href="/#festival">축제</a>
+        <a href="/#popup">팝업</a>
       </nav>
     </header>
   );
