@@ -2891,3 +2891,26 @@
     font-size: 9px;
   }
 }
+/* =========================================
+   THIS WEEK 카드 버튼 하단 고정
+========================================= */
+
+.this-week-slider {
+  align-items: stretch;
+}
+
+.this-week-slider .event-card {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.this-week-slider .event-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.this-week-slider .event-detail-button {
+  margin-top: auto;
+}
