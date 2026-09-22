@@ -2156,3 +2156,469 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* ========================================
+   THIS WEEK 가로 슬라이더
+======================================== */
+
+.this-week-slider-wrapper {
+  position: relative;
+}
+
+.this-week-slider {
+  display: flex;
+  gap: 24px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  scrollbar-width: none;
+}
+
+.this-week-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.this-week-slider .event-card {
+  flex: 0 0 calc((100% - 48px) / 3);
+  min-width: 0;
+
+  scroll-snap-align: start;
+}
+
+/* 화살표 */
+
+.this-week-arrow {
+  position: absolute;
+  top: 36%;
+
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: #111111;
+
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.this-week-arrow:hover {
+  background: #f7f7f7;
+  transform: translateY(-2px);
+}
+
+.this-week-arrow-left {
+  left: -24px;
+}
+
+.this-week-arrow-right {
+  right: -24px;
+}
+
+/* 태블릿 */
+
+@media (max-width: 900px) {
+  .this-week-slider .event-card {
+    flex: 0 0 calc((100% - 20px) / 2);
+  }
+
+  .this-week-slider {
+    gap: 20px;
+  }
+}
+
+/* 모바일 */
+
+@media (max-width: 650px) {
+  .this-week-slider {
+    gap: 14px;
+  }
+
+  .this-week-slider .event-card {
+    flex: 0 0 85%;
+  }
+
+  .this-week-arrow {
+    display: none;
+  }
+}
+
+/* ========================================
+   관리자 일정 다중 선택
+======================================== */
+
+.admin-bulk-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-top: 20px;
+  margin-bottom: 4px;
+
+  padding: 14px 16px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.admin-bulk-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-select-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #333333;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.admin-select-all input,
+.admin-event-checkbox input {
+  width: 17px;
+  height: 17px;
+
+  margin: 0;
+
+  accent-color: #1670d2;
+
+  cursor: pointer;
+}
+
+.admin-selected-count {
+  padding-left: 14px;
+
+  border-left: 1px solid #dddddd;
+
+  color: #1670d2;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* 선택 삭제 버튼 */
+
+.admin-bulk-delete-button {
+  padding: 9px 15px;
+
+  border: 1px solid #e5484d;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #e5484d;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.admin-bulk-delete-button:hover:not(:disabled) {
+  background: #e5484d;
+  color: #ffffff;
+}
+
+.admin-bulk-delete-button:disabled {
+  border-color: #dddddd;
+
+  color: #aaaaaa;
+  background: #f8f8f8;
+
+  cursor: not-allowed;
+}
+
+
+/* ========================================
+   일정별 체크박스
+======================================== */
+
+.admin-event-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  padding: 4px;
+
+  cursor: pointer;
+}
+
+
+/* 선택된 일정 */
+
+.admin-event-item-selected {
+  border-color: #9dc8f5 !important;
+  background: #f7fbff !important;
+
+  box-shadow:
+    0 0 0 1px rgba(22, 112, 210, 0.06);
+}
+
+
+/* ========================================
+   다중 선택 모바일
+======================================== */
+
+@media (max-width: 650px) {
+  .admin-bulk-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-bulk-delete-button {
+    width: 100%;
+  }
+
+  .admin-selected-count {
+    margin-left: auto;
+
+    padding-left: 0;
+
+    border-left: none;
+  }
+
+  .admin-event-checkbox {
+    padding-top: 6px;
+  }
+}
+/* =========================================================
+   THIS WEEK 가로 슬라이더 최종 설정
+   PC : 3개 + 다음 카드 일부
+   모바일 : 1개 + 다음 카드 일부
+========================================================= */
+
+.this-week-slider-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+
+/* 슬라이드 영역 */
+.this-week-slider {
+  display: flex;
+  gap: 24px;
+
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+
+  scrollbar-width: none;
+
+  /* 마지막 카드도 자연스럽게 볼 수 있도록 */
+  padding-right: 80px;
+}
+
+.this-week-slider::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* =========================================================
+   PC
+   약 3.3개의 카드가 보이도록 설정
+========================================================= */
+
+.this-week-slider .event-card {
+  /*
+    기존에는 정확히 3개였지만
+    29% 정도로 줄여서 다음 카드가 살짝 보이도록 함
+  */
+  flex: 0 0 29%;
+
+  min-width: 0;
+
+  scroll-snap-align: start;
+}
+
+
+/* =========================================================
+   화살표
+========================================================= */
+
+.this-week-arrow {
+  position: absolute;
+  top: 38%;
+
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  color: #111111;
+
+  font-size: 30px;
+
+  cursor: pointer;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.13);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.this-week-arrow:hover {
+  background: #f7f7f7;
+  transform: scale(1.06);
+}
+
+.this-week-arrow-left {
+  left: -24px;
+}
+
+.this-week-arrow-right {
+  right: -24px;
+}
+
+
+/* =========================================================
+   태블릿
+   2개 + 다음 카드 일부
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .this-week-slider {
+    gap: 18px;
+    padding-right: 60px;
+  }
+
+  .this-week-slider .event-card {
+    flex: 0 0 44%;
+  }
+
+  .this-week-arrow-left {
+    left: -10px;
+  }
+
+  .this-week-arrow-right {
+    right: -10px;
+  }
+}
+
+
+/* =========================================================
+   모바일
+   1개 + 다음 카드 일부
+========================================================= */
+
+@media (max-width: 650px) {
+
+  .this-week-slider {
+    gap: 14px;
+
+    /*
+      오른쪽 다음 카드가 보이게
+    */
+    padding-right: 45px;
+
+    /*
+      모바일에서 손가락 스와이프 부드럽게
+    */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .this-week-slider .event-card {
+    /*
+      한 카드가 화면의 82%
+      → 오른쪽에 다음 카드 약 18% 노출
+    */
+    flex: 0 0 82%;
+  }
+
+  /*
+    모바일에서도 화살표 표시
+  */
+  .this-week-arrow {
+    display: flex;
+
+    width: 40px;
+    height: 40px;
+
+    font-size: 25px;
+  }
+
+  .this-week-arrow-left {
+    left: -8px;
+  }
+
+  .this-week-arrow-right {
+    right: -8px;
+  }
+}
+
+
+/* 아주 작은 휴대폰 */
+@media (max-width: 430px) {
+
+  .this-week-slider .event-card {
+    flex: 0 0 84%;
+  }
+
+  .this-week-slider {
+    gap: 12px;
+  }
+
+  .this-week-arrow {
+    width: 36px;
+    height: 36px;
+
+    font-size: 22px;
+  }
+}
