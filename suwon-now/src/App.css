@@ -1,671 +1,1625 @@
-/* ===========================
-   기본 설정
-=========================== */
+  /* ===========================
+    기본 설정
+  =========================== */
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+  }
+
+  body {
+    background: #f5f5f5;
+    overflow-x: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  /* ===========================
+    Header
+  =========================== */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-}
-
-body {
-  background: #f5f5f5;
-  overflow-x: hidden;
-  font-family: Arial, sans-serif;
-}
-
-/* ===========================
-   Header
-=========================== */
-
-header {
-  width: 100%;
-  min-height: 90px;
-
-  display: flex;
-  align-items: center;
-
-  padding: 16px 40px;
-
-  background: white;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.logo {
-  flex-shrink: 0;
-}
-
-.logo h1 {
-  margin: 0;
-
-  font-family: "Montserrat", sans-serif;
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -2px;
-
-  color: #0066cc;
-  white-space: nowrap;
-}
-
-nav {
-  flex: 1;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  gap: 14px;
-  margin-left: 40px;
-}
-
-nav a {
-  min-width: 100px;
-
-  padding: 12px 24px;
-
-  color: #333;
-  background: white;
-
-  border: 1px solid #d9d9d9;
-  border-radius: 10px;
-
-  text-align: center;
-  text-decoration: none;
-
-  font-size: 17px;
-  font-weight: 600;
-
-  transition: 0.25s;
-}
-
-nav a:hover {
-  color: white;
-  background: #1976d2;
-  border-color: #1976d2;
-}
-
-/* ===========================
-   Main
-=========================== */
-
-main {
-  width: 100%;
-}
-
-/* ===========================
-   Hero Section
-=========================== */
-
-.hero-section {
-  width: 100%;
-  padding-bottom: 20px;
-  background: #f5f5f5;
-}
-
-/* ===========================
-   Hero Slider
-=========================== */
-
-.hero-slider {
-  position: relative;
-
-  width: 100%;
-  height: 500px;
-
-  overflow: hidden;
-
-  background: #111;
-}
-
-.hero-slide {
-  position: absolute;
-  inset: 0;
-
-  width: 100%;
-  height: 100%;
-
-  background-color: #111;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  opacity: 0;
-  pointer-events: none;
-
-  transition: opacity 0.8s ease;
-}
-
-.hero-slide.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-
-  background: rgba(0, 0, 0, 0.42);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-
-  width: 100%;
-  max-width: 1200px;
-  height: 100%;
-
-  margin: 0 auto;
-  padding: 0 80px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  color: white;
-  text-align: center;
-}
-
-.hero-category {
-  display: inline-block;
-
-  margin-bottom: 16px;
-
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 2px;
-}
-
-.hero-content h2 {
-  max-width: 850px;
-
-  margin: 0 0 18px;
-
-  color: white;
-
-  font-size: 52px;
-  line-height: 1.2;
-
-  word-break: keep-all;
-}
-
-.hero-content p {
-  max-width: 720px;
-
-  margin: 0;
-
-  color: white;
-
-  font-size: 19px;
-  line-height: 1.7;
-
-  word-break: keep-all;
-}
-
-/* ===========================
-   Hero 버튼
-=========================== */
-
-.hero-buttons {
-  width: 100%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  gap: 16px;
-
-  margin-top: 10px;
-}
-
-.hero-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  min-width: 190px;
-  padding: 15px 26px;
-
-  color: #0a3655;
-  background: #8fd3ff;
-
-  border: 1px solid #8fd3ff;
-  border-radius: 12px;
-
-  font-size: 16px;
-  font-weight: 700;
-  text-decoration: none;
-  white-space: nowrap;
-
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
-
-  transition:
-    background 0.25s ease,
-    transform 0.25s ease;
-}
-
-.hero-button:hover {
-  background: #66c2ff;
-  transform: translateY(-3px);
-}
-
-/* ===========================
-   Hero 화살표
-=========================== */
-
-.hero-arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 5;
-
-  transform: translateY(-50%);
-
-  width: 46px;
-  height: 46px;
-
-  color: #111;
-  background: rgba(255, 255, 255, 0.78);
-
-  border: none;
-  border-radius: 50%;
-
-  font-size: 32px;
-  line-height: 1;
-
-  cursor: pointer;
-}
-
-.hero-arrow-left {
-  left: 22px;
-}
-
-.hero-arrow-right {
-  right: 22px;
-}
-
-/* ===========================
-   Hero 슬라이드 점
-=========================== */
-
-.hero-dots {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
-  z-index: 5;
-
-  display: flex;
-  gap: 10px;
-
-  transform: translateX(-50%);
-}
-
-.hero-dots button {
-  width: 10px;
-  height: 10px;
-
-  padding: 0;
-
-  background: rgba(255, 255, 255, 0.5);
-
-  border: none;
-  border-radius: 50%;
-
-  cursor: pointer;
-
-  transition: 0.25s;
-}
-
-.hero-dots button.active {
-  width: 28px;
-
-  background: white;
-
-  border-radius: 999px;
-}
-
-/* ===========================
-   태블릿
-=========================== */
-
-@media (max-width: 1024px) {
   header {
-    padding: 14px 20px;
-  }
+    width: 100%;
+    min-height: 90px;
 
-  .logo h1 {
-    font-size: 34px;
-  }
+    display: flex;
+    align-items: center;
 
-  nav {
-    justify-content: flex-start;
+    padding: 16px 40px;
 
-    gap: 10px;
-    margin-left: 24px;
-
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  nav a {
-    min-width: 88px;
-
-    padding: 10px 18px;
-
-    font-size: 16px;
-  }
-
-  .hero-slider {
-    height: 480px;
-  }
-
-  .hero-content {
-    padding: 0 65px;
-  }
-
-  .hero-content h2 {
-    font-size: 45px;
-  }
-
-  .hero-content p {
-    font-size: 18px;
-  }
-}
-
-/* ===========================
-   모바일
-=========================== */
-
-@media (max-width: 768px) {
-  header {
-    display: block;
-
-    min-height: auto;
-
-    padding: 16px 0 12px;
-
-    overflow: hidden;
+    background: white;
+    border-bottom: 1px solid #e5e5e5;
   }
 
   .logo {
-    padding: 0 20px;
+    flex-shrink: 0;
   }
 
   .logo h1 {
-    font-size: 32px;
-    letter-spacing: -1.5px;
+    margin: 0;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -2px;
+
+    color: #0066cc;
+    white-space: nowrap;
   }
 
   nav {
-    width: 100%;
+    flex: 1;
 
-    justify-content: flex-start;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    margin: 14px 0 0;
-    padding: 0 16px 4px;
-
-    gap: 10px;
-
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  nav::-webkit-scrollbar {
-    display: none;
+    gap: 14px;
+    margin-left: 40px;
   }
 
   nav a {
-    flex: 0 0 auto;
+    min-width: 100px;
 
-    min-width: 82px;
+    padding: 12px 24px;
 
-    padding: 10px 16px;
+    color: #333;
+    background: white;
 
-    font-size: 15px;
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
 
-    border-radius: 9px;
+    text-align: center;
+    text-decoration: none;
+
+    font-size: 17px;
+    font-weight: 600;
+
+    transition: 0.25s;
   }
 
+  nav a:hover {
+    color: white;
+    background: #1976d2;
+    border-color: #1976d2;
+  }
+
+  /* ===========================
+    Main
+  =========================== */
+
+  main {
+    width: 100%;
+  }
+
+  /* ===========================
+    Hero Section
+  =========================== */
+
+  .hero-section {
+    width: 100%;
+    padding-bottom: 20px;
+    background: #f5f5f5;
+  }
+
+  /* ===========================
+    Hero Slider
+  =========================== */
+
   .hero-slider {
-    height: 460px;
+    position: relative;
+
+    width: 100%;
+    height: 500px;
+
+    overflow: hidden;
+
+    background: #111;
+  }
+
+  .hero-slide {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: #111;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.8s ease;
+  }
+
+  .hero-slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.42);
   }
 
   .hero-content {
-    padding: 0 55px;
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+
+    margin: 0 auto;
+    padding: 0 80px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    color: white;
+    text-align: center;
   }
 
   .hero-category {
-    margin-bottom: 12px;
-    font-size: 12px;
+    display: inline-block;
+
+    margin-bottom: 16px;
+
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
   }
 
   .hero-content h2 {
-    font-size: 35px;
+    max-width: 850px;
+
+    margin: 0 0 18px;
+
+    color: white;
+
+    font-size: 52px;
+    line-height: 1.2;
+
+    word-break: keep-all;
   }
 
   .hero-content p {
-    font-size: 16px;
+    max-width: 720px;
+
+    margin: 0;
+
+    color: white;
+
+    font-size: 19px;
+    line-height: 1.7;
+
+    word-break: keep-all;
   }
 
+  /* ===========================
+    Hero 버튼
+  =========================== */
+
   .hero-buttons {
-    width: calc(100% - 40px);
-    margin: 10px auto 0;
-    gap: 10px;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 16px;
+
+    margin-top: 10px;
   }
 
   .hero-button {
-    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    min-width: 0;
-    padding: 13px 12px;
+    min-width: 190px;
+    padding: 15px 26px;
 
-    font-size: 14px;
+    color: #0a3655;
+    background: #8fd3ff;
+
+    border: 1px solid #8fd3ff;
+    border-radius: 12px;
+
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+
+    transition:
+      background 0.25s ease,
+      transform 0.25s ease;
   }
 
-  .hero-arrow {
-    width: 40px;
-    height: 40px;
+  .hero-button:hover {
+    background: #66c2ff;
+    transform: translateY(-3px);
+  }
 
-    font-size: 27px;
+  /* ===========================
+    Hero 화살표
+  =========================== */
+
+  .hero-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+
+    transform: translateY(-50%);
+
+    width: 46px;
+    height: 46px;
+
+    color: #111;
+    background: rgba(255, 255, 255, 0.78);
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 32px;
+    line-height: 1;
+
+    cursor: pointer;
   }
 
   .hero-arrow-left {
-    left: 12px;
+    left: 22px;
   }
 
   .hero-arrow-right {
-    right: 12px;
-  }
-}
-
-/* ===========================
-   작은 모바일
-=========================== */
-
-@media (max-width: 430px) {
-  .logo h1 {
-    font-size: 29px;
+    right: 22px;
   }
 
-  nav a {
-    min-width: 76px;
+  /* ===========================
+    Hero 슬라이드 점
+  =========================== */
 
-    padding: 9px 14px;
+  .hero-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    z-index: 5;
+
+    display: flex;
+    gap: 10px;
+
+    transform: translateX(-50%);
+  }
+
+  .hero-dots button {
+    width: 10px;
+    height: 10px;
+
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.5);
+
+    border: none;
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+  }
+
+  .hero-dots button.active {
+    width: 28px;
+
+    background: white;
+
+    border-radius: 999px;
+  }
+
+  /* ===========================
+    태블릿
+  =========================== */
+
+  @media (max-width: 1024px) {
+    header {
+      padding: 14px 20px;
+    }
+
+    .logo h1 {
+      font-size: 34px;
+    }
+
+    nav {
+      justify-content: flex-start;
+
+      gap: 10px;
+      margin-left: 24px;
+
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav a {
+      min-width: 88px;
+
+      padding: 10px 18px;
+
+      font-size: 16px;
+    }
+
+    .hero-slider {
+      height: 480px;
+    }
+
+    .hero-content {
+      padding: 0 65px;
+    }
+
+    .hero-content h2 {
+      font-size: 45px;
+    }
+
+    .hero-content p {
+      font-size: 18px;
+    }
+  }
+
+  /* ===========================
+    모바일
+  =========================== */
+
+  @media (max-width: 768px) {
+    header {
+      display: block;
+
+      min-height: auto;
+
+      padding: 16px 0 12px;
+
+      overflow: hidden;
+    }
+
+    .logo {
+      padding: 0 20px;
+    }
+
+    .logo h1 {
+      font-size: 32px;
+      letter-spacing: -1.5px;
+    }
+
+    nav {
+      width: 100%;
+
+      justify-content: flex-start;
+
+      margin: 14px 0 0;
+      padding: 0 16px 4px;
+
+      gap: 10px;
+
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav a {
+      flex: 0 0 auto;
+
+      min-width: 82px;
+
+      padding: 10px 16px;
+
+      font-size: 15px;
+
+      border-radius: 9px;
+    }
+
+    .hero-slider {
+      height: 460px;
+    }
+
+    .hero-content {
+      padding: 0 55px;
+    }
+
+    .hero-category {
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+
+    .hero-content h2 {
+      font-size: 35px;
+    }
+
+    .hero-content p {
+      font-size: 16px;
+    }
+
+    .hero-buttons {
+      width: calc(100% - 40px);
+      margin: 10px auto 0;
+      gap: 10px;
+    }
+
+    .hero-button {
+      flex: 1;
+
+      min-width: 0;
+      padding: 13px 12px;
+
+      font-size: 14px;
+    }
+
+    .hero-arrow {
+      width: 40px;
+      height: 40px;
+
+      font-size: 27px;
+    }
+
+    .hero-arrow-left {
+      left: 12px;
+    }
+
+    .hero-arrow-right {
+      right: 12px;
+    }
+  }
+
+  /* ===========================
+    작은 모바일
+  =========================== */
+
+  @media (max-width: 430px) {
+    .logo h1 {
+      font-size: 29px;
+    }
+
+    nav a {
+      min-width: 76px;
+
+      padding: 9px 14px;
+
+      font-size: 14px;
+    }
+
+    .hero-slider {
+      height: 430px;
+    }
+
+    .hero-content {
+      padding: 0 42px;
+    }
+
+    .hero-content h2 {
+      font-size: 30px;
+    }
+
+    .hero-content p {
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
+      width: calc(100% - 50px);
+
+      flex-direction: column;
+
+      margin-top: 100px;
+    }
+
+    .hero-button {
+      width: 100%;
+    }
+  }
+  /* ===========================
+    THIS WEEK
+  =========================== */
+
+  .this-week-section {
+    width: 100%;
+    padding: 80px 24px 100px;
+    background: #ffffff;
+  }
+
+  .section-inner {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    gap: 24px;
+    margin-bottom: 36px;
+  }
+
+  .section-label {
+    display: inline-block;
+    margin-bottom: 8px;
+
+    color: #168de2;
+
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+  }
+
+  .section-heading h2 {
+    margin-bottom: 10px;
+
+    color: #111;
+
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+  }
+
+  .section-heading p {
+    color: #666;
+
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .section-more {
+    flex-shrink: 0;
+
+    padding: 12px 18px;
+
+    color: #1976d2;
+    background: #edf7ff;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+
+    transition: 0.25s;
+  }
+
+  .section-more:hover {
+    background: #dcefff;
+    transform: translateY(-2px);
+  }
+
+  /* 카드 */
+
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  .event-card {
+    overflow: hidden;
+
+    background: white;
+
+    border: 1px solid #e7e7e7;
+    border-radius: 18px;
+
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .event-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+  }
+
+  .event-image {
+    position: relative;
+
+    width: 100%;
+    height: 210px;
+
+    background-color: #111;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .event-category {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+
+    padding: 7px 11px;
+
+    color: white;
+    background: rgba(0, 0, 0, 0.72);
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  .event-info {
+    padding: 20px;
+  }
+
+  .event-date {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .event-date strong {
+    color: #1976d2;
+    font-size: 15px;
+  }
+
+  .event-date span {
+    color: #888;
+    font-size: 14px;
+  }
+
+  .event-info h3 {
+    margin-bottom: 10px;
+
+    color: #171717;
+
+    font-size: 21px;
+    line-height: 1.35;
+
+    word-break: keep-all;
+  }
+
+  .event-info p {
+    margin-bottom: 20px;
+
+    color: #777;
 
     font-size: 14px;
   }
 
-  .hero-slider {
-    height: 430px;
+  .event-detail-button {
+    width: 100%;
+
+    padding: 12px 16px;
+
+    color: #0a3655;
+    background: #b8e4ff;
+
+    border: none;
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: 0.25s;
   }
 
-  .hero-content {
-    padding: 0 42px;
+  .event-detail-button:hover {
+    color: white;
+    background: #4db4f5;
   }
 
-  .hero-content h2 {
+  /* ===========================
+    THIS WEEK 태블릿
+  =========================== */
+
+  @media (max-width: 1024px) {
+    .event-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* ===========================
+    THIS WEEK 모바일
+  =========================== */
+
+  @media (max-width: 768px) {
+    .this-week-section {
+      padding: 60px 18px 80px;
+    }
+
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
+
+      margin-bottom: 28px;
+    }
+
+    .section-heading h2 {
+      font-size: 34px;
+    }
+
+    .section-heading p {
+      font-size: 15px;
+    }
+
+    .event-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .event-image {
+      height: 230px;
+    }
+
+    .section-more {
+      align-self: flex-start;
+    }
+  }
+
+  /* ========================================
+    SUWON PLAY ADMIN
+  ======================================== */
+
+  .admin-page {
+    min-height: calc(100vh - 90px);
+    background: #f6f8fb;
+    padding: 60px 24px 100px;
+  }
+
+  .admin-container {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+  }
+
+  /* 상단 영역 */
+
+  .admin-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    margin-bottom: 35px;
+  }
+
+  .admin-label {
+    display: inline-block;
+    margin-bottom: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #1769d2;
+  }
+
+  .admin-top h1 {
+    margin: 0 0 10px;
+
+    font-size: 38px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .admin-top p {
+    margin: 0;
+
+    font-size: 15px;
+    color: #6b7280;
+  }
+
+  /* 새 일정 등록 버튼 */
+
+  .admin-add-button {
+    border: none;
+    border-radius: 10px;
+
+    padding: 14px 22px;
+
+    background: #1769d2;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+  }
+
+  .admin-add-button:hover {
+    transform: translateY(-2px);
+    background: #0f58b5;
+  }
+
+  /* ========================================
+    요약 카드
+  ======================================== */
+
+  .admin-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+
+    margin-bottom: 35px;
+  }
+
+  .admin-summary-card {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    padding: 22px 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .admin-summary-card span {
+    font-size: 14px;
+    color: #6b7280;
+  }
+
+  .admin-summary-card strong {
+    font-size: 30px;
+    color: #111827;
+  }
+
+  /* ========================================
+    일정 목록
+  ======================================== */
+
+  .admin-list-section {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    padding: 30px;
+  }
+
+  .admin-list-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-bottom: 22px;
+
+    border-bottom: 1px solid #eeeeee;
+  }
+
+  .admin-list-heading h2 {
+    margin: 0 0 6px;
+
+    font-size: 22px;
+    color: #111827;
+  }
+
+  .admin-list-heading p {
+    margin: 0;
+
+    font-size: 14px;
+    color: #6b7280;
+  }
+
+  /* 데이터가 없을 때 */
+
+  .admin-empty {
+    text-align: center;
+
+    padding: 70px 20px;
+  }
+
+  .admin-empty h3 {
+    margin: 0 0 8px;
+
+    font-size: 18px;
+    color: #374151;
+  }
+
+  .admin-empty p {
+    margin: 0;
+
+    font-size: 14px;
+    color: #9ca3af;
+  }
+
+  /* ========================================
+    일정 등록 팝업
+  ======================================== */
+
+  .admin-modal-overlay {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 1000;
+
+    background: rgba(15, 23, 42, 0.55);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px;
+  }
+
+  .admin-modal {
+    width: min(680px, 100%);
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 18px;
+
+    box-shadow:
+      0 25px 60px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 팝업 상단 */
+
+  .admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    padding: 28px 30px 22px;
+
+    border-bottom: 1px solid #eeeeee;
+  }
+
+  .admin-modal-header h2 {
+    margin: 0;
+
+    font-size: 26px;
+    color: #111827;
+  }
+
+  .admin-modal-close {
+    width: 36px;
+    height: 36px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f3f4f6;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+  }
+
+  .admin-modal-close:hover {
+    background: #e5e7eb;
+  }
+
+  /* ========================================
+    등록 Form
+  ======================================== */
+
+  .admin-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    padding: 28px 30px;
+  }
+
+  .admin-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .admin-form-full {
+    grid-column: 1 / -1;
+  }
+
+  .admin-form-group label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  .admin-form-group input,
+  .admin-form-group select,
+  .admin-form-group textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+
+    padding: 12px 13px;
+
+    background: white;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+
+    transition: 0.2s;
+  }
+
+  .admin-form-group input:focus,
+  .admin-form-group select:focus,
+  .admin-form-group textarea:focus {
+    border-color: #1769d2;
+
+    box-shadow:
+      0 0 0 3px rgba(23, 105, 210, 0.1);
+  }
+
+  .admin-form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  /* 파일 선택 */
+
+  .admin-form-group input[type="file"] {
+    background: #f9fafb;
+  }
+
+  /* 공개 설정 */
+
+  .admin-publish {
+    padding: 15px 0 0;
+  }
+
+  .admin-publish label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .admin-publish input {
+    width: 17px;
+    height: 17px;
+
+    accent-color: #1769d2;
+  }
+
+  /* ========================================
+    팝업 하단 버튼
+  ======================================== */
+
+  .admin-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    padding: 20px 30px 26px;
+
+    border-top: 1px solid #eeeeee;
+  }
+
+  .admin-cancel-button,
+  .admin-submit-button {
+    padding: 12px 20px;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+  }
+
+  .admin-cancel-button {
+    border: 1px solid #d1d5db;
+
+    background: white;
+    color: #374151;
+  }
+
+  .admin-submit-button {
+    border: none;
+
+    background: #1769d2;
+    color: white;
+  }
+
+  .admin-submit-button:hover {
+    background: #0f58b5;
+  }
+
+  /* ========================================
+    모바일
+  ======================================== */
+
+  @media (max-width: 768px) {
+
+    .admin-page {
+      padding: 35px 16px 70px;
+    }
+
+    .admin-top {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .admin-top h1 {
+      font-size: 30px;
+    }
+
+    .admin-add-button {
+      width: 100%;
+    }
+
+    .admin-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-list-section {
+      padding: 22px 18px;
+    }
+
+    .admin-modal-overlay {
+      padding: 15px;
+    }
+
+    .admin-form {
+      grid-template-columns: 1fr;
+
+      padding: 22px 20px;
+    }
+
+    .admin-form-full {
+      grid-column: auto;
+    }
+
+    .admin-modal-header {
+      padding: 22px 20px;
+    }
+
+    .admin-modal-footer {
+      padding: 18px 20px 22px;
+    }
+
+  }
+
+  /* =========================
+    ADMIN LOGIN
+  ========================= */
+
+  .admin-login-container {
+    min-height: calc(100vh - 90px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+
+  .admin-login-card {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 20px;
+    padding: 42px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+  }
+
+  .admin-login-card h1 {
+    margin: 8px 0 10px;
     font-size: 30px;
   }
 
-  .hero-content p {
-    font-size: 15px;
+  .admin-login-description {
+    margin: 0 0 30px;
+    color: #777;
     line-height: 1.6;
   }
 
-  .hero-buttons {
-    width: calc(100% - 50px);
-
+  .admin-login-form {
+    display: flex;
     flex-direction: column;
-
-    margin-top: 100px;
+    gap: 20px;
   }
 
-  .hero-button {
+  .admin-login-form .admin-form-group {
     width: 100%;
   }
-}
-/* ===========================
-   THIS WEEK
-=========================== */
 
-.this-week-section {
-  width: 100%;
-  padding: 80px 24px 100px;
-  background: #ffffff;
-}
+  .admin-login-form input {
+    box-sizing: border-box;
+    width: 100%;
+  }
 
-.section-inner {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-}
+  .admin-login-error {
+    margin: -5px 0 0;
+    font-size: 14px;
+    color: #e5484d;
+  }
 
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  .admin-login-button {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #111;
+    color: #fff;
+  }
 
-  gap: 24px;
-  margin-bottom: 36px;
-}
+  .admin-login-button:hover {
+    opacity: 0.85;
+  }
 
-.section-label {
-  display: inline-block;
-  margin-bottom: 8px;
+  .admin-login-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 
-  color: #168de2;
+  .admin-top-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 1.8px;
-}
+  .admin-logout-button {
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-.section-heading h2 {
-  margin-bottom: 10px;
+  .admin-logout-button:hover {
+    background: #f5f5f5;
+  }
 
-  color: #111;
+  @media (max-width: 768px) {
+    .admin-login-card {
+      padding: 30px 22px;
+    }
 
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-}
+    .admin-top-buttons {
+      width: 100%;
+    }
 
-.section-heading p {
-  color: #666;
+    .admin-logout-button,
+    .admin-add-button {
+      flex: 1;
+    }
+  }
+  .admin-reset-button {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #dddddd;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #555555;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-  font-size: 17px;
-  line-height: 1.6;
-}
+  .admin-reset-button:hover {
+    background: #f7f7f7;
+  }
 
-.section-more {
-  flex-shrink: 0;
+  .admin-reset-success {
+    margin: -5px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #16803c;
+  }
+  /* ========================================
+    THIS WEEK - 4:5 인스타 이미지
+  ======================================== */
 
-  padding: 12px 18px;
+  .event-card {
+    overflow: hidden;
+    border-radius: 18px;
+    background: #ffffff;
+  }
 
-  color: #1976d2;
-  background: #edf7ff;
+  .event-image {
+    position: relative;
 
-  border-radius: 10px;
+    /* 인스타 게시물 비율 */
+    aspect-ratio: 4 / 5;
 
-  font-size: 15px;
-  font-weight: 700;
-  text-decoration: none;
+    width: 100%;
+    height: auto;
 
-  transition: 0.25s;
-}
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
-.section-more:hover {
-  background: #dcefff;
-  transform: translateY(-2px);
-}
+    background-color: #f2f2f2;
+  }
 
-/* 카드 */
+  .event-category {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    background: rgba(0, 0, 0, 0.82);
+    color: white;
+
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+
+  /* ========================================
+    관리자 일정 목록
+  ======================================== */
+
+  .admin-event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    margin-top: 24px;
+  }
+
+  .admin-event-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding: 20px 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e8e8e8;
+    border-radius: 14px;
+
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .admin-event-item:hover {
+    border-color: #d5d5d5;
+
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.05);
+
+    transform: translateY(-1px);
+  }
+
+  .admin-event-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .admin-event-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 8px;
+
+    font-size: 12px;
+    color: #777777;
+  }
+
+  .admin-event-category {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    background: #eef6ff;
+    color: #0071e3;
+
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .admin-event-main h3 {
+    margin: 0 0 7px;
+
+    font-size: 18px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .admin-event-main p {
+    margin: 0;
+
+    color: #777777;
+
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+
+  /* 관리자 수정/삭제 버튼 */
+
+  .admin-event-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    flex-shrink: 0;
+  }
+
+  .admin-edit-button,
+  .admin-delete-button {
+    padding: 9px 14px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+  }
+
+  .admin-edit-button {
+    border: 1px solid #d7d7d7;
+
+    background: #ffffff;
+    color: #222222;
+  }
+
+  .admin-edit-button:hover {
+    background: #f5f5f5;
+  }
+
+  .admin-delete-button {
+    border: 1px solid #ffd7d7;
+
+    background: #fff7f7;
+    color: #d93838;
+  }
+
+  .admin-delete-button:hover {
+    background: #ffeded;
+  }
+
+
+  /* 모바일 */
+
+  @media (max-width: 700px) {
+
+    .admin-event-item {
+      align-items: flex-start;
+      flex-direction: column;
+
+      gap: 16px;
+
+      padding: 18px;
+    }
+
+    .admin-event-actions {
+      width: 100%;
+    }
+
+    .admin-edit-button,
+    .admin-delete-button {
+      flex: 1;
+    }
+  }
+  /* =========================================================
+   SUWON PLAY - 일정 이미지 / 관리자 일정 UI 최종 수정
+========================================================= */
+
+
+/* =========================================================
+   1. THIS WEEK 카드
+========================================================= */
 
 .event-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .event-card {
+  width: 100%;
   overflow: hidden;
 
-  background: white;
+  background: #ffffff;
 
-  border: 1px solid #e7e7e7;
+  border: 1px solid #e5e5e5;
   border-radius: 18px;
 
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
-.event-card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
-}
+
+/* 이미지 영역 */
 
 .event-image {
   position: relative;
 
   width: 100%;
-  height: 210px;
 
-  background-color: #111;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
+  /* 인스타 게시물 1080x1350 = 4:5 */
+  aspect-ratio: 4 / 5;
+
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+
+  background-color: #f3f3f3;
 }
+
+
+/* SPORTS 등의 카테고리 */
 
 .event-category {
   position: absolute;
+
   top: 14px;
   left: 14px;
 
-  padding: 7px 11px;
-
-  color: white;
-  background: rgba(0, 0, 0, 0.72);
+  padding: 7px 12px;
 
   border-radius: 999px;
 
+  background: rgba(0, 0, 0, 0.82);
+  color: #ffffff;
+
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 1px;
+
+  letter-spacing: 0.5px;
+
+  z-index: 2;
 }
+
+
+/* 카드 아래 정보 */
 
 .event-info {
   padding: 20px;
@@ -676,673 +1630,397 @@ main {
   justify-content: space-between;
   align-items: center;
 
-  gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .event-date strong {
-  color: #1976d2;
-  font-size: 15px;
+  color: #0071e3;
+
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .event-date span {
-  color: #888;
-  font-size: 14px;
+  color: #999999;
+
+  font-size: 13px;
 }
 
 .event-info h3 {
-  margin-bottom: 10px;
-
-  color: #171717;
+  margin: 0 0 10px;
 
   font-size: 21px;
-  line-height: 1.35;
+  font-weight: 700;
 
-  word-break: keep-all;
+  color: #111111;
 }
 
-.event-info p {
-  margin-bottom: 20px;
-
-  color: #777;
+.event-info > p {
+  margin: 0 0 18px;
 
   font-size: 14px;
+
+  color: #777777;
 }
 
 .event-detail-button {
   width: 100%;
 
-  padding: 12px 16px;
-
-  color: #0a3655;
-  background: #b8e4ff;
+  padding: 13px;
 
   border: none;
   border-radius: 10px;
+
+  background: #b9e2fa;
+
+  color: #111111;
 
   font-size: 14px;
   font-weight: 700;
 
   cursor: pointer;
-  transition: 0.25s;
 }
 
-.event-detail-button:hover {
-  color: white;
-  background: #4db4f5;
-}
 
-/* ===========================
-   THIS WEEK 태블릿
-=========================== */
+/* =========================================================
+   2. 관리자 등록/수정 모달의 기존 이미지
+========================================================= */
 
-@media (max-width: 1024px) {
-  .event-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ===========================
-   THIS WEEK 모바일
-=========================== */
-
-@media (max-width: 768px) {
-  .this-week-section {
-    padding: 60px 18px 80px;
-  }
-
-  .section-heading {
-    align-items: flex-start;
-    flex-direction: column;
-
-    margin-bottom: 28px;
-  }
-
-  .section-heading h2 {
-    font-size: 34px;
-  }
-
-  .section-heading p {
-    font-size: 15px;
-  }
-
-  .event-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .event-image {
-    height: 230px;
-  }
-
-  .section-more {
-    align-self: flex-start;
-  }
-}
-
-/* ========================================
-   SUWON PLAY ADMIN
-======================================== */
-
-.admin-page {
-  min-height: calc(100vh - 90px);
-  background: #f6f8fb;
-  padding: 60px 24px 100px;
-}
-
-.admin-container {
-  width: min(1180px, 100%);
-  margin: 0 auto;
-}
-
-/* 상단 영역 */
-
-.admin-top {
+.admin-current-image {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 30px;
-  margin-bottom: 35px;
+  align-items: center;
+
+  gap: 14px;
+
+  margin: 10px 0 16px;
+
+  padding: 12px;
+
+  max-width: 300px;
+
+  background: #f7f8fa;
+
+  border: 1px solid #e7e7e7;
+  border-radius: 12px;
 }
 
-.admin-label {
-  display: inline-block;
-  margin-bottom: 10px;
 
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #1769d2;
+/* 기존 이미지 절대 크게 나오지 않도록 강제 */
+
+.admin-current-image img {
+  display: block !important;
+
+  width: 70px !important;
+  height: 88px !important;
+
+  min-width: 70px;
+  max-width: 70px !important;
+
+  object-fit: cover !important;
+
+  border-radius: 8px;
+
+  border: 1px solid #e5e5e5;
 }
 
-.admin-top h1 {
-  margin: 0 0 10px;
-
-  font-size: 38px;
-  font-weight: 800;
-  color: #111827;
-}
-
-.admin-top p {
+.admin-current-image p {
   margin: 0;
 
-  font-size: 15px;
-  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #666666;
 }
 
-/* 새 일정 등록 버튼 */
 
-.admin-add-button {
-  border: none;
-  border-radius: 10px;
+/* =========================================================
+   3. 관리자 등록된 일정 목록
+========================================================= */
 
-  padding: 14px 22px;
+.admin-event-list {
+  display: flex;
+  flex-direction: column;
 
-  background: #1769d2;
-  color: white;
+  gap: 12px;
 
-  font-size: 14px;
+  margin-top: 22px;
+}
+
+
+/* 일정 하나 */
+
+.admin-event-item {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  width: 100%;
+
+  padding: 16px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-event-item:hover {
+  border-color: #d8d8d8;
+
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+
+  transform: translateY(-1px);
+}
+
+
+/* 관리자 목록 이미지 */
+
+.admin-event-thumbnail {
+  width: 62px !important;
+  height: 78px !important;
+
+  min-width: 62px;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+
+  background-color: #f3f3f3;
+}
+
+
+/* 일정 정보 */
+
+.admin-event-main {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.admin-event-meta {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 6px;
+
+  font-size: 12px;
+
+  color: #777777;
+}
+
+
+/* 카테고리 */
+
+.admin-event-category {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 9px;
+
+  background: #edf6ff;
+
+  color: #0071e3;
+
+  border-radius: 999px;
+
+  font-size: 11px;
   font-weight: 700;
+}
+
+
+/* 일정 제목 */
+
+.admin-event-main h3 {
+  margin: 0 0 5px;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  line-height: 1.3;
+
+  color: #111111;
+}
+
+
+/* 날짜 / 시간 / 장소 */
+
+.admin-event-main p {
+  margin: 0;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  color: #777777;
+}
+
+
+/* =========================================================
+   4. 관리자 수정 / 삭제 버튼
+========================================================= */
+
+.admin-event-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.admin-edit-button,
+.admin-delete-button {
+  min-width: 58px;
+
+  padding: 9px 13px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
 
   cursor: pointer;
 
-  transition: 0.2s;
+  transition: 0.2s ease;
 }
 
-.admin-add-button:hover {
-  transform: translateY(-2px);
-  background: #0f58b5;
+
+/* 수정 */
+
+.admin-edit-button {
+  background: #111111;
+
+  border: 1px solid #111111;
+
+  color: #ffffff;
 }
 
-/* ========================================
-   요약 카드
-======================================== */
-
-.admin-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-
-  margin-bottom: 35px;
+.admin-edit-button:hover {
+  background: #333333;
 }
 
-.admin-summary-card {
-  background: white;
 
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
+/* 삭제 */
 
-  padding: 22px 24px;
+.admin-delete-button {
+  background: #ffffff;
 
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  border: 1px solid #dddddd;
+
+  color: #666666;
 }
 
-.admin-summary-card span {
-  font-size: 14px;
-  color: #6b7280;
+.admin-delete-button:hover {
+  background: #fff3f3;
+
+  border-color: #ffcaca;
+
+  color: #d93636;
 }
 
-.admin-summary-card strong {
-  font-size: 30px;
-  color: #111827;
-}
 
-/* ========================================
-   일정 목록
-======================================== */
+/* =========================================================
+   5. 관리자 목록 영역
+========================================================= */
 
 .admin-list-section {
-  background: white;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  overflow: hidden;
 
   padding: 30px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
 }
 
 .admin-list-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding-bottom: 22px;
+  padding-bottom: 20px;
 
   border-bottom: 1px solid #eeeeee;
 }
 
 .admin-list-heading h2 {
-  margin: 0 0 6px;
+  margin: 0 0 7px;
 
-  font-size: 22px;
-  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
+
+  color: #111111;
 }
 
 .admin-list-heading p {
   margin: 0;
 
   font-size: 14px;
-  color: #6b7280;
+
+  color: #777777;
 }
 
-/* 데이터가 없을 때 */
 
-.admin-empty {
-  text-align: center;
+/* =========================================================
+   6. 모바일
+========================================================= */
 
-  padding: 70px 20px;
-}
+@media (max-width: 900px) {
 
-.admin-empty h3 {
-  margin: 0 0 8px;
-
-  font-size: 18px;
-  color: #374151;
-}
-
-.admin-empty p {
-  margin: 0;
-
-  font-size: 14px;
-  color: #9ca3af;
-}
-
-/* ========================================
-   일정 등록 팝업
-======================================== */
-
-.admin-modal-overlay {
-  position: fixed;
-
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  z-index: 1000;
-
-  background: rgba(15, 23, 42, 0.55);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  padding: 30px;
-}
-
-.admin-modal {
-  width: min(680px, 100%);
-  max-height: 90vh;
-
-  overflow-y: auto;
-
-  background: white;
-
-  border-radius: 18px;
-
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.2);
-}
-
-/* 팝업 상단 */
-
-.admin-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-
-  padding: 28px 30px 22px;
-
-  border-bottom: 1px solid #eeeeee;
-}
-
-.admin-modal-header h2 {
-  margin: 0;
-
-  font-size: 26px;
-  color: #111827;
-}
-
-.admin-modal-close {
-  width: 36px;
-  height: 36px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: #f3f4f6;
-
-  font-size: 25px;
-  line-height: 1;
-
-  cursor: pointer;
-}
-
-.admin-modal-close:hover {
-  background: #e5e7eb;
-}
-
-/* ========================================
-   등록 Form
-======================================== */
-
-.admin-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-
-  padding: 28px 30px;
-}
-
-.admin-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.admin-form-full {
-  grid-column: 1 / -1;
-}
-
-.admin-form-group label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #374151;
-}
-
-.admin-form-group input,
-.admin-form-group select,
-.admin-form-group textarea {
-  width: 100%;
-
-  box-sizing: border-box;
-
-  border: 1px solid #d1d5db;
-  border-radius: 9px;
-
-  padding: 12px 13px;
-
-  background: white;
-
-  font-family: inherit;
-  font-size: 14px;
-
-  outline: none;
-
-  transition: 0.2s;
-}
-
-.admin-form-group input:focus,
-.admin-form-group select:focus,
-.admin-form-group textarea:focus {
-  border-color: #1769d2;
-
-  box-shadow:
-    0 0 0 3px rgba(23, 105, 210, 0.1);
-}
-
-.admin-form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-/* 파일 선택 */
-
-.admin-form-group input[type="file"] {
-  background: #f9fafb;
-}
-
-/* 공개 설정 */
-
-.admin-publish {
-  padding: 15px 0 0;
-}
-
-.admin-publish label {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-
-  cursor: pointer;
-
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.admin-publish input {
-  width: 17px;
-  height: 17px;
-
-  accent-color: #1769d2;
-}
-
-/* ========================================
-   팝업 하단 버튼
-======================================== */
-
-.admin-modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-
-  padding: 20px 30px 26px;
-
-  border-top: 1px solid #eeeeee;
-}
-
-.admin-cancel-button,
-.admin-submit-button {
-  padding: 12px 20px;
-
-  border-radius: 9px;
-
-  font-size: 14px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.admin-cancel-button {
-  border: 1px solid #d1d5db;
-
-  background: white;
-  color: #374151;
-}
-
-.admin-submit-button {
-  border: none;
-
-  background: #1769d2;
-  color: white;
-}
-
-.admin-submit-button:hover {
-  background: #0f58b5;
-}
-
-/* ========================================
-   모바일
-======================================== */
-
-@media (max-width: 768px) {
-
-  .admin-page {
-    padding: 35px 16px 70px;
+  .event-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .admin-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
+}
 
-  .admin-top h1 {
-    font-size: 30px;
-  }
 
-  .admin-add-button {
-    width: 100%;
-  }
+@media (max-width: 650px) {
 
-  .admin-summary {
+  .event-grid {
     grid-template-columns: 1fr;
   }
 
   .admin-list-section {
-    padding: 22px 18px;
+    padding: 20px;
   }
 
-  .admin-modal-overlay {
-    padding: 15px;
+  .admin-event-item {
+    align-items: flex-start;
+
+    flex-wrap: wrap;
   }
 
-  .admin-form {
-    grid-template-columns: 1fr;
+  .admin-event-thumbnail {
+    width: 55px !important;
+    height: 69px !important;
 
-    padding: 22px 20px;
+    min-width: 55px;
   }
 
-  .admin-form-full {
-    grid-column: auto;
-  }
-
-  .admin-modal-header {
-    padding: 22px 20px;
-  }
-
-  .admin-modal-footer {
-    padding: 18px 20px 22px;
-  }
-
-}
-
-/* =========================
-   ADMIN LOGIN
-========================= */
-
-.admin-login-container {
-  min-height: calc(100vh - 90px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-}
-
-.admin-login-card {
-  width: 100%;
-  max-width: 460px;
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
-  border-radius: 20px;
-  padding: 42px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
-}
-
-.admin-login-card h1 {
-  margin: 8px 0 10px;
-  font-size: 30px;
-}
-
-.admin-login-description {
-  margin: 0 0 30px;
-  color: #777;
-  line-height: 1.6;
-}
-
-.admin-login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.admin-login-form .admin-form-group {
-  width: 100%;
-}
-
-.admin-login-form input {
-  box-sizing: border-box;
-  width: 100%;
-}
-
-.admin-login-error {
-  margin: -5px 0 0;
-  font-size: 14px;
-  color: #e5484d;
-}
-
-.admin-login-button {
-  width: 100%;
-  border: none;
-  border-radius: 10px;
-  padding: 15px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  background: #111;
-  color: #fff;
-}
-
-.admin-login-button:hover {
-  opacity: 0.85;
-}
-
-.admin-login-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.admin-top-buttons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.admin-logout-button {
-  border: 1px solid #ddd;
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.admin-logout-button:hover {
-  background: #f5f5f5;
-}
-
-@media (max-width: 768px) {
-  .admin-login-card {
-    padding: 30px 22px;
-  }
-
-  .admin-top-buttons {
-    width: 100%;
-  }
-
-  .admin-logout-button,
-  .admin-add-button {
+  .admin-event-main {
     flex: 1;
   }
-}
-.admin-reset-button {
-  width: 100%;
-  padding: 13px;
-  border: 1px solid #dddddd;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #555555;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
 
-.admin-reset-button:hover {
-  background: #f7f7f7;
-}
+  .admin-event-actions {
+    width: 100%;
 
-.admin-reset-success {
-  margin: -5px 0 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #16803c;
+    padding-left: 71px;
+  }
+
+  .admin-edit-button,
+  .admin-delete-button {
+    flex: 1;
+  }
+
 }
