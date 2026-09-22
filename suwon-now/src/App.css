@@ -2967,3 +2967,62 @@ header nav {
     margin-top: 32px;
   }
 }
+/* =========================================
+   HEADER - MOBILE
+   로고 1줄 + 메뉴 1줄
+========================================= */
+
+@media (max-width: 650px) {
+
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px 16px 12px;
+    gap: 14px;
+  }
+
+  /* 로고 */
+  header .logo {
+    width: 100%;
+  }
+
+  header .logo h1 {
+    margin: 0;
+    font-size: 27px;
+    line-height: 1;
+  }
+
+  /* 메뉴 전체 */
+  header nav {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+
+    width: 100%;
+    margin: 0;
+    gap: 5px;
+
+    overflow: visible;
+  }
+
+  /* 각각의 메뉴 버튼 */
+  header nav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    height: 38px;
+    padding: 0 3px;
+
+    border: 1px solid #e2e2e2;
+    border-radius: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    text-decoration: none;
+  }
+
+}
