@@ -2,6 +2,7 @@ import Home from "./pages/Home";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import EventDetail from "./pages/EventDetail";
+import Schedule from "./pages/Schedule";
 import "./App.css";
 
 function App() {
@@ -18,8 +19,13 @@ function App() {
     return <ResetPassword />;
   }
 
-  // /event/15 같은 주소
-  if (path.startsWith("/event/")) {
+  if (path === "/schedule") {
+    return <Schedule />;
+  }
+
+  if (
+    path.startsWith("/event/")
+  ) {
     return <EventDetail />;
   }
 
