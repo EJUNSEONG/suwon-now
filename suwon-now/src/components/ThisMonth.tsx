@@ -575,17 +575,15 @@ function ThisMonth() {
                         .map(
                           (event) => (
 
-                            <div
-                              className={
-                                `month-event month-event-${event.category}`
-                              }
-                              key={
-                                `${event.id}-${day}`
-                              }
-                              title={
-                                event.title
-                              }
-                            >
+                           <a
+  href={`/event/${event.id}`}
+  className={
+    `month-event month-event-${event.category}`
+  }
+  key={`${event.id}-${day}`}
+  title={event.title}
+>
+                            
 
                               <span className="month-event-category">
                                 {getCategoryName(
@@ -597,8 +595,7 @@ function ThisMonth() {
                                 {event.title}
                               </span>
 
-                            </div>
-
+                            </a>
                           )
                         )}
 

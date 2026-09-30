@@ -7,14 +7,31 @@ function Header() {
         </a>
       </div>
 
-      <nav>
-        <a href="/">홈</a>
-        <a href="/schedule">전체 일정</a>
-        <a href="/schedule?category=sports">스포츠</a>
-        <a href="/schedule?category=performance">공연</a>
-        <a href="/schedule?category=festival">축제</a>
-        <a href="/schedule?category=popup">팝업</a>
-      </nav>
+    <nav>
+  <a href="/">
+    홈
+  </a>
+
+  <a href="/schedule">
+    전체 일정
+  </a>
+
+  <a href="/schedule?category=sports">
+    스포츠
+  </a>
+
+  <a href="/schedule?category=performance">
+    공연
+  </a>
+
+  <a href="/schedule?category=festival">
+    축제
+  </a>
+
+  <a href="/schedule?category=popup">
+    팝업
+  </a>
+</nav>
     </header>
   );
 }

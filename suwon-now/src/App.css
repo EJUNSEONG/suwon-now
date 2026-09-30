@@ -3122,3 +3122,226 @@ header nav {
     font-size: 10px;
   }
 }
+/* =========================================
+   EVENT DETAIL
+========================================= */
+
+.event-detail-page {
+  min-height: 100vh;
+  padding: 70px 0 120px;
+  background: #fff;
+}
+
+.event-detail-container {
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.event-detail-back {
+  display: inline-block;
+  margin-bottom: 30px;
+
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+.event-detail-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(320px, 500px)
+    minmax(0, 1fr);
+
+  gap: 70px;
+  align-items: start;
+}
+
+/* 이미지 */
+
+.event-detail-image-area {
+  width: 100%;
+}
+
+.event-detail-image {
+  display: block;
+
+  width: 100%;
+  aspect-ratio: 4 / 5;
+
+  object-fit: cover;
+
+  border-radius: 18px;
+}
+
+.event-detail-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  aspect-ratio: 4 / 5;
+
+  border-radius: 18px;
+
+  background: #f4f4f4;
+
+  color: #999;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* 정보 */
+
+.event-detail-info {
+  padding-top: 12px;
+}
+
+.event-detail-category {
+  display: inline-flex;
+
+  padding: 7px 12px;
+
+  border-radius: 20px;
+
+  background: #eaf5ff;
+  color: #0877d1;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.event-detail-info h1 {
+  margin: 18px 0 35px;
+
+  font-size: 42px;
+  line-height: 1.25;
+
+  color: #111;
+}
+
+/* 일정 / 시간 / 장소 */
+
+.event-detail-meta {
+  display: flex;
+  flex-direction: column;
+
+  border-top: 1px solid #e8e8e8;
+}
+
+.event-detail-meta > div {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+
+  gap: 20px;
+
+  padding: 18px 0;
+
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.event-detail-meta span {
+  color: #888;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.event-detail-meta strong {
+  color: #222;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 설명 */
+
+.event-detail-description {
+  margin-top: 40px;
+}
+
+.event-detail-description h2 {
+  margin: 0 0 14px;
+
+  font-size: 20px;
+}
+
+.event-detail-description p {
+  margin: 0;
+
+  color: #555;
+
+  font-size: 15px;
+  line-height: 1.8;
+
+  white-space: pre-line;
+}
+
+/* 공식 링크 */
+
+.event-detail-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  margin-top: 35px;
+  padding: 17px 20px;
+
+  border-radius: 10px;
+
+  background: #87cefa;
+  color: #111;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+/* =========================================
+   EVENT DETAIL MOBILE
+========================================= */
+
+@media (max-width: 650px) {
+
+  .event-detail-page {
+    padding: 40px 0 80px;
+  }
+
+  .event-detail-container {
+    width: calc(100% - 40px);
+  }
+
+  .event-detail-layout {
+    display: block;
+  }
+
+  .event-detail-image {
+    border-radius: 12px;
+  }
+
+  .event-detail-info {
+    padding-top: 30px;
+  }
+
+  .event-detail-info h1 {
+    margin: 15px 0 25px;
+
+    font-size: 28px;
+  }
+
+  .event-detail-meta > div {
+    grid-template-columns: 65px 1fr;
+
+    gap: 12px;
+
+    padding: 15px 0;
+  }
+
+  .event-detail-description {
+    margin-top: 30px;
+  }
+}

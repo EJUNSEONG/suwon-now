@@ -472,12 +472,12 @@ function ThisWeek() {
                         </p>
                       )}
 
-                      <button
-                        type="button"
-                        className="event-detail-button"
-                      >
-                        자세히 보기
-                      </button>
+                     <a
+  href={`/event/${event.id}`}
+  className="event-detail-button"
+>
+  자세히 보기
+</a>
 
                     </div>
 
