@@ -26,16 +26,66 @@ function ThisMonth() {
     useState(true);
 
   // ========================================
-  // 현재 날짜
+  // 실제 오늘 날짜
   // ========================================
 
   const today = new Date();
 
-  const currentYear =
+  const todayYear =
     today.getFullYear();
 
-  const currentMonth =
+  const todayMonth =
     today.getMonth();
+
+  // ========================================
+  // 현재 달력에서 보고 있는 년 / 월
+  // ========================================
+
+  const [viewYear, setViewYear] =
+    useState(todayYear);
+
+  const [viewMonth, setViewMonth] =
+    useState(todayMonth);
+
+  // ========================================
+  // 이동 가능한 범위
+  //
+  // 현재 달 기준
+  // 이전 1년 ~ 이후 1년
+  //
+  // 예:
+  // 2026년 9월 기준
+  // 2025년 9월 ~ 2027년 9월
+  // ========================================
+
+  const minDate =
+    new Date(
+      todayYear - 1,
+      todayMonth,
+      1
+    );
+
+  const maxDate =
+    new Date(
+      todayYear + 1,
+      todayMonth,
+      1
+    );
+
+  const currentViewDate =
+    new Date(
+      viewYear,
+      viewMonth,
+      1
+    );
+
+  const canGoPrevious =
+    currentViewDate.getTime() >
+    minDate.getTime();
+
+  const canGoNext =
+    currentViewDate.getTime() <
+    maxDate.getTime();
 
   // ========================================
   // YYYY-MM-DD 변환
@@ -59,20 +109,20 @@ function ThisMonth() {
   };
 
   // ========================================
-  // 이번 달 시작 / 마지막 날짜
+  // 현재 보고 있는 달의 시작 / 마지막 날짜
   // ========================================
 
   const monthStart =
     new Date(
-      currentYear,
-      currentMonth,
+      viewYear,
+      viewMonth,
       1
     );
 
   const monthEnd =
     new Date(
-      currentYear,
-      currentMonth + 1,
+      viewYear,
+      viewMonth + 1,
       0
     );
 
@@ -83,13 +133,69 @@ function ThisMonth() {
     formatDate(monthEnd);
 
   // ========================================
-  // 이번 달 일정 불러오기
+  // 이전 달
+  // ========================================
+
+  const handlePreviousMonth = () => {
+    if (!canGoPrevious) return;
+
+    const previousMonth =
+      new Date(
+        viewYear,
+        viewMonth - 1,
+        1
+      );
+
+    setViewYear(
+      previousMonth.getFullYear()
+    );
+
+    setViewMonth(
+      previousMonth.getMonth()
+    );
+  };
+
+  // ========================================
+  // 다음 달
+  // ========================================
+
+  const handleNextMonth = () => {
+    if (!canGoNext) return;
+
+    const nextMonth =
+      new Date(
+        viewYear,
+        viewMonth + 1,
+        1
+      );
+
+    setViewYear(
+      nextMonth.getFullYear()
+    );
+
+    setViewMonth(
+      nextMonth.getMonth()
+    );
+  };
+
+  // ========================================
+  // 현재 달로 돌아가기
+  // ========================================
+
+  const handleGoToday = () => {
+    setViewYear(todayYear);
+    setViewMonth(todayMonth);
+  };
+
+  // ========================================
+  // 일정 불러오기
   //
-  // 단기:
-  // event_date가 이번 달 안에 있으면 표시
+  // 단기 일정:
+  // 해당 월 안에 날짜가 있는 일정
   //
-  // 장기:
-  // 이번 달과 기간이 조금이라도 겹치면 표시
+  // 장기 일정:
+  // 해당 월과 일정 기간이
+  // 하루라도 겹치면 가져옴
   // ========================================
 
   useEffect(() => {
@@ -100,23 +206,32 @@ function ThisMonth() {
         await supabase
           .from("events")
           .select("*")
+
           .eq(
             "is_published",
             true
           )
+
+          // 일정 시작일이
+          // 현재 보고 있는 달의 마지막 날보다
+          // 이전이어야 함
           .lte(
             "event_date",
             monthEndString
           )
+
+          // 단기 일정 또는 장기 일정
           .or(
-            `end_date.gte.${monthStartString},and(event_type.eq.short,event_date.gte.${monthStartString})`
+            `and(event_type.eq.short,event_date.gte.${monthStartString}),and(event_type.eq.long,end_date.gte.${monthStartString})`
           )
+
           .order(
             "event_date",
             {
               ascending: true,
             }
           )
+
           .order(
             "event_time",
             {
@@ -126,7 +241,7 @@ function ThisMonth() {
 
       if (error) {
         console.error(
-          "이번 달 일정 불러오기 오류:",
+          "월간 일정 불러오기 오류:",
           error
         );
 
@@ -145,13 +260,7 @@ function ThisMonth() {
   ]);
 
   // ========================================
-  // 달력 첫 번째 칸 계산
-  //
-  // JS:
-  // 일=0 월=1 화=2...
-  //
-  // 달력:
-  // 일 월 화 수 목 금 토
+  // 달력 첫 번째 요일
   // ========================================
 
   const firstDay =
@@ -161,7 +270,7 @@ function ThisMonth() {
     monthEnd.getDate();
 
   // ========================================
-  // 달력 칸 생성
+  // 달력 날짜 배열 생성
   // ========================================
 
   const calendarDays:
@@ -185,7 +294,7 @@ function ThisMonth() {
     calendarDays.push(day);
   }
 
-  // 마지막 주 빈칸 채우기
+  // 마지막 주 빈칸
   while (
     calendarDays.length % 7 !== 0
   ) {
@@ -193,7 +302,7 @@ function ThisMonth() {
   }
 
   // ========================================
-  // 해당 날짜의 일정 확인
+  // 특정 날짜에 해당하는 일정
   // ========================================
 
   const getEventsForDay = (
@@ -201,8 +310,8 @@ function ThisMonth() {
   ) => {
     const date =
       new Date(
-        currentYear,
-        currentMonth,
+        viewYear,
+        viewMonth,
         day
       );
 
@@ -211,7 +320,11 @@ function ThisMonth() {
 
     return events.filter(
       (event) => {
+
+        // ------------------------------
         // 단기 일정
+        // ------------------------------
+
         if (
           event.event_type === "short"
         ) {
@@ -221,7 +334,10 @@ function ThisMonth() {
           );
         }
 
+        // ------------------------------
         // 장기 일정
+        // ------------------------------
+
         const endDate =
           event.end_date ??
           event.event_date;
@@ -263,18 +379,18 @@ function ThisMonth() {
 
   // ========================================
   // 오늘인지 확인
+  //
+  // 다른 달을 보고 있을 때는
+  // 오늘 표시가 나오지 않음
   // ========================================
 
   const isToday = (
     day: number
   ) => {
     return (
-      today.getFullYear() ===
-        currentYear &&
-      today.getMonth() ===
-        currentMonth &&
-      today.getDate() ===
-        day
+      todayYear === viewYear &&
+      todayMonth === viewMonth &&
+      today.getDate() === day
     );
   };
 
@@ -289,11 +405,14 @@ function ThisMonth() {
     >
       <div className="section-inner">
 
-        {/* 상단 */}
+        {/* ==================================
+            상단 제목
+        ================================== */}
 
         <div className="section-heading">
 
           <div>
+
             <span className="section-label">
               MONTHLY SCHEDULE
             </span>
@@ -303,8 +422,9 @@ function ThisMonth() {
             </h2>
 
             <p>
-              이번 달 수원의 경기·공연·축제·팝업 일정을 한눈에 확인해보세요.
+              수원의 경기·공연·축제·팝업 일정을 월별로 확인해보세요.
             </p>
+
           </div>
 
           <a
@@ -316,22 +436,83 @@ function ThisMonth() {
 
         </div>
 
-        {/* 달력 */}
+        {/* ==================================
+            달력
+        ================================== */}
 
         <div className="month-calendar">
 
-          {/* 달력 상단 */}
+          {/* ==================================
+              달력 상단
+          ================================== */}
 
           <div className="month-calendar-header">
 
-            <h3>
-              {currentYear}년{" "}
-              {currentMonth + 1}월
-            </h3>
+            {/* 이전 달 */}
+
+            <button
+              type="button"
+              className="month-nav-button"
+              onClick={
+                handlePreviousMonth
+              }
+              disabled={
+                !canGoPrevious
+              }
+              aria-label="이전 달"
+            >
+              ‹
+            </button>
+
+            {/* 년 / 월 */}
+
+            <div className="month-calendar-title">
+
+              <h3>
+                {viewYear}년{" "}
+                {viewMonth + 1}월
+              </h3>
+
+              {/* 현재 달이 아닐 때만 표시 */}
+
+              {(
+                viewYear !== todayYear ||
+                viewMonth !== todayMonth
+              ) && (
+                <button
+                  type="button"
+                  className="month-today-button"
+                  onClick={
+                    handleGoToday
+                  }
+                >
+                  이번 달
+                </button>
+              )}
+
+            </div>
+
+            {/* 다음 달 */}
+
+            <button
+              type="button"
+              className="month-nav-button"
+              onClick={
+                handleNextMonth
+              }
+              disabled={
+                !canGoNext
+              }
+              aria-label="다음 달"
+            >
+              ›
+            </button>
 
           </div>
 
-          {/* 요일 */}
+          {/* ==================================
+              요일
+          ================================== */}
 
           <div className="month-weekdays">
 
@@ -345,18 +526,23 @@ function ThisMonth() {
 
           </div>
 
-          {/* 날짜 */}
+          {/* ==================================
+              날짜
+          ================================== */}
 
           <div className="month-days">
 
             {calendarDays.map(
               (day, index) => {
 
+                // 빈칸
                 if (day === null) {
                   return (
                     <div
                       className="month-day month-day-empty"
-                      key={`empty-${index}`}
+                      key={
+                        `empty-${index}`
+                      }
                     />
                   );
                 }
@@ -374,7 +560,7 @@ function ThisMonth() {
                     key={day}
                   >
 
-                    {/* 날짜 숫자 */}
+                    {/* 날짜 */}
 
                     <div className="month-day-number">
                       {day}
@@ -388,8 +574,11 @@ function ThisMonth() {
                         .slice(0, 3)
                         .map(
                           (event) => (
+
                             <div
-                              className={`month-event month-event-${event.category}`}
+                              className={
+                                `month-event month-event-${event.category}`
+                              }
                               key={
                                 `${event.id}-${day}`
                               }
@@ -409,14 +598,19 @@ function ThisMonth() {
                               </span>
 
                             </div>
+
                           )
                         )}
+
+                      {/* 3개 이상 */}
 
                       {dayEvents.length > 3 && (
                         <span className="month-more-events">
                           +
-                          {dayEvents.length -
-                            3}
+                          {
+                            dayEvents.length -
+                            3
+                          }
                           개
                         </span>
                       )}
@@ -432,9 +626,11 @@ function ThisMonth() {
 
         </div>
 
+        {/* 로딩 */}
+
         {loading && (
           <p className="month-loading">
-            이번 달 일정을 불러오는 중입니다.
+            일정을 불러오는 중입니다.
           </p>
         )}
 

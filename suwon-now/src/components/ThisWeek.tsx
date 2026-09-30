@@ -19,24 +19,67 @@ type EventItem = {
 };
 
 function ThisWeek() {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] =
+    useState<EventItem[]>([]);
 
-  const sliderRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] =
+    useState(true);
+
+  const sliderRef =
+    useRef<HTMLDivElement>(null);
 
   // ========================================
-  // 이번 주 단기 일정 불러오기
+  // YYYY-MM-DD 형식 변환
+  // ========================================
+
+  const formatDate = (date: Date) => {
+    const year =
+      date.getFullYear();
+
+    const month =
+      String(
+        date.getMonth() + 1
+      ).padStart(2, "0");
+
+    const day =
+      String(
+        date.getDate()
+      ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  // ========================================
+  // 이번 주 일정 불러오기
+  //
+  // 단기 일정:
+  // 날짜가 이번 주에 있으면 표시
+  //
+  // 장기 일정:
+  // 일정 기간과 이번 주가
+  // 하루라도 겹치면 표시
   // ========================================
 
   useEffect(() => {
     const fetchEvents = async () => {
+      setLoading(true);
+
       const today = new Date();
 
-      // 월요일 시작 기준
-      const day = today.getDay();
-      const diff = day === 0 ? -6 : 1 - day;
+      // ------------------------------------
+      // 이번 주 월요일
+      // ------------------------------------
 
-      const startOfWeek = new Date(today);
+      const day =
+        today.getDay();
+
+      const diff =
+        day === 0
+          ? -6
+          : 1 - day;
+
+      const startOfWeek =
+        new Date(today);
 
       startOfWeek.setDate(
         today.getDate() + diff
@@ -49,6 +92,10 @@ function ThisWeek() {
         0
       );
 
+      // ------------------------------------
+      // 이번 주 일요일
+      // ------------------------------------
+
       const endOfWeek =
         new Date(startOfWeek);
 
@@ -56,33 +103,29 @@ function ThisWeek() {
         startOfWeek.getDate() + 6
       );
 
-      // ====================================
-      // YYYY-MM-DD 형식 변환
-      // ====================================
+      endOfWeek.setHours(
+        23,
+        59,
+        59,
+        999
+      );
 
-      const formatDate = (date: Date) => {
-        const year =
-          date.getFullYear();
+      const startDateString =
+        formatDate(startOfWeek);
 
-        const month =
-          String(
-            date.getMonth() + 1
-          ).padStart(2, "0");
-
-        const dateDay =
-          String(
-            date.getDate()
-          ).padStart(2, "0");
-
-        return `${year}-${month}-${dateDay}`;
-      };
+      const endDateString =
+        formatDate(endOfWeek);
 
       // ====================================
-      // Supabase 일정 조회
+      // Supabase 조회
       //
-      // 1. 이번 주 시작일 ~ 종료일
-      // 2. 공개 일정
-      // 3. 단기 일정만 표시
+      // 단기:
+      // event_date >= 이번 주 월요일
+      // event_date <= 이번 주 일요일
+      //
+      // 장기:
+      // event_date <= 이번 주 일요일
+      // end_date >= 이번 주 월요일
       // ====================================
 
       const { data, error } =
@@ -90,24 +133,22 @@ function ThisWeek() {
           .from("events")
           .select("*")
 
-          .gte(
-            "event_date",
-            formatDate(startOfWeek)
-          )
-
-          .lte(
-            "event_date",
-            formatDate(endOfWeek)
-          )
-
+          // 공개된 일정만
           .eq(
             "is_published",
             true
           )
 
-          .eq(
-            "event_type",
-            "short"
+          // 시작일이 이번 주 마지막 날보다
+          // 뒤에 있으면 안 됨
+          .lte(
+            "event_date",
+            endDateString
+          )
+
+          // 단기 / 장기 일정 조건
+          .or(
+            `and(event_type.eq.short,event_date.gte.${startDateString}),and(event_type.eq.long,end_date.gte.${startDateString})`
           )
 
           .order(
@@ -126,11 +167,15 @@ function ThisWeek() {
 
       if (error) {
         console.error(
-          "일정 불러오기 오류:",
+          "이번 주 일정 불러오기 오류:",
           error
         );
+
+        setEvents([]);
       } else {
-        setEvents(data ?? []);
+        setEvents(
+          (data ?? []) as EventItem[]
+        );
       }
 
       setLoading(false);
@@ -141,6 +186,9 @@ function ThisWeek() {
 
   // ========================================
   // 날짜 표시
+  //
+  // 2026-10-04
+  // → 10월 4일
   // ========================================
 
   const formatDisplayDate = (
@@ -150,6 +198,35 @@ function ThisWeek() {
       dateString.split("-");
 
     return `${Number(month)}월 ${Number(day)}일`;
+  };
+
+  // ========================================
+  // 카드 날짜 표시
+  //
+  // 단기:
+  // 10월 4일
+  //
+  // 장기:
+  // 10월 1일 ~ 10월 20일
+  // ========================================
+
+  const getEventDateText = (
+    event: EventItem
+  ) => {
+    if (
+      event.event_type === "long" &&
+      event.end_date
+    ) {
+      return `${formatDisplayDate(
+        event.event_date
+      )} ~ ${formatDisplayDate(
+        event.end_date
+      )}`;
+    }
+
+    return formatDisplayDate(
+      event.event_date
+    );
   };
 
   // ========================================
@@ -165,6 +242,31 @@ function ThisWeek() {
   };
 
   // ========================================
+  // 카테고리 표시
+  // ========================================
+
+  const getCategoryName = (
+    category: string
+  ) => {
+    switch (category) {
+      case "sports":
+        return "SPORTS";
+
+      case "performance":
+        return "PERFORMANCE";
+
+      case "festival":
+        return "FESTIVAL";
+
+      case "popup":
+        return "POP-UP";
+
+      default:
+        return category.toUpperCase();
+    }
+  };
+
+  // ========================================
   // 슬라이드 이동
   //
   // 카드 한 개씩 이동
@@ -174,7 +276,9 @@ function ThisWeek() {
   const scrollSlider = (
     direction: "left" | "right"
   ) => {
-    if (!sliderRef.current) return;
+    if (!sliderRef.current) {
+      return;
+    }
 
     const container =
       sliderRef.current;
@@ -184,13 +288,15 @@ function ThisWeek() {
         ".event-card"
       ) as HTMLElement | null;
 
-    if (!firstCard) return;
+    if (!firstCard) {
+      return;
+    }
 
-    // 현재 화면에서 실제 카드 너비
+    // 실제 카드 너비
     const cardWidth =
       firstCard.offsetWidth;
 
-    // CSS에 설정된 gap 값
+    // CSS gap
     const styles =
       window.getComputedStyle(
         container
@@ -201,7 +307,7 @@ function ThisWeek() {
         styles.columnGap
       ) || 0;
 
-    // 카드 1개 + 간격만큼 이동
+    // 카드 하나 + 간격
     const scrollAmount =
       cardWidth + gap;
 
@@ -233,6 +339,7 @@ function ThisWeek() {
         <div className="section-heading">
 
           <div>
+
             <span className="section-label">
               SUWON PLAY PICK
             </span>
@@ -244,9 +351,8 @@ function ThisWeek() {
             <p>
               이번 주 수원에서 즐길 수 있는 주요 일정을 확인해보세요.
             </p>
-          </div>
 
-          {/* 전체 일정 페이지 */}
+          </div>
 
           <a
             href="/schedule"
@@ -300,77 +406,85 @@ function ThisWeek() {
               ref={sliderRef}
             >
 
-              {events.map((event) => (
+              {events.map(
+                (event) => (
 
-                <article
-                  className="event-card"
-                  key={event.id}
-                >
-
-                  {/* 이미지 */}
-
-                  <div
-                    className="event-image"
-                    style={
-                      event.image_url
-                        ? {
-                            backgroundImage:
-                              `url(${event.image_url})`,
-                          }
-                        : {}
-                    }
+                  <article
+                    className="event-card"
+                    key={event.id}
                   >
 
-                    <span className="event-category">
-                      {event.category.toUpperCase()}
-                    </span>
+                    {/* ========================
+                        이미지
+                    ======================== */}
 
-                  </div>
+                    <div
+                      className="event-image"
+                      style={
+                        event.image_url
+                          ? {
+                              backgroundImage:
+                                `url(${event.image_url})`,
+                            }
+                          : {}
+                      }
+                    >
 
-                  {/* 일정 정보 */}
-
-                  <div className="event-info">
-
-                    <div className="event-date">
-
-                      <strong>
-                        {formatDisplayDate(
-                          event.event_date
+                      <span className="event-category">
+                        {getCategoryName(
+                          event.category
                         )}
-                      </strong>
-
-                      {event.event_time && (
-                        <span>
-                          {formatTime(
-                            event.event_time
-                          )}
-                        </span>
-                      )}
+                      </span>
 
                     </div>
 
-                    <h3>
-                      {event.title}
-                    </h3>
+                    {/* ========================
+                        일정 정보
+                    ======================== */}
 
-                    {event.place && (
-                      <p>
-                        {event.place}
-                      </p>
-                    )}
+                    <div className="event-info">
 
-                    <button
-                      type="button"
-                      className="event-detail-button"
-                    >
-                      자세히 보기
-                    </button>
+                      <div className="event-date">
 
-                  </div>
+                        <strong>
+                          {getEventDateText(
+                            event
+                          )}
+                        </strong>
 
-                </article>
+                        {event.event_time && (
+                          <span>
+                            {formatTime(
+                              event.event_time
+                            )}
+                          </span>
+                        )}
 
-              ))}
+                      </div>
+
+                      <h3>
+                        {event.title}
+                      </h3>
+
+                      {event.place && (
+                        <p>
+                          {event.place}
+                        </p>
+                      )}
+
+                      <button
+                        type="button"
+                        className="event-detail-button"
+                      >
+                        자세히 보기
+                      </button>
+
+                    </div>
+
+                  </article>
+
+                )
+              )}
 
             </div>
 
