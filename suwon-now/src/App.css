@@ -4014,3 +4014,13 @@ header nav {
   }
 
 }
+/* 달력 일정 링크 밑줄 제거 */
+.month-event {
+  text-decoration: none !important;
+}
+
+.month-event:hover,
+.month-event:visited,
+.month-event:active {
+  text-decoration: none !important;
+}

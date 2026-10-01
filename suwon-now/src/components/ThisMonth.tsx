@@ -5,6 +5,7 @@ type EventItem = {
   id: number;
   title: string;
   category: string;
+  sport_type: string | null;
 
   event_type: "short" | "long";
   event_date: string;
@@ -376,6 +377,45 @@ function ThisMonth() {
         return category;
     }
   };
+  // ========================================
+// 스포츠 종목 이모지
+// ========================================
+
+const getSportEmoji = (
+  sportType: string | null
+) => {
+  switch (sportType) {
+    case "soccer":
+      return "⚽";
+
+    case "baseball":
+      return "⚾";
+
+    case "basketball":
+      return "🏀";
+
+    case "volleyball":
+      return "🏐";
+
+    case "running":
+      return "🏃";
+
+    case "badminton":
+      return "🏸";
+
+    case "tennis":
+      return "🎾";
+
+    case "golf":
+      return "⛳";
+
+    case "etc":
+      return "🏅";
+
+    default:
+      return "";
+  }
+};
 
   // ========================================
   // 오늘인지 확인
@@ -585,15 +625,24 @@ function ThisMonth() {
 >
                             
 
-                              <span className="month-event-category">
-                                {getCategoryName(
-                                  event.category
-                                )}
-                              </span>
+<span className="month-event-category">
+  {getCategoryName(
+    event.category
+  )}
+</span>
 
-                              <span className="month-event-title">
-                                {event.title}
-                              </span>
+{event.category === "sports" &&
+  event.sport_type && (
+    <span className="month-event-sport-icon">
+      {getSportEmoji(
+        event.sport_type
+      )}
+    </span>
+  )}
+
+<span className="month-event-title">
+  {event.title}
+</span>
 
                             </a>
                           )
