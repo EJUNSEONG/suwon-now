@@ -17,6 +17,8 @@ type EventItem = {
   image_url: string | null;
   ticket_url: string | null;
   is_published: boolean;
+
+  view_count: number;
 };
 
 function EventDetail() {
@@ -29,13 +31,21 @@ function EventDetail() {
   const [error, setError] =
     useState("");
 
-  // URL:
+  // ========================================
+  // URL에서 일정 ID 가져오기
+  //
   // /event/15
-  // → 15 추출
+  // → 15
+  // ========================================
+
   const eventId =
     window.location.pathname
       .split("/")
       .filter(Boolean)[1];
+
+  // ========================================
+  // 일정 상세 조회 + 조회수 증가
+  // ========================================
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -47,6 +57,10 @@ function EventDetail() {
         setLoading(false);
         return;
       }
+
+      // ------------------------------------
+      // 1. 일정 정보 조회
+      // ------------------------------------
 
       const { data, error } =
         await supabase
@@ -70,14 +84,40 @@ function EventDetail() {
         return;
       }
 
-      setEvent(data);
+      setEvent(data as EventItem);
+
+      // ------------------------------------
+      // 2. 조회수 +1
+      //
+      // Supabase SQL에서 만든
+      // increment_event_view 함수 실행
+      // ------------------------------------
+
+      const { error: viewError } =
+        await supabase.rpc(
+          "increment_event_view",
+          {
+            event_id: Number(eventId),
+          }
+        );
+
+      if (viewError) {
+        console.error(
+          "조회수 증가 오류:",
+          viewError
+        );
+      }
+
       setLoading(false);
     };
 
     fetchEvent();
   }, [eventId]);
 
+  // ========================================
   // 날짜 표시
+  // ========================================
+
   const formatDisplayDate = (
     dateString: string
   ) => {
@@ -89,7 +129,10 @@ function EventDetail() {
     )}월 ${Number(day)}일`;
   };
 
+  // ========================================
   // 시간 표시
+  // ========================================
+
   const formatTime = (
     time: string | null
   ) => {
@@ -98,7 +141,10 @@ function EventDetail() {
     return time.slice(0, 5);
   };
 
-  // 카테고리
+  // ========================================
+  // 카테고리 한글 표시
+  // ========================================
+
   const getCategoryName = (
     category: string
   ) => {
@@ -120,7 +166,16 @@ function EventDetail() {
     }
   };
 
-  // 날짜
+  // ========================================
+  // 일정 날짜 표시
+  //
+  // 단기:
+  // 2026년 10월 4일
+  //
+  // 장기:
+  // 2026년 10월 1일 ~ 2026년 10월 20일
+  // ========================================
+
   const getEventDateText = (
     event: EventItem
   ) => {
@@ -140,21 +195,33 @@ function EventDetail() {
     );
   };
 
+  // ========================================
+  // 로딩
+  // ========================================
+
   if (loading) {
     return (
       <>
         <Header />
 
         <main className="event-detail-page">
+
           <div className="event-detail-container">
+
             <p>
               일정을 불러오는 중입니다.
             </p>
+
           </div>
+
         </main>
       </>
     );
   }
+
+  // ========================================
+  // 일정 없음
+  // ========================================
 
   if (error || !event) {
     return (
@@ -162,6 +229,7 @@ function EventDetail() {
         <Header />
 
         <main className="event-detail-page">
+
           <div className="event-detail-container">
 
             <h1>
@@ -176,10 +244,15 @@ function EventDetail() {
             </a>
 
           </div>
+
         </main>
       </>
     );
   }
+
+  // ========================================
+  // 상세 화면
+  // ========================================
 
   return (
     <>
@@ -200,25 +273,33 @@ function EventDetail() {
 
           <div className="event-detail-layout">
 
-            {/* 대표 이미지 */}
+            {/* =================================
+                대표 이미지
+            ================================= */}
 
             <div className="event-detail-image-area">
 
               {event.image_url ? (
+
                 <img
                   src={event.image_url}
                   alt={event.title}
                   className="event-detail-image"
                 />
+
               ) : (
+
                 <div className="event-detail-no-image">
                   SUWON PLAY
                 </div>
+
               )}
 
             </div>
 
-            {/* 정보 */}
+            {/* =================================
+                일정 정보
+            ================================= */}
 
             <div className="event-detail-info">
 
@@ -231,6 +312,8 @@ function EventDetail() {
               <h1>
                 {event.title}
               </h1>
+
+              {/* 기본 정보 */}
 
               <div className="event-detail-meta">
 
@@ -247,7 +330,9 @@ function EventDetail() {
                 </div>
 
                 {event.event_time && (
+
                   <div>
+
                     <span>
                       시간
                     </span>
@@ -257,11 +342,15 @@ function EventDetail() {
                         event.event_time
                       )}
                     </strong>
+
                   </div>
+
                 )}
 
                 {event.place && (
+
                   <div>
+
                     <span>
                       장소
                     </span>
@@ -269,12 +358,17 @@ function EventDetail() {
                     <strong>
                       {event.place}
                     </strong>
+
                   </div>
+
                 )}
 
               </div>
 
+              {/* 일정 설명 */}
+
               {event.description && (
+
                 <div className="event-detail-description">
 
                   <h2>
@@ -286,9 +380,13 @@ function EventDetail() {
                   </p>
 
                 </div>
+
               )}
 
+              {/* 공식 / 예매 링크 */}
+
               {event.ticket_url && (
+
                 <a
                   href={event.ticket_url}
                   target="_blank"
@@ -297,6 +395,7 @@ function EventDetail() {
                 >
                   공식 / 예매 페이지 보기 →
                 </a>
+
               )}
 
             </div>
