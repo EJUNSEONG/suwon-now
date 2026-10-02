@@ -4024,3 +4024,461 @@ header nav {
 .month-event:active {
   text-decoration: none !important;
 }
+/* =========================================
+   HERO - MAIN IMAGE 최종 설정
+========================================= */
+
+.hero-section {
+  width: 100%;
+  padding-bottom: 20px;
+  background: #f5f5f5;
+}
+
+.hero-slider {
+  position: relative;
+
+  width: 100%;
+  height: 500px;
+
+  overflow: hidden;
+  background: #111;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.8s ease;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 실제 Hero 이미지 */
+.hero-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+
+  user-select: none;
+}
+
+/* =========================================
+   HERO 좌우 화살표
+========================================= */
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  height: 46px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.8);
+  color: #111;
+
+  font-size: 32px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.hero-arrow:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.hero-arrow-left {
+  left: 22px;
+}
+
+.hero-arrow-right {
+  right: 22px;
+}
+
+/* =========================================
+   HERO 하단 슬라이드 점
+========================================= */
+
+.hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 10;
+
+  display: flex;
+  gap: 10px;
+
+  transform: translateX(-50%);
+}
+
+.hero-dots button {
+  width: 10px;
+  height: 10px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.hero-dots button.active {
+  width: 28px;
+
+  border-radius: 999px;
+
+  background: #fff;
+}
+
+/* =========================================
+   HERO TABLET
+========================================= */
+
+@media (max-width: 1024px) {
+  .hero-slider {
+    height: 400px;
+  }
+}
+
+/* =========================================
+   HERO MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+  .hero-slider {
+    height: 300px;
+  }
+
+  .hero-arrow {
+    width: 40px;
+    height: 40px;
+
+    font-size: 27px;
+  }
+
+  .hero-arrow-left {
+    left: 12px;
+  }
+
+  .hero-arrow-right {
+    right: 12px;
+  }
+}
+
+/* =========================================
+   HERO SMALL MOBILE
+========================================= */
+
+@media (max-width: 430px) {
+  .hero-slider {
+    height: 230px;
+  }
+
+  .hero-arrow {
+    width: 36px;
+    height: 36px;
+
+    font-size: 24px;
+  }
+
+  .hero-arrow-left {
+    left: 8px;
+  }
+
+  .hero-arrow-right {
+    right: 8px;
+  }
+}
+  /* HERO MAIN IMAGE */
+
+.hero-section {
+  width: 100%;
+  background: #f5f5f5;
+  padding-bottom: 20px;
+}
+
+.hero-slider {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  background: #111;
+}
+
+.hero-main-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+/* =========================================
+   HERO MAIN IMAGE - NEW
+========================================= */
+
+.hero-section {
+  width: 100%;
+  background: #f5f5f5;
+  padding-bottom: 20px;
+}
+
+/* 이미지가 들어가는 영역 */
+.hero-slider {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  background: #111;
+}
+
+/* 메인 이미지 */
+.hero-main-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+
+  user-select: none;
+}
+
+
+/* =========================================
+   HERO 아래 버튼
+========================================= */
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  padding-top: 10px;
+}
+
+.hero-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #87cefa;
+  color: #111;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.hero-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.96);
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1024px) {
+  .hero-slider {
+    height: 240px;
+  }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+  .hero-slider {
+    height: 190px;
+  }
+
+  .hero-buttons {
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
+
+  .hero-button {
+    flex: 1;
+    padding: 11px 12px;
+
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 430px) {
+  .hero-slider {
+    height: 150px;
+  }
+
+  .hero-button {
+    font-size: 12px;
+  }
+}
+/* =========================================
+   HERO MAIN IMAGE
+   기존 Hero 크기 기준
+========================================= */
+
+.hero-section {
+  width: 100%;
+  background: #f5f5f5;
+  padding-bottom: 20px;
+}
+
+.hero-slider {
+  position: relative;
+  width: 100%;
+  height: 650px;
+  overflow: hidden;
+  background: #111;
+}
+
+/* 메인 이미지 */
+.hero-main-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+
+  user-select: none;
+}
+
+
+/* =========================================
+   HERO 아래 버튼
+========================================= */
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  padding-top: 10px;
+}
+
+.hero-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #87cefa;
+  color: #111;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.hero-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.96);
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1024px) {
+  .hero-slider {
+    height: 480px;
+  }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+  .hero-slider {
+    height: 460px;
+  }
+
+  .hero-buttons {
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
+
+  .hero-button {
+    flex: 1;
+    padding: 11px 12px;
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 430px) {
+  .hero-slider {
+    height: 500px;
+  }
+
+  .hero-button {
+    font-size: 12px;
+  }
+}

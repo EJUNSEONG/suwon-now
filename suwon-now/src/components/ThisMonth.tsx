@@ -20,11 +20,8 @@ type EventItem = {
 };
 
 function ThisMonth() {
-  const [events, setEvents] =
-    useState<EventItem[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // ========================================
   // 실제 오늘 날짜
@@ -32,53 +29,40 @@ function ThisMonth() {
 
   const today = new Date();
 
-  const todayYear =
-    today.getFullYear();
-
-  const todayMonth =
-    today.getMonth();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth();
 
   // ========================================
   // 현재 달력에서 보고 있는 년 / 월
   // ========================================
 
-  const [viewYear, setViewYear] =
-    useState(todayYear);
-
-  const [viewMonth, setViewMonth] =
-    useState(todayMonth);
+  const [viewYear, setViewYear] = useState(todayYear);
+  const [viewMonth, setViewMonth] = useState(todayMonth);
 
   // ========================================
   // 이동 가능한 범위
   //
   // 현재 달 기준
   // 이전 1년 ~ 이후 1년
-  //
-  // 예:
-  // 2026년 9월 기준
-  // 2025년 9월 ~ 2027년 9월
   // ========================================
 
-  const minDate =
-    new Date(
-      todayYear - 1,
-      todayMonth,
-      1
-    );
+  const minDate = new Date(
+    todayYear - 1,
+    todayMonth,
+    1
+  );
 
-  const maxDate =
-    new Date(
-      todayYear + 1,
-      todayMonth,
-      1
-    );
+  const maxDate = new Date(
+    todayYear + 1,
+    todayMonth,
+    1
+  );
 
-  const currentViewDate =
-    new Date(
-      viewYear,
-      viewMonth,
-      1
-    );
+  const currentViewDate = new Date(
+    viewYear,
+    viewMonth,
+    1
+  );
 
   const canGoPrevious =
     currentViewDate.getTime() >
@@ -93,18 +77,15 @@ function ThisMonth() {
   // ========================================
 
   const formatDate = (date: Date) => {
-    const year =
-      date.getFullYear();
+    const year = date.getFullYear();
 
-    const month =
-      String(
-        date.getMonth() + 1
-      ).padStart(2, "0");
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
 
-    const day =
-      String(
-        date.getDate()
-      ).padStart(2, "0");
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
   };
@@ -113,19 +94,17 @@ function ThisMonth() {
   // 현재 보고 있는 달의 시작 / 마지막 날짜
   // ========================================
 
-  const monthStart =
-    new Date(
-      viewYear,
-      viewMonth,
-      1
-    );
+  const monthStart = new Date(
+    viewYear,
+    viewMonth,
+    1
+  );
 
-  const monthEnd =
-    new Date(
-      viewYear,
-      viewMonth + 1,
-      0
-    );
+  const monthEnd = new Date(
+    viewYear,
+    viewMonth + 1,
+    0
+  );
 
   const monthStartString =
     formatDate(monthStart);
@@ -140,12 +119,11 @@ function ThisMonth() {
   const handlePreviousMonth = () => {
     if (!canGoPrevious) return;
 
-    const previousMonth =
-      new Date(
-        viewYear,
-        viewMonth - 1,
-        1
-      );
+    const previousMonth = new Date(
+      viewYear,
+      viewMonth - 1,
+      1
+    );
 
     setViewYear(
       previousMonth.getFullYear()
@@ -163,12 +141,11 @@ function ThisMonth() {
   const handleNextMonth = () => {
     if (!canGoNext) return;
 
-    const nextMonth =
-      new Date(
-        viewYear,
-        viewMonth + 1,
-        1
-      );
+    const nextMonth = new Date(
+      viewYear,
+      viewMonth + 1,
+      1
+    );
 
     setViewYear(
       nextMonth.getFullYear()
@@ -207,7 +184,6 @@ function ThisMonth() {
         await supabase
           .from("events")
           .select("*")
-
           .eq(
             "is_published",
             true
@@ -309,19 +285,17 @@ function ThisMonth() {
   const getEventsForDay = (
     day: number
   ) => {
-    const date =
-      new Date(
-        viewYear,
-        viewMonth,
-        day
-      );
+    const date = new Date(
+      viewYear,
+      viewMonth,
+      day
+    );
 
     const dateString =
       formatDate(date);
 
     return events.filter(
       (event) => {
-
         // ------------------------------
         // 단기 일정
         // ------------------------------
@@ -377,45 +351,46 @@ function ThisMonth() {
         return category;
     }
   };
+
   // ========================================
-// 스포츠 종목 이모지
-// ========================================
+  // 스포츠 종목 이모지
+  // ========================================
 
-const getSportEmoji = (
-  sportType: string | null
-) => {
-  switch (sportType) {
-    case "soccer":
-      return "⚽";
+  const getSportEmoji = (
+    sportType: string | null
+  ) => {
+    switch (sportType) {
+      case "soccer":
+        return "⚽";
 
-    case "baseball":
-      return "⚾";
+      case "baseball":
+        return "⚾";
 
-    case "basketball":
-      return "🏀";
+      case "basketball":
+        return "🏀";
 
-    case "volleyball":
-      return "🏐";
+      case "volleyball":
+        return "🏐";
 
-    case "running":
-      return "🏃";
+      case "running":
+        return "🏃";
 
-    case "badminton":
-      return "🏸";
+      case "badminton":
+        return "🏸";
 
-    case "tennis":
-      return "🎾";
+      case "tennis":
+        return "🎾";
 
-    case "golf":
-      return "⛳";
+      case "golf":
+        return "⛳";
 
-    case "etc":
-      return "🏅";
+      case "etc":
+        return "🏅";
 
-    default:
-      return "";
-  }
-};
+      default:
+        return "";
+    }
+  };
 
   // ========================================
   // 오늘인지 확인
@@ -452,7 +427,6 @@ const getSportEmoji = (
         <div className="section-heading">
 
           <div>
-
             <span className="section-label">
               MONTHLY SCHEDULE
             </span>
@@ -464,7 +438,6 @@ const getSportEmoji = (
             <p>
               수원의 경기·공연·축제·팝업 일정을 월별로 확인해보세요.
             </p>
-
           </div>
 
           <a
@@ -555,7 +528,6 @@ const getSportEmoji = (
           ================================== */}
 
           <div className="month-weekdays">
-
             <div>일</div>
             <div>월</div>
             <div>화</div>
@@ -563,7 +535,6 @@ const getSportEmoji = (
             <div>목</div>
             <div>금</div>
             <div>토</div>
-
           </div>
 
           {/* ==================================
@@ -615,36 +586,39 @@ const getSportEmoji = (
                         .map(
                           (event) => (
 
-                           <a
-  href={`/event/${event.id}`}
-  className={
-    `month-event month-event-${event.category}`
-  }
-  key={`${event.id}-${day}`}
-  title={event.title}
->
-                            
+                            <a
+                              href={`/event/${event.id}`}
+                              className={
+                                `month-event month-event-${event.category}`
+                              }
+                              key={`${event.id}-${day}`}
+                              title={event.title}
+                            >
 
-<span className="month-event-category">
-  {getCategoryName(
-    event.category
-  )}
-</span>
+                              <span className="month-event-category">
+                                {getCategoryName(
+                                  event.category
+                                )}
+                              </span>
 
-{event.category === "sports" &&
-  event.sport_type && (
-    <span className="month-event-sport-icon">
-      {getSportEmoji(
-        event.sport_type
-      )}
-    </span>
-  )}
+                              {/* 스포츠 종목 이모지 */}
 
-<span className="month-event-title">
-  {event.title}
-</span>
+                              {event.category ===
+                                "sports" &&
+                                event.sport_type && (
+                                  <span className="month-event-sport-icon">
+                                    {getSportEmoji(
+                                      event.sport_type
+                                    )}
+                                  </span>
+                                )}
+
+                              <span className="month-event-title">
+                                {event.title}
+                              </span>
 
                             </a>
+
                           )
                         )}
 
