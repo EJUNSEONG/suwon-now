@@ -4779,3 +4779,33 @@ header nav {
     margin-top: 0 !important;
   }
 }
+/* 모바일 월간 달력 일정 표시 개선 */
+@media (max-width: 768px) {
+  .month-event {
+    padding: 4px 3px !important;
+    gap: 2px !important;
+
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+
+    white-space: normal !important;
+    overflow: hidden !important;
+  }
+
+  .month-event-title {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+
+    white-space: normal !important;
+    overflow: hidden !important;
+
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .month-event-sport-icon {
+    font-size: 11px !important;
+    flex-shrink: 0;
+  }
+}
