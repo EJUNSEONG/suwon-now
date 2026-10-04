@@ -4767,3 +4767,15 @@ header nav {
     padding-top: 14px !important;
   }
 }
+/* 모바일 THIS WEEK ↔ THIS MONTH 간격 줄이기 */
+@media (max-width: 768px) {
+  #this-week {
+    padding-bottom: 30px !important;
+    margin-bottom: 0 !important;
+  }
+
+  #this-month {
+    padding-top: 40px !important;
+    margin-top: 0 !important;
+  }
+}
