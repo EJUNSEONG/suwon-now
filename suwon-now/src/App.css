@@ -4809,3 +4809,11 @@ header nav {
     flex-shrink: 0;
   }
 }
+@media (max-width: 768px) {
+  .month-calendar {
+    width: calc(100% + 30px) !important;
+    max-width: none !important;
+    margin-left: -15px !important;
+    margin-right: -15px !important;
+  }
+}
