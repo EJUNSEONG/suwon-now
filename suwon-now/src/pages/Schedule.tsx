@@ -24,41 +24,28 @@ type EventItem = {
 type SortType = "latest" | "views";
 
 function Schedule() {
-  const [events, setEvents] =
-    useState<EventItem[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [sortType, setSortType] =
     useState<SortType>("latest");
 
   // ========================================
   // URL에서 카테고리 확인
-  //
-  // /schedule
-  // → 전체
-  //
-  // /schedule?category=sports
-  // → 스포츠
   // ========================================
 
-  const searchParams =
-    new URLSearchParams(
-      window.location.search
-    );
+  const searchParams = new URLSearchParams(
+    window.location.search
+  );
 
   const category =
-    searchParams.get("category") ??
-    "all";
+    searchParams.get("category") ?? "all";
 
   // ========================================
   // 카테고리 정보
   // ========================================
 
-  const getCategoryName = (
-    value: string
-  ) => {
+  const getCategoryName = (value: string) => {
     switch (value) {
       case "sports":
         return "스포츠";
@@ -124,10 +111,59 @@ function Schedule() {
   };
 
   // ========================================
+  // 날짜 문자열 → Date 변환
+  // ========================================
+
+  const getDate = (dateString: string) => {
+    const [year, month, day] = dateString
+      .split("-")
+      .map(Number);
+
+    return new Date(year, month - 1, day);
+  };
+
+  // ========================================
+  // 일정 상태 구분
+  //
+  // 0 = 현재 진행 중
+  // 1 = 다가오는 일정
+  // 2 = 지난 일정
+  // ========================================
+
+  const getEventGroup = (
+    event: EventItem,
+    today: Date
+  ) => {
+    const startDate = getDate(event.event_date);
+
+    const endDate =
+      event.event_type === "long" &&
+      event.end_date
+        ? getDate(event.end_date)
+        : startDate;
+
+    // 현재 진행 중
+    if (
+      startDate <= today &&
+      endDate >= today
+    ) {
+      return 0;
+    }
+
+    // 앞으로 예정된 일정
+    if (startDate > today) {
+      return 1;
+    }
+
+    // 이미 끝난 일정
+    return 2;
+  };
+
+  // ========================================
   // 일정 불러오기
   //
-  // 최신순:
-  // event_date DESC
+  // 날짜순:
+  // 진행 중 → 다가오는 일정 → 지난 일정
   //
   // 조회순:
   // view_count DESC
@@ -137,61 +173,40 @@ function Schedule() {
     const fetchEvents = async () => {
       setLoading(true);
 
-      let query =
-        supabase
-          .from("events")
-          .select("*")
-          .eq(
-            "is_published",
-            true
-          );
+      let query = supabase
+        .from("events")
+        .select("*")
+        .eq("is_published", true);
 
       // ------------------------------------
       // 카테고리 필터
       // ------------------------------------
 
       if (category !== "all") {
-        query =
-          query.eq(
-            "category",
-            category
-          );
+        query = query.eq(
+          "category",
+          category
+        );
       }
 
       // ------------------------------------
-      // 정렬
+      // 조회순일 때만 Supabase에서 정렬
       // ------------------------------------
 
       if (sortType === "views") {
-        query =
-          query
-            .order(
-              "view_count",
-              {
-                ascending: false,
-              }
-            )
-            .order(
-              "event_date",
-              {
-                ascending: false,
-              }
-            );
-      } else {
-        query =
-          query
-            .order(
-              "event_date",
-              {
-                ascending: false,
-              }
-            )
-            .order(
-              "event_time",
-              {
-                ascending: false,
-              }
-            );
+        query = query
+          .order(
+            "view_count",
+            {
+              ascending: false,
+            }
+          )
+          .order(
+            "event_date",
+            {
+              ascending: false,
+            }
+          );
       }
 
       const { data, error } =
@@ -205,9 +220,79 @@ function Schedule() {
 
         setEvents([]);
       } else {
-        setEvents(
-          (data ?? []) as EventItem[]
-        );
+        const eventList =
+          (data ?? []) as EventItem[];
+
+        // ------------------------------------
+        // 날짜순 정렬
+        // ------------------------------------
+
+        if (sortType === "latest") {
+          const today = new Date();
+
+          today.setHours(
+            0,
+            0,
+            0,
+            0
+          );
+
+          eventList.sort((a, b) => {
+            const groupA =
+              getEventGroup(a, today);
+
+            const groupB =
+              getEventGroup(b, today);
+
+            // 1.
+            // 진행 중
+            // ↓
+            // 다가오는 일정
+            // ↓
+            // 지난 일정
+            if (groupA !== groupB) {
+              return groupA - groupB;
+            }
+
+            const startA = getDate(
+              a.event_date
+            ).getTime();
+
+            const startB = getDate(
+              b.event_date
+            ).getTime();
+
+            // --------------------------------
+            // 현재 진행 중인 일정
+            //
+            // 최근 시작한 일정부터
+            // --------------------------------
+
+            if (groupA === 0) {
+              return startB - startA;
+            }
+
+            // --------------------------------
+            // 다가오는 일정
+            //
+            // 가장 가까운 일정부터
+            // --------------------------------
+
+            if (groupA === 1) {
+              return startA - startB;
+            }
+
+            // --------------------------------
+            // 지난 일정
+            //
+            // 가장 최근 일정부터
+            // --------------------------------
+
+            return startB - startA;
+          });
+        }
+
+        setEvents(eventList);
       }
 
       setLoading(false);
@@ -280,7 +365,6 @@ function Schedule() {
       <Header />
 
       <main className="schedule-page">
-
         <div className="schedule-container">
 
           {/* ==================================
@@ -288,7 +372,6 @@ function Schedule() {
           ================================== */}
 
           <div className="schedule-heading">
-
             <span className="section-label">
               SUWON PLAY SCHEDULE
             </span>
@@ -300,7 +383,6 @@ function Schedule() {
             <p>
               {getPageDescription()}
             </p>
-
           </div>
 
           {/* ==================================
@@ -334,8 +416,7 @@ function Schedule() {
             <a
               href="/schedule?category=performance"
               className={
-                category ===
-                "performance"
+                category === "performance"
                   ? "active"
                   : ""
               }
@@ -374,7 +455,6 @@ function Schedule() {
           <div className="schedule-result-header">
 
             <div className="schedule-result-count">
-
               <strong>
                 {getCategoryName(
                   category
@@ -384,7 +464,6 @@ function Schedule() {
               <span>
                 {events.length}개의 일정
               </span>
-
             </div>
 
             {/* 정렬 */}
@@ -404,7 +483,7 @@ function Schedule() {
                   )
                 }
               >
-                최신순
+                날짜순
               </button>
 
               <button
@@ -460,9 +539,7 @@ function Schedule() {
 
                     {/* 이미지 */}
 
-                    <div
-                      className="schedule-card-image"
-                    >
+                    <div className="schedule-card-image">
 
                       {event.image_url ? (
 
@@ -557,7 +634,6 @@ function Schedule() {
           )}
 
         </div>
-
       </main>
     </>
   );

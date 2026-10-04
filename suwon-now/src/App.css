@@ -4817,3 +4817,20 @@ header nav {
     margin-right: -15px !important;
   }
 }
+
+/* ========================================
+   THIS WEEK → THIS MONTH 간격 조정
+======================================== */
+
+/* PC */
+@media (min-width: 769px) {
+  #this-week {
+    padding-bottom: 35px !important;
+    margin-bottom: 0 !important;
+  }
+
+  #this-month {
+    padding-top: 45px !important;
+    margin-top: 0 !important;
+  }
+}
