@@ -5125,3 +5125,283 @@ header nav {
     font-size: 10px;
   }
 }
+
+/* THIS WEEK 경기 카드 날짜·시간·장소 */
+
+.this-week-slider .match-card-meta {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ALL SCHEDULE 경기 카드 날짜·시간·장소 */
+
+.schedule-match-meta {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 모바일에서는 조금 작게 */
+
+@media (max-width: 650px) {
+  .this-week-slider .match-card-meta,
+  .schedule-match-meta {
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   스포츠 경기 카드 팀 로고 및 이름 정렬
+========================================= */
+
+/* THIS WEEK + ALL SCHEDULE 공통 */
+
+.this-week-slider .match-card-team,
+.schedule-match-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  gap: 8px;
+}
+
+/* 로고 박스 크기와 위치 통일 */
+
+.this-week-slider .match-card-logo-box,
+.schedule-match-logo {
+  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+/* 팀 이름 영역 높이 통일 */
+
+.this-week-slider .match-card-team > span,
+.schedule-match-team > span {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: center;
+
+  width: 100%;
+  min-height: 36px;
+
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+
+/* VS 위치를 로고 중앙에 맞추기 */
+
+.this-week-slider .match-card-vs,
+.schedule-match-vs {
+  align-self: start;
+  margin-top: 42px;
+}
+
+/* =========================================
+   모바일
+========================================= */
+
+@media (max-width: 650px) {
+  .this-week-slider .match-card-team > span,
+  .schedule-match-team > span {
+    min-height: 44px;
+    line-height: 22px;
+    font-size: 12px;
+  }
+
+  .this-week-slider .match-card-vs,
+  .schedule-match-vs {
+    margin-top: 48px;
+  }
+}
+
+/* =========================================
+   EVENT DETAIL - 스포츠 경기 카드
+========================================= */
+
+.event-detail-match-card {
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+  min-height: 450px;
+
+  padding: 65px 28px 35px;
+
+  background: linear-gradient(
+    155deg,
+    #142d56 0%,
+    #09172e 100%
+  );
+
+  color: #fff;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 30px;
+
+  text-align: center;
+  border-radius: inherit;
+}
+
+/* 홈팀 / VS / 원정팀 */
+
+.event-detail-match-teams {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  gap: 16px;
+  align-items: start;
+}
+
+/* 팀 영역 */
+
+.event-detail-match-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 0;
+}
+
+/* 로고 박스 */
+
+.event-detail-match-logo {
+  box-sizing: border-box;
+
+  width: 100%;
+  max-width: 175px;
+  aspect-ratio: 1 / 1;
+
+  padding: 16px;
+
+  background: #fff;
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.event-detail-match-logo img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+/* 팀 이름 - 두 줄까지 같은 높이 */
+
+.event-detail-match-team > span {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 48px;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* VS */
+
+.event-detail-match-vs {
+  align-self: start;
+  margin-top: 65px;
+
+  font-size: 30px;
+  font-weight: 900;
+  color: #b8d9ff;
+}
+
+/* 두 줄 문구 */
+
+.event-detail-match-copy {
+  margin: auto 0;
+
+  font-size: clamp(20px, 2.5vw, 30px);
+  font-weight: 800;
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
+}
+
+/* 날짜 / 시간 / 장소 */
+
+.event-detail-match-meta {
+  margin-top: auto;
+
+  color: #d7e5f6;
+  font-size: 16px;
+  line-height: 1.8;
+
+  overflow-wrap: anywhere;
+}
+
+/* 오른쪽 날짜 / 시간 글자 확대 */
+
+.event-detail-meta strong.event-detail-meta-emphasis {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* =========================================
+   모바일
+========================================= */
+
+@media (max-width: 650px) {
+  .event-detail-match-card {
+    min-height: 380px;
+    padding: 45px 16px 25px;
+    gap: 20px;
+  }
+
+  .event-detail-match-teams {
+    gap: 10px;
+  }
+
+  .event-detail-match-logo {
+    max-width: 135px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .event-detail-match-team > span {
+    min-height: 44px;
+    font-size: 12px;
+    line-height: 22px;
+  }
+
+  .event-detail-match-vs {
+    margin-top: 48px;
+    font-size: 23px;
+  }
+
+  .event-detail-match-copy {
+    font-size: 21px;
+  }
+
+  .event-detail-match-meta {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .event-detail-meta strong.event-detail-meta-emphasis {
+    font-size: 16px;
+  }
+}
