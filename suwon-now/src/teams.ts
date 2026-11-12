@@ -2,7 +2,7 @@
 export type Team = {
   name: string;
   logo: string;
-  sport: "basketball" | "soccer" | "volleyball" | "baseball";
+  sport: "basketball" | "soccer" | "volleyball" | "baseball" | "wk-league";
 };
 
 export const teams: Team[] = [
