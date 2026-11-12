@@ -1,11 +1,19 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import Header from "../components/Header";
+import { teams } from "../teams";
 
 type EventItem = {
   id: number;
   title: string;
   category: string;
+
+  sport_type: string | null;
+  home_team: string | null;
+  away_team: string | null;
+  card_line1: string | null;
+  card_line2: string | null;
 
   event_type: "short" | "long";
   event_date: string;
@@ -26,7 +34,6 @@ type SortType = "latest" | "views";
 function Schedule() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [sortType, setSortType] =
     useState<SortType>("latest");
 
@@ -49,16 +56,12 @@ function Schedule() {
     switch (value) {
       case "sports":
         return "스포츠";
-
       case "performance":
         return "공연";
-
       case "festival":
         return "축제";
-
       case "popup":
         return "팝업";
-
       default:
         return "전체 일정";
     }
@@ -72,16 +75,12 @@ function Schedule() {
     switch (category) {
       case "sports":
         return "SPORTS";
-
       case "performance":
         return "PERFORMANCE";
-
       case "festival":
         return "FESTIVAL";
-
       case "popup":
         return "POP-UP";
-
       default:
         return "ALL SCHEDULE";
     }
@@ -95,16 +94,12 @@ function Schedule() {
     switch (category) {
       case "sports":
         return "수원에서 열리는 스포츠 일정을 확인해보세요.";
-
       case "performance":
         return "수원에서 즐길 수 있는 공연 일정을 확인해보세요.";
-
       case "festival":
         return "수원의 다양한 축제 일정을 확인해보세요.";
-
       case "popup":
         return "수원에서 열리는 팝업 일정을 확인해보세요.";
-
       default:
         return "수원의 경기·공연·축제·팝업 일정을 한눈에 확인해보세요.";
     }
@@ -142,7 +137,6 @@ function Schedule() {
         ? getDate(event.end_date)
         : startDate;
 
-    // 현재 진행 중
     if (
       startDate <= today &&
       endDate >= today
@@ -150,23 +144,15 @@ function Schedule() {
       return 0;
     }
 
-    // 앞으로 예정된 일정
     if (startDate > today) {
       return 1;
     }
 
-    // 이미 끝난 일정
     return 2;
   };
 
   // ========================================
   // 일정 불러오기
-  //
-  // 날짜순:
-  // 진행 중 → 다가오는 일정 → 지난 일정
-  //
-  // 조회순:
-  // view_count DESC
   // ========================================
 
   useEffect(() => {
@@ -178,9 +164,7 @@ function Schedule() {
         .select("*")
         .eq("is_published", true);
 
-      // ------------------------------------
       // 카테고리 필터
-      // ------------------------------------
 
       if (category !== "all") {
         query = query.eq(
@@ -189,28 +173,19 @@ function Schedule() {
         );
       }
 
-      // ------------------------------------
-      // 조회순일 때만 Supabase에서 정렬
-      // ------------------------------------
+      // 조회순 정렬
 
       if (sortType === "views") {
         query = query
-          .order(
-            "view_count",
-            {
-              ascending: false,
-            }
-          )
-          .order(
-            "event_date",
-            {
-              ascending: false,
-            }
-          );
+          .order("view_count", {
+            ascending: false,
+          })
+          .order("event_date", {
+            ascending: false,
+          });
       }
 
-      const { data, error } =
-        await query;
+      const { data, error } = await query;
 
       if (error) {
         console.error(
@@ -223,33 +198,25 @@ function Schedule() {
         const eventList =
           (data ?? []) as EventItem[];
 
-        // ------------------------------------
         // 날짜순 정렬
-        // ------------------------------------
+        // 진행 중 → 다가오는 일정 → 지난 일정
 
         if (sortType === "latest") {
           const today = new Date();
 
-          today.setHours(
-            0,
-            0,
-            0,
-            0
-          );
+          today.setHours(0, 0, 0, 0);
 
           eventList.sort((a, b) => {
-            const groupA =
-              getEventGroup(a, today);
+            const groupA = getEventGroup(
+              a,
+              today
+            );
 
-            const groupB =
-              getEventGroup(b, today);
+            const groupB = getEventGroup(
+              b,
+              today
+            );
 
-            // 1.
-            // 진행 중
-            // ↓
-            // 다가오는 일정
-            // ↓
-            // 지난 일정
             if (groupA !== groupB) {
               return groupA - groupB;
             }
@@ -262,31 +229,19 @@ function Schedule() {
               b.event_date
             ).getTime();
 
-            // --------------------------------
-            // 현재 진행 중인 일정
-            //
-            // 최근 시작한 일정부터
-            // --------------------------------
+            // 진행 중: 최근 시작한 일정부터
 
             if (groupA === 0) {
               return startB - startA;
             }
 
-            // --------------------------------
-            // 다가오는 일정
-            //
-            // 가장 가까운 일정부터
-            // --------------------------------
+            // 다가오는 일정: 가까운 일정부터
 
             if (groupA === 1) {
               return startA - startB;
             }
 
-            // --------------------------------
-            // 지난 일정
-            //
-            // 가장 최근 일정부터
-            // --------------------------------
+            // 지난 일정: 최근 일정부터
 
             return startB - startA;
           });
@@ -299,10 +254,7 @@ function Schedule() {
     };
 
     fetchEvents();
-  }, [
-    category,
-    sortType,
-  ]);
+  }, [category, sortType]);
 
   // ========================================
   // 날짜 표시
@@ -345,7 +297,7 @@ function Schedule() {
   };
 
   // ========================================
-  // 시간
+  // 시간 표시
   // ========================================
 
   const formatTime = (
@@ -354,6 +306,41 @@ function Schedule() {
     if (!time) return "";
 
     return time.slice(0, 5);
+  };
+
+  // ========================================
+  // 스포츠 경기 로고 가져오기
+  // ========================================
+
+  const getMatchLogos = (
+    event: EventItem
+  ) => {
+    if (
+      event.category !== "sports" ||
+      !event.sport_type ||
+      !event.home_team ||
+      !event.away_team
+    ) {
+      return null;
+    }
+
+    const home = teams.find(
+      (team) =>
+        team.sport === event.sport_type &&
+        team.name === event.home_team
+    );
+
+    const away = teams.find(
+      (team) =>
+        team.sport === event.sport_type &&
+        team.name === event.away_team
+    );
+
+    if (!home?.logo || !away?.logo) {
+      return null;
+    }
+
+    return { home, away };
   };
 
   // ========================================
@@ -367,30 +354,21 @@ function Schedule() {
       <main className="schedule-page">
         <div className="schedule-container">
 
-          {/* ==================================
-              페이지 제목
-          ================================== */}
+          {/* 페이지 제목 */}
 
           <div className="schedule-heading">
             <span className="section-label">
               SUWON PLAY SCHEDULE
             </span>
 
-            <h1>
-              {getPageTitle()}
-            </h1>
+            <h1>{getPageTitle()}</h1>
 
-            <p>
-              {getPageDescription()}
-            </p>
+            <p>{getPageDescription()}</p>
           </div>
 
-          {/* ==================================
-              카테고리 메뉴
-          ================================== */}
+          {/* 카테고리 메뉴 */}
 
           <div className="schedule-category-menu">
-
             <a
               href="/schedule"
               className={
@@ -445,20 +423,14 @@ function Schedule() {
             >
               팝업
             </a>
-
           </div>
 
-          {/* ==================================
-              결과 상단
-          ================================== */}
+          {/* 결과 상단 */}
 
           <div className="schedule-result-header">
-
             <div className="schedule-result-count">
               <strong>
-                {getCategoryName(
-                  category
-                )}
+                {getCategoryName(category)}
               </strong>
 
               <span>
@@ -469,7 +441,6 @@ function Schedule() {
             {/* 정렬 */}
 
             <div className="schedule-sort">
-
               <button
                 type="button"
                 className={
@@ -478,9 +449,7 @@ function Schedule() {
                     : ""
                 }
                 onClick={() =>
-                  setSortType(
-                    "latest"
-                  )
+                  setSortType("latest")
                 }
               >
                 날짜순
@@ -494,96 +463,157 @@ function Schedule() {
                     : ""
                 }
                 onClick={() =>
-                  setSortType(
-                    "views"
-                  )
+                  setSortType("views")
                 }
               >
                 조회순
               </button>
-
             </div>
-
           </div>
 
-          {/* ==================================
-              일정 목록
-          ================================== */}
+          {/* 일정 목록 */}
 
           {loading ? (
-
             <div className="schedule-message">
               일정을 불러오는 중입니다.
             </div>
-
           ) : events.length === 0 ? (
-
             <div className="schedule-message">
               등록된 일정이 없습니다.
             </div>
-
           ) : (
-
             <div className="schedule-grid">
+              {events.map((event) => {
+                const match = getMatchLogos(event);
 
-              {events.map(
-                (event) => (
-
+                return (
                   <a
-                    href={
-                      `/event/${event.id}`
-                    }
+                    href={`/event/${event.id}`}
                     className="schedule-card"
                     key={event.id}
                   >
+                    {/* 카드 이미지 영역 */}
 
-                    {/* 이미지 */}
+                    <div
+                      className={`schedule-card-image ${
+                        match
+                          ? "schedule-match-image"
+                          : ""
+                      }`}
+                    >
+                      {match ? (
+                        /* 스포츠 경기 카드 */
 
-                    <div className="schedule-card-image">
+                        <div className="schedule-match-content">
+                          <div className="schedule-match-teams">
 
-                      {event.image_url ? (
+                            {/* 홈팀 */}
+
+                            <div className="schedule-match-team">
+                              <div className="schedule-match-logo">
+                                <img
+                                  src={match.home.logo}
+                                  alt={`${match.home.name} 로고`}
+                                />
+                              </div>
+
+                              <span>
+                                {match.home.name}
+                              </span>
+                            </div>
+
+                            {/* VS */}
+
+                            <strong className="schedule-match-vs">
+                              VS
+                            </strong>
+
+                            {/* 원정팀 */}
+
+                            <div className="schedule-match-team">
+                              <div className="schedule-match-logo">
+                                <img
+                                  src={match.away.logo}
+                                  alt={`${match.away.name} 로고`}
+                                />
+                              </div>
+
+                              <span>
+                                {match.away.name}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 두 줄 문구 */}
+
+                          {(event.card_line1 ||
+                            event.card_line2) && (
+                            <div className="schedule-match-copy">
+                              {event.card_line1 && (
+                                <div>
+                                  {event.card_line1}
+                                </div>
+                              )}
+
+                              {event.card_line2 && (
+                                <div>
+                                  {event.card_line2}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* 날짜 / 시간 / 장소 */}
+
+                          <div className="schedule-match-meta">
+                            <div>
+                              {getEventDateText(event)}
+
+                              {event.event_time &&
+                                ` · ${formatTime(
+                                  event.event_time
+                                )}`}
+                            </div>
+
+                            {event.place && (
+                              <div>
+                                {event.place}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : event.image_url ? (
+                        /* 기존 포스터 이미지 */
 
                         <img
-                          src={
-                            event.image_url
-                          }
-                          alt={
-                            event.title
-                          }
+                          src={event.image_url}
+                          alt={event.title}
                         />
-
                       ) : (
+                        /* 이미지 없는 일반 일정 */
 
                         <div className="schedule-card-no-image">
                           SUWON PLAY
                         </div>
-
                       )}
 
-                      {/* 카테고리 */}
+                      {/* 카테고리 표시 */}
 
                       <span
-                        className={
-                          `schedule-card-category schedule-card-category-${event.category}`
-                        }
+                        className={`schedule-card-category schedule-card-category-${event.category}`}
                       >
                         {getCategoryName(
                           event.category
                         )}
                       </span>
-
                     </div>
 
-                    {/* 정보 */}
+                    {/* 일정 정보 */}
 
                     <div className="schedule-card-info">
-
                       <div className="schedule-card-date">
-
                         <span>
-                          {getEventDateText(
-                            event
-                          )}
+                          {getEventDateText(event)}
                         </span>
 
                         {event.event_time && (
@@ -593,46 +623,29 @@ function Schedule() {
                             )}
                           </span>
                         )}
-
                       </div>
 
-                      <h2>
-                        {event.title}
-                      </h2>
+                      <h2>{event.title}</h2>
 
                       {event.place && (
-                        <p>
-                          {event.place}
-                        </p>
+                        <p>{event.place}</p>
                       )}
 
                       <div className="schedule-card-bottom">
-
                         <span>
-                          조회{" "}
-                          {
-                            event.view_count ??
-                            0
-                          }
+                          조회 {event.view_count ?? 0}
                         </span>
 
                         <span>
                           자세히 보기 →
                         </span>
-
                       </div>
-
                     </div>
-
                   </a>
-
-                )
-              )}
-
+                );
+              })}
             </div>
-
           )}
-
         </div>
       </main>
     </>
