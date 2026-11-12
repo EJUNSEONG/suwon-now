@@ -50,7 +50,7 @@ export const teams: Team[] = [
   { name: "흥국생명 핑크스파이더스", logo: "/logos/volleyball-pink-spiders.png", sport: "volleyball" },
   { name: "정관장 레드스파크스", logo: "/logos/volleyball-red-sparks.png", sport: "volleyball" },
   { name: "삼성화재 블루팡스", logo: "/logos/volleyball-samsung-bluefangs.png", sport: "volleyball" },
-  { name: "부산 OK저축은행 숲 수퍼스", logo: "/logos/volleyball-soop-supers.png", sport: "volleyball" },
+  { name: "숲 수퍼스", logo: "/logos/volleyball-soop-supers.png", sport: "volleyball" },
   { name: "우리카드 우리WON", logo: "/logos/volleyball-woori-card.png", sport: "volleyball" },
 ];
 
