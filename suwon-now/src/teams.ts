@@ -52,7 +52,56 @@ export const teams: Team[] = [
   { name: "삼성화재 블루팡스", logo: "/logos/volleyball-samsung-bluefangs.png", sport: "volleyball" },
   { name: "숲 수퍼스", logo: "/logos/volleyball-soop-supers.png", sport: "volleyball" },
   { name: "우리카드 우리WON", logo: "/logos/volleyball-woori-card.png", sport: "volleyball" },
+
+    // ========================================
+  // WK리그 여자축구
+  // ========================================
+
+  {
+    sport: "wk-league",
+    name: "경주한수원",
+    logo: "/logos/soccer-wk-gyeongju.png",
+  },
+  {
+    sport: "wk-league",
+    name: "수원FC",
+    logo: "/logos/soccer-wk-suwon.png",
+  },
+  {
+    sport: "wk-league",
+    name: "세종 스포츠토토",
+    logo: "/logos/soccer-wk-sejong.png",
+  },
+  {
+    sport: "wk-league",
+    name: "인천현대제철",
+    logo: "/logos/soccer-wk-incheon.png",
+  },
+  {
+    sport: "wk-league",
+    name: "문경상무",
+    logo: "/logos/soccer-wk-mungyeong.png",
+  },
+  {
+    sport: "wk-league",
+    name: "강진 스완스 WFC",
+    logo: "/logos/soccer-wk-gangjin.png",
+  },
+  {
+    sport: "wk-league",
+    name: "서울시청",
+    logo: "/logos/soccer-wk-seoul.png",
+  },
+  {
+    sport: "wk-league",
+    name: "화천KSPO",
+    logo: "/logos/soccer-wk-hwacheon.png",
+  },
+
 ];
+
+ 
+ 
 
 // 팀 이름으로 로고 찾기
 export const getTeamLogo = (teamName: string): string => {

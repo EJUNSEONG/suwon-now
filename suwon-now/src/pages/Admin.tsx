@@ -30,12 +30,14 @@ type EventItem = {
 const MATCH_SPORTS = [
   "soccer",
   "baseball",
+  "wk-league",
   "basketball",
   "volleyball",
 ];
 
 const SPORT_OPTIONS = [
   ["soccer", "⚽ 축구"],
+  ["wk-league", "⚽ 여자축구 (WK리그)"],
   ["baseball", "⚾ 야구"],
   ["basketball", "🏀 농구"],
   ["volleyball", "🏐 배구"],
