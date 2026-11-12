@@ -4834,3 +4834,166 @@ header nav {
     margin-top: 0 !important;
   }
 }
+
+/* =========================================================
+   THIS WEEK - 스포츠 경기 전용 카드
+   기존 event-card 크기, 슬라이드, 기타 카테고리는 유지
+========================================================= */
+
+.this-week-slider .match-card-image {
+  background: linear-gradient(
+    155deg,
+    #142d56 0%,
+    #09172e 100%
+  ) !important;
+
+  color: #fff;
+
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+/* 카드 전체 내용 */
+
+.this-week-slider .match-card-content {
+  box-sizing: border-box;
+
+  width: 100%;
+  min-width: 0;
+
+  padding: 54px 16px 18px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  gap: 14px;
+  text-align: center;
+}
+
+/* 홈팀 / VS / 원정팀 */
+
+.this-week-slider .match-card-teams {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  gap: 8px;
+  align-items: center;
+
+  margin-top: auto;
+}
+
+/* 팀 이름과 로고 */
+
+.this-week-slider .match-card-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 9px;
+  min-width: 0;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  overflow-wrap: anywhere;
+}
+
+/* 흰색 로고 박스 */
+
+.this-week-slider .match-card-logo-box {
+  box-sizing: border-box;
+
+  width: 100%;
+  max-width: 110px;
+
+  aspect-ratio: 1 / 1;
+
+  border-radius: 12px;
+  padding: 10px;
+
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 팀 로고 이미지 */
+
+.this-week-slider .match-card-logo-box img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+/* 중앙 VS */
+
+.this-week-slider .match-card-vs {
+  font-size: clamp(
+    16px,
+    2vw,
+    25px
+  );
+
+  font-weight: 900;
+  color: #b8d9ff;
+}
+
+/* 관리자 페이지에서 입력한 두 줄 문구 */
+
+.this-week-slider .match-card-copy {
+  margin: auto 0;
+
+  font-size: clamp(
+    15px,
+    1.55vw,
+    21px
+  );
+
+  line-height: 1.45;
+  font-weight: 800;
+
+  overflow-wrap: anywhere;
+}
+
+/* 경기 날짜 / 시간 / 장소 */
+
+.this-week-slider .match-card-meta {
+  margin-top: auto;
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  color: #d7e5f6;
+
+  overflow-wrap: anywhere;
+}
+
+/* ========================================
+   모바일 반응형
+======================================== */
+
+@media (max-width: 650px) {
+  .this-week-slider .match-card-content {
+    padding: 54px 14px 18px;
+  }
+
+  .this-week-slider .match-card-copy {
+    font-size: 19px;
+  }
+
+  .this-week-slider .match-card-logo-box {
+    max-width: 120px;
+  }
+}

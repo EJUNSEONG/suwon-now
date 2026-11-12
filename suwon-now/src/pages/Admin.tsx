@@ -1,7 +1,11 @@
+
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import Header from "../components/Header";
 import { supabase } from "../lib/supabase";
+import { teams } from "../teams";
+
 type EventItem = {
   id: number;
   created_at: string;
@@ -17,11 +21,40 @@ type EventItem = {
   image_url: string | null;
   ticket_url: string | null;
   is_published: boolean;
+  home_team: string | null;
+  away_team: string | null;
+  card_line1: string | null;
+  card_line2: string | null;
 };
+
+const MATCH_SPORTS = [
+  "soccer",
+  "baseball",
+  "basketball",
+  "volleyball",
+];
+
+const SPORT_OPTIONS = [
+  ["soccer", "⚽ 축구"],
+  ["baseball", "⚾ 야구"],
+  ["basketball", "🏀 농구"],
+  ["volleyball", "🏐 배구"],
+  ["running", "🏃 러닝"],
+  ["badminton", "🏸 배드민턴"],
+  ["tennis", "🎾 테니스"],
+  ["golf", "⛳ 골프"],
+  ["etc", "🏅 기타"],
+];
+
+const CATEGORY_OPTIONS = [
+  ["sports", "스포츠"],
+  ["performance", "공연"],
+  ["festival", "축제"],
+  ["popup", "팝업"],
+];
+
 function Admin() {
-  // ========================================
   // 로그인
-  // ========================================
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [email, setEmail] = useState("");
@@ -29,27 +62,20 @@ function Admin() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [resetMessage, setResetMessage] = useState("");
-  // ========================================
-  // 일정 데이터
-  // ========================================
+
+  // 일정 목록
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
-  // ========================================
-  // 등록 / 수정 모달
-  // ========================================
+  const [selectedEventIds, setSelectedEventIds] = useState<number[]>([]);
+
+  // 등록 / 수정
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEventId, setEditingEventId] =
-    useState<number | null>(null);
-  const [existingImageUrl, setExistingImageUrl] =
-    useState<string | null>(null);
-  // ========================================
-  // 일정 입력값
-  // ========================================
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("sports");
   const [sportType, setSportType] = useState("");
-  const [eventType, setEventType] =
-    useState<"short" | "long">("short");
+  const [eventType, setEventType] = useState<"short" | "long">("short");
   const [eventDate, setEventDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [eventTime, setEventTime] = useState("");
@@ -58,137 +84,137 @@ function Admin() {
   const [ticketUrl, setTicketUrl] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  // ========================================
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+
+  // 경기 카드
+  const [homeTeam, setHomeTeam] = useState("");
+  const [awayTeam, setAwayTeam] = useState("");
+  const [cardLine1, setCardLine1] = useState("");
+  const [cardLine2, setCardLine2] = useState("");
+
   // 저장 상태
-  // ========================================
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  // ========================================
-  // 다중 선택
-  // ========================================
-  const [selectedEventIds, setSelectedEventIds] =
-    useState<number[]>([]);
-  // ========================================
-  // 삭제 모달
-  // ========================================
-  const [deleteMode, setDeleteMode] =
-    useState<"single" | "multiple" | null>(null);
-  const [deleteTarget, setDeleteTarget] =
-    useState<EventItem | null>(null);
+
+  // 삭제
+  const [deleteMode, setDeleteMode] = useState<"single" | "multiple" | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EventItem | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
-  // ========================================
+
+  const isMatchSport =
+    category === "sports" && MATCH_SPORTS.includes(sportType);
+
+  const availableTeams = teams.filter(
+    (team) => team.sport === sportType
+  );
+
+  const homeLogo = availableTeams.find(
+    (team) => team.name === homeTeam
+  )?.logo;
+
+  const awayLogo = availableTeams.find(
+    (team) => team.name === awayTeam
+  )?.logo;
+
   // 로그인 상태 확인
-  // ========================================
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
       setAuthLoading(false);
     };
+
     checkSession();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
+
+    const { data: { subscription } } =
+      supabase.auth.onAuthStateChange((_event, currentSession) => {
+        setSession(currentSession);
+      });
+
+    return () => subscription.unsubscribe();
   }, []);
-  // ========================================
+
   // 로그인 후 일정 불러오기
-  // ========================================
   useEffect(() => {
     if (session) {
-      fetchEvents();
+      void fetchEvents();
     } else {
       setEvents([]);
       setSelectedEventIds([]);
     }
   }, [session]);
-  // ========================================
-  // 일정 불러오기
-  // ========================================
+
   const fetchEvents = async () => {
     setEventsLoading(true);
-   const { data, error } = await supabase
-  .from("events")
-  .select("*")
-  .order("created_at", {
-    ascending: false,
-  });
+
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .order("created_at", { ascending: false });
+
     if (error) {
       console.error("일정 불러오기 오류:", error);
-      setEventsLoading(false);
-      return;
+    } else {
+      setEvents((data ?? []) as EventItem[]);
     }
-    setEvents(data ?? []);
+
     setEventsLoading(false);
   };
-  // ========================================
+
   // 로그인
-  // ========================================
-  const handleLogin = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email || !password) {
+
+    if (!email.trim() || !password) {
       setLoginError("이메일과 비밀번호를 입력해주세요.");
       return;
     }
+
     setLoginLoading(true);
     setLoginError("");
     setResetMessage("");
+
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     });
-    if (error) {
-      console.error("로그인 오류:", error);
-      setLoginError(error.message);
-    }
+
+    if (error) setLoginError(error.message);
     setLoginLoading(false);
   };
-  // ========================================
+
   // 비밀번호 재설정
-  // ========================================
   const handlePasswordReset = async () => {
-    if (!email) {
+    if (!email.trim()) {
       setLoginError("먼저 관리자 이메일을 입력해주세요.");
       return;
     }
+
     setLoginError("");
     setResetMessage("");
-    const redirectUrl =
-      `${window.location.origin}/reset-password`;
-    const { error } =
-      await supabase.auth.resetPasswordForEmail(
-        email.trim(),
-        {
-          redirectTo: redirectUrl,
-        }
-      );
-    if (error) {
-      console.error("비밀번호 재설정 오류:", error);
-      setLoginError(error.message);
-      return;
-    }
-    setResetMessage(
-      "비밀번호 재설정 메일을 보냈습니다. 이메일을 확인해주세요."
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      {
+        redirectTo: `${window.location.origin}/reset-password`,
+      }
     );
+
+    if (error) {
+      setLoginError(error.message);
+    } else {
+      setResetMessage(
+        "비밀번호 재설정 메일을 보냈습니다. 이메일을 확인해주세요."
+      );
+    }
   };
-  // ========================================
-  // 로그아웃
-  // ========================================
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
-  // ========================================
-  // 입력폼 초기화
-  // ========================================
+
+  // 입력 초기화
   const resetEventForm = () => {
     setTitle("");
     setCategory("sports");
@@ -205,26 +231,28 @@ function Admin() {
     setExistingImageUrl(null);
     setEditingEventId(null);
     setSubmitError("");
+
+    setHomeTeam("");
+    setAwayTeam("");
+    setCardLine1("");
+    setCardLine2("");
   };
-  // ========================================
-  // 새 일정 등록 모달
-  // ========================================
+
   const handleOpenNewEvent = () => {
     resetEventForm();
     setIsModalOpen(true);
   };
-  // ========================================
-  // 등록/수정 모달 닫기
-  // ========================================
+
   const closeModal = () => {
     if (submitLoading) return;
     setIsModalOpen(false);
     resetEventForm();
   };
-  // ========================================
-  // 수정 모달
-  // ========================================
+
+  // 기존 일정 수정
   const handleEditEvent = (event: EventItem) => {
+    resetEventForm();
+
     setEditingEventId(event.id);
     setTitle(event.title);
     setCategory(event.category);
@@ -232,89 +260,111 @@ function Admin() {
     setEventType(event.event_type ?? "short");
     setEventDate(event.event_date);
     setEndDate(event.end_date ?? "");
-    setEventTime(
-      event.event_time
-        ? event.event_time.slice(0, 5)
-        : ""
-    );
+    setEventTime(event.event_time?.slice(0, 5) ?? "");
     setPlace(event.place ?? "");
     setDescription(event.description ?? "");
     setTicketUrl(event.ticket_url ?? "");
     setIsPublished(event.is_published);
     setExistingImageUrl(event.image_url);
-    setImageFile(null);
-    setSubmitError("");
+
+    setHomeTeam(event.home_team ?? "");
+    setAwayTeam(event.away_team ?? "");
+    setCardLine1(event.card_line1 ?? "");
+    setCardLine2(event.card_line2 ?? "");
+
     setIsModalOpen(true);
   };
-  // ========================================
-  // Storage 파일 경로 추출
-  // ========================================
-  const getStorageFilePath = (
-    imageUrl: string | null
-  ) => {
+
+  // Storage 이미지 경로 추출
+  const getStorageFilePath = (imageUrl: string | null) => {
     if (!imageUrl) return null;
-    const marker =
-      "/storage/v1/object/public/event-images/";
-    const markerIndex = imageUrl.indexOf(marker);
-    if (markerIndex === -1) {
-      return null;
-    }
-    const filePath = imageUrl.substring(
-      markerIndex + marker.length
+
+    const marker = "/storage/v1/object/public/event-images/";
+    const index = imageUrl.indexOf(marker);
+
+    if (index === -1) return null;
+
+    return decodeURIComponent(
+      imageUrl.substring(index + marker.length).split("?")[0]
     );
-    return decodeURIComponent(filePath);
   };
-  // ========================================
-  // 일정 등록 / 수정
-  // ========================================
+
+  // 일정 저장
   const handleSubmitEvent = async () => {
     if (!title.trim()) {
       setSubmitError("일정 제목을 입력해주세요.");
       return;
     }
+
     if (category === "sports" && !sportType) {
       setSubmitError("스포츠 종목을 선택해주세요.");
       return;
     }
+
     if (!eventDate) {
-      setSubmitError(
-        eventType === "long"
-          ? "시작일을 선택해주세요."
-          : "날짜를 선택해주세요."
-      );
+      setSubmitError("날짜를 선택해주세요.");
       return;
     }
+
     if (eventType === "long" && !endDate) {
-      setSubmitError(
-        "장기 일정은 종료일을 선택해주세요."
-      );
+      setSubmitError("장기 일정은 종료일을 선택해주세요.");
       return;
     }
-    if (
-      eventType === "long" &&
-      endDate < eventDate
-    ) {
+
+    if (eventType === "long" && endDate < eventDate) {
       setSubmitError(
         "종료일은 시작일과 같거나 이후로 설정해주세요."
       );
       return;
     }
+
+    // 팀을 선택한 경우 양쪽 모두 선택해야 함
+    if (isMatchSport && (homeTeam || awayTeam)) {
+      if (!homeTeam || !awayTeam) {
+        setSubmitError("홈팀과 원정팀을 모두 선택해주세요.");
+        return;
+      }
+
+      if (homeTeam === awayTeam) {
+        setSubmitError("홈팀과 원정팀은 서로 달라야 합니다.");
+        return;
+      }
+
+      if (
+        !availableTeams.some((team) => team.name === homeTeam) ||
+        !availableTeams.some((team) => team.name === awayTeam)
+      ) {
+        setSubmitError("선택한 종목에 맞는 팀을 선택해주세요.");
+        return;
+      }
+    }
+
+    const totalCardLength =
+      (cardLine1 + cardLine2).length;
+
+    if (isMatchSport && totalCardLength >= 30) {
+      setSubmitError(
+        "카드 문구는 두 줄 합쳐 공백 포함 30자 미만으로 작성해주세요."
+      );
+      return;
+    }
+
     setSubmitLoading(true);
     setSubmitError("");
+
+    let newUploadedFileName: string | null = null;
+
     try {
-      let imageUrl: string | null =
-        existingImageUrl;
-      let newUploadedFileName: string | null =
-        null;
-      // ====================================
+      let imageUrl = existingImageUrl;
+
       // 새 이미지 업로드
-      // ====================================
       if (imageFile) {
         const allowedTypes = [
           "image/jpeg",
           "image/png",
           "image/webp",
         ];
+
         if (!allowedTypes.includes(imageFile.type)) {
           setSubmitError(
             "이미지는 JPG, PNG, WebP 형식만 업로드할 수 있습니다."
@@ -322,404 +372,254 @@ function Admin() {
           setSubmitLoading(false);
           return;
         }
+
         if (imageFile.size > 5 * 1024 * 1024) {
-          setSubmitError(
-            "이미지 용량은 5MB 이하로 업로드해주세요."
-          );
+          setSubmitError("이미지 용량은 5MB 이하로 업로드해주세요.");
           setSubmitLoading(false);
           return;
         }
-        const fileExtension =
-          imageFile.name
-            .split(".")
-            .pop()
-            ?.toLowerCase() || "jpg";
+
+        const extension =
+          imageFile.name.split(".").pop()?.toLowerCase() ?? "png";
+
         const fileName =
-          `${Date.now()}-${crypto.randomUUID()}.${fileExtension}`;
-        const { error: uploadError } =
-          await supabase.storage
-            .from("event-images")
-            .upload(fileName, imageFile, {
-              cacheControl: "3600",
-              upsert: false,
-            });
+          `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("event-images")
+          .upload(fileName, imageFile, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
         if (uploadError) {
-          console.error(
-            "이미지 업로드 오류:",
-            uploadError
-          );
           setSubmitError(
-            "이미지 업로드에 실패했습니다: " +
-              uploadError.message
+            "이미지 업로드에 실패했습니다: " + uploadError.message
           );
           setSubmitLoading(false);
           return;
         }
+
         newUploadedFileName = fileName;
-        const { data: publicUrlData } =
-          supabase.storage
-            .from("event-images")
-            .getPublicUrl(fileName);
-        imageUrl = publicUrlData.publicUrl;
+
+        const { data } = supabase.storage
+          .from("event-images")
+          .getPublicUrl(fileName);
+
+        imageUrl = data.publicUrl;
       }
-      // ====================================
-      // DB 저장 데이터
-      // ====================================
+
       const eventData = {
         title: title.trim(),
         category,
-        sport_type:
-          category === "sports"
-            ? sportType
-            : null,
+        sport_type: category === "sports" ? sportType : null,
         event_type: eventType,
         event_date: eventDate,
-        end_date:
-          eventType === "long"
-            ? endDate
-            : null,
+        end_date: eventType === "long" ? endDate : null,
         event_time: eventTime || null,
         place: place.trim() || null,
         description: description.trim() || null,
         image_url: imageUrl,
         ticket_url: ticketUrl.trim() || null,
         is_published: isPublished,
+
+        home_team:
+          isMatchSport ? homeTeam || null : null,
+        away_team:
+          isMatchSport ? awayTeam || null : null,
+        card_line1:
+          isMatchSport ? cardLine1.trim() || null : null,
+        card_line2:
+          isMatchSport ? cardLine2.trim() || null : null,
       };
-      // ====================================
-      // 일정 수정
-      // ====================================
+
+      let saveError = null;
+
       if (editingEventId !== null) {
-        const { error: updateError } =
-          await supabase
-            .from("events")
-            .update(eventData)
-            .eq("id", editingEventId);
-        if (updateError) {
-          console.error(
-            "일정 수정 오류:",
-            updateError
-          );
-          if (newUploadedFileName) {
-            await supabase.storage
-              .from("event-images")
-              .remove([newUploadedFileName]);
-          }
-          setSubmitError(
-            "일정 수정에 실패했습니다: " +
-              updateError.message
-          );
-          setSubmitLoading(false);
-          return;
+        const { error } = await supabase
+          .from("events")
+          .update(eventData)
+          .eq("id", editingEventId);
+
+        saveError = error;
+      } else {
+        const { error } = await supabase
+          .from("events")
+          .insert([eventData]);
+
+        saveError = error;
+      }
+
+      if (saveError) {
+        if (newUploadedFileName) {
+          await supabase.storage
+            .from("event-images")
+            .remove([newUploadedFileName]);
         }
-        // 이미지 교체 시 기존 이미지 삭제
-        if (imageFile && existingImageUrl) {
-          const oldFilePath =
-            getStorageFilePath(existingImageUrl);
-          if (oldFilePath) {
-            const { error: removeError } =
-              await supabase.storage
-                .from("event-images")
-                .remove([oldFilePath]);
-            if (removeError) {
-              console.warn(
-                "기존 이미지 삭제 실패:",
-                removeError
-              );
-            }
-          }
+
+        setSubmitError(
+          "일정 저장에 실패했습니다: " + saveError.message
+        );
+        return;
+      }
+
+      // 이미지 교체 시 기존 이미지 정리
+      if (
+        editingEventId !== null &&
+        imageFile &&
+        existingImageUrl
+      ) {
+        const oldPath = getStorageFilePath(existingImageUrl);
+
+        if (oldPath) {
+          const { error } = await supabase.storage
+            .from("event-images")
+            .remove([oldPath]);
+
+          if (error) console.warn("기존 이미지 삭제 실패:", error);
         }
       }
-      // ====================================
-      // 새 일정 등록
-      // ====================================
-      else {
-        const { error: insertError } =
-          await supabase
-            .from("events")
-            .insert([eventData]);
-        if (insertError) {
-          console.error(
-            "일정 등록 오류:",
-            insertError
-          );
-          if (newUploadedFileName) {
-            await supabase.storage
-              .from("event-images")
-              .remove([newUploadedFileName]);
-          }
-          setSubmitError(
-            "일정 등록에 실패했습니다: " +
-              insertError.message
-          );
-          setSubmitLoading(false);
-          return;
-        }
-      }
+
       await fetchEvents();
-      setSubmitLoading(false);
       setIsModalOpen(false);
       resetEventForm();
     } catch (error) {
-      console.error(
-        "일정 저장 중 오류:",
-        error
-      );
-      setSubmitError(
-        "일정을 저장하는 중 오류가 발생했습니다."
-      );
+      console.error("일정 저장 오류:", error);
+      setSubmitError("일정을 저장하는 중 오류가 발생했습니다.");
+    } finally {
       setSubmitLoading(false);
     }
   };
-  // ========================================
-  // 체크박스 하나 선택
-  // ========================================
+
+  // 체크박스 선택
   const handleSelectEvent = (id: number) => {
-    setSelectedEventIds((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter(
-          (eventId) => eventId !== id
-        );
-      }
-      return [...prev, id];
-    });
-  };
-  // ========================================
-  // 전체 선택 / 전체 해제
-  // ========================================
-  const handleSelectAll = () => {
-    if (
-      events.length > 0 &&
-      selectedEventIds.length === events.length
-    ) {
-      setSelectedEventIds([]);
-      return;
-    }
-    setSelectedEventIds(
-      events.map((event) => event.id)
+    setSelectedEventIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id]
     );
   };
-  // ========================================
-  // 개별 삭제 모달 열기
-  // ========================================
-  const handleDeleteEvent = (
-    event: EventItem
-  ) => {
+
+  const handleSelectAll = () => {
+    if (selectedEventIds.length === events.length) {
+      setSelectedEventIds([]);
+    } else {
+      setSelectedEventIds(events.map((event) => event.id));
+    }
+  };
+
+  // 삭제 모달
+  const handleDeleteEvent = (event: EventItem) => {
     setDeleteMode("single");
     setDeleteTarget(event);
     setDeleteError("");
   };
-  // ========================================
-  // 선택 삭제 모달 열기
-  // ========================================
+
   const handleDeleteSelected = () => {
-    if (selectedEventIds.length === 0) {
-      return;
-    }
+    if (selectedEventIds.length === 0) return;
+
     setDeleteMode("multiple");
     setDeleteTarget(null);
     setDeleteError("");
   };
-  // ========================================
-  // 삭제 모달 닫기
-  // ========================================
+
   const closeDeleteModal = () => {
     if (deleteLoading) return;
+
     setDeleteMode(null);
     setDeleteTarget(null);
     setDeleteError("");
   };
-  // ========================================
-  // 실제 삭제
-  // ========================================
+
+  // 삭제 실행
   const confirmDeleteEvent = async () => {
     if (!deleteMode) return;
+
+    const targetIds =
+      deleteMode === "single"
+        ? deleteTarget ? [deleteTarget.id] : []
+        : selectedEventIds;
+
+    if (targetIds.length === 0) return;
+
     setDeleteLoading(true);
     setDeleteError("");
-    // ====================================
-    // 개별 삭제
-    // ====================================
-    if (deleteMode === "single") {
-      if (!deleteTarget) {
-        setDeleteLoading(false);
-        return;
-      }
-      const event = deleteTarget;
-      const { error: deleteEventError } =
-        await supabase
-          .from("events")
-          .delete()
-          .eq("id", event.id);
-      if (deleteEventError) {
-        console.error(
-          "일정 삭제 오류:",
-          deleteEventError
-        );
-        setDeleteError(
-          "일정 삭제에 실패했습니다."
-        );
-        setDeleteLoading(false);
-        return;
-      }
-      // 이미지 삭제
-      if (event.image_url) {
-        const filePath =
-          getStorageFilePath(event.image_url);
-        if (filePath) {
-          const { error: imageDeleteError } =
-            await supabase.storage
-              .from("event-images")
-              .remove([filePath]);
-          if (imageDeleteError) {
-            console.warn(
-              "이미지 삭제 오류:",
-              imageDeleteError
-            );
-          }
-        }
-      }
-      setSelectedEventIds((prev) =>
-        prev.filter((id) => id !== event.id)
+
+    try {
+      const targetEvents = events.filter((event) =>
+        targetIds.includes(event.id)
       );
-    }
-    // ====================================
-    // 선택된 일정 일괄 삭제
-    // ====================================
-    if (deleteMode === "multiple") {
-      if (selectedEventIds.length === 0) {
-        setDeleteLoading(false);
+
+      const { error } = await supabase
+        .from("events")
+        .delete()
+        .in("id", targetIds);
+
+      if (error) {
+        setDeleteError("일정 삭제에 실패했습니다: " + error.message);
         return;
       }
-      const selectedEvents =
-        events.filter((event) =>
-          selectedEventIds.includes(event.id)
-        );
-      const { error: bulkDeleteError } =
-        await supabase
-          .from("events")
-          .delete()
-          .in("id", selectedEventIds);
-      if (bulkDeleteError) {
-        console.error(
-          "선택 일정 삭제 오류:",
-          bulkDeleteError
-        );
-        setDeleteError(
-          "선택한 일정을 삭제하는 데 실패했습니다."
-        );
-        setDeleteLoading(false);
-        return;
-      }
-      const imagePaths =
-        selectedEvents
-          .map((event) =>
-            getStorageFilePath(event.image_url)
-          )
-          .filter(
-            (path): path is string =>
-              path !== null
-          );
+
+      // 연결된 Storage 이미지 삭제
+      const imagePaths = targetEvents
+        .map((event) => getStorageFilePath(event.image_url))
+        .filter((path): path is string => path !== null);
+
       if (imagePaths.length > 0) {
-        const { error: storageError } =
-          await supabase.storage
-            .from("event-images")
-            .remove(imagePaths);
+        const { error: storageError } = await supabase.storage
+          .from("event-images")
+          .remove(imagePaths);
+
         if (storageError) {
-          console.warn(
-            "이미지 일괄 삭제 오류:",
-            storageError
-          );
+          console.warn("이미지 삭제 오류:", storageError);
         }
       }
-      setSelectedEventIds([]);
+
+      setSelectedEventIds((prev) =>
+        prev.filter((id) => !targetIds.includes(id))
+      );
+
+      await fetchEvents();
+
+      setDeleteMode(null);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error("일정 삭제 오류:", error);
+      setDeleteError("삭제 중 오류가 발생했습니다.");
+    } finally {
+      setDeleteLoading(false);
     }
-    await fetchEvents();
-    setDeleteLoading(false);
-    setDeleteMode(null);
-    setDeleteTarget(null);
-    setDeleteError("");
   };
-  // ========================================
-  // 이번 주 단기 일정 수
-  // ========================================
+
+  // 이번 주 일정
   const getThisWeekCount = () => {
     const today = new Date();
     const day = today.getDay();
-    const diff =
-      day === 0
-        ? -6
-        : 1 - day;
-    const startOfWeek =
-      new Date(today);
-    startOfWeek.setDate(
-      today.getDate() + diff
-    );
-    startOfWeek.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-    const endOfWeek =
-      new Date(startOfWeek);
-    endOfWeek.setDate(
-      startOfWeek.getDate() + 6
-    );
-    endOfWeek.setHours(
-      23,
-      59,
-      59,
-      999
-    );
+    const diff = day === 0 ? -6 : 1 - day;
+
+    const start = new Date(today);
+    start.setDate(today.getDate() + diff);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
     return events.filter((event) => {
-      // 장기 일정은 THIS WEEK에서 제외
-      if (event.event_type === "long") {
-        return false;
-      }
-      const eventDateObject =
-        new Date(
-          `${event.event_date}T00:00:00`
-        );
-      return (
-        eventDateObject >= startOfWeek &&
-        eventDateObject <= endOfWeek
-      );
+      if (event.event_type === "long") return false;
+
+      const date = new Date(`${event.event_date}T00:00:00`);
+      return date >= start && date <= end;
     }).length;
   };
-  // ========================================
-  // 카테고리 한글
-  // ========================================
-  const getCategoryName = (
-    category: string
-  ) => {
-    switch (category) {
-      case "sports":
-        return "스포츠";
-      case "performance":
-        return "공연";
-      case "festival":
-        return "축제";
-      case "popup":
-        return "팝업";
-      default:
-        return category;
-    }
-  };
-  // ========================================
-  // 날짜 표시
-  // ========================================
-  const formatEventDate = (
-    dateString: string
-  ) => {
-    const [
-      year,
-      month,
-      day,
-    ] = dateString.split("-");
-    return `${year}.${month}.${day}`;
-  };
-  // ========================================
-  // 인증 확인 중
-  // ========================================
+
+  const getCategoryName = (value: string) =>
+    CATEGORY_OPTIONS.find(([key]) => key === value)?.[1] ?? value;
+
+  const formatEventDate = (value: string) =>
+    value.replace(/-/g, ".");
+
+  // 로그인 확인
   if (authLoading) {
     return (
       <>
@@ -727,18 +627,15 @@ function Admin() {
         <main className="admin-page">
           <div className="admin-container">
             <div className="admin-empty">
-              <h3>
-                관리자 정보를 확인하고 있습니다.
-              </h3>
+              <h3>관리자 정보를 확인하고 있습니다.</h3>
             </div>
           </div>
         </main>
       </>
     );
   }
-  // ========================================
+
   // 로그인 화면
-  // ========================================
   if (!session) {
     return (
       <>
@@ -749,61 +646,55 @@ function Admin() {
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
-              <h1>
-                관리자 로그인
-              </h1>
+
+              <h1>관리자 로그인</h1>
+
               <p className="admin-login-description">
                 일정 관리를 위해 관리자 계정으로 로그인해주세요.
               </p>
+
               <form
                 className="admin-login-form"
                 onSubmit={handleLogin}
               >
                 <div className="admin-form-group">
-                  <label>
-                    이메일
-                  </label>
+                  <label>이메일</label>
                   <input
                     type="email"
                     placeholder="관리자 이메일"
                     value={email}
-                    onChange={(e) =>
-                      setEmail(e.target.value)
-                    }
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
+
                 <div className="admin-form-group">
-                  <label>
-                    비밀번호
-                  </label>
+                  <label>비밀번호</label>
                   <input
                     type="password"
                     placeholder="비밀번호"
                     value={password}
-                    onChange={(e) =>
-                      setPassword(e.target.value)
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+
                 {loginError && (
-                  <p className="admin-login-error">
-                    {loginError}
-                  </p>
+                  <p className="admin-login-error">{loginError}</p>
                 )}
+
                 {resetMessage && (
                   <p className="admin-reset-success">
                     {resetMessage}
                   </p>
                 )}
+
                 <button
                   type="submit"
                   className="admin-login-button"
                   disabled={loginLoading}
                 >
-                  {loginLoading
-                    ? "로그인 중..."
-                    : "로그인"}
+                  {loginLoading ? "로그인 중..." : "로그인"}
                 </button>
+
                 <button
                   type="button"
                   className="admin-reset-button"
@@ -818,15 +709,15 @@ function Admin() {
       </>
     );
   }
-  // ========================================
-  // 관리자 화면
-  // ========================================
+
   const allSelected =
     events.length > 0 &&
     selectedEventIds.length === events.length;
+
   return (
     <>
       <Header />
+
       <main className="admin-page">
         <div className="admin-container">
           {/* 상단 */}
@@ -835,13 +726,12 @@ function Admin() {
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
-              <h1>
-                일정 관리
-              </h1>
+              <h1>일정 관리</h1>
               <p>
                 경기·공연·축제·팝업 일정을 등록하고 관리할 수 있습니다.
               </p>
             </div>
+
             <div className="admin-top-buttons">
               <button
                 type="button"
@@ -850,6 +740,7 @@ function Admin() {
               >
                 로그아웃
               </button>
+
               <button
                 type="button"
                 className="admin-add-button"
@@ -859,51 +750,36 @@ function Admin() {
               </button>
             </div>
           </section>
+
           {/* 통계 */}
           <section className="admin-summary">
             <div className="admin-summary-card">
-              <span>
-                전체 일정
-              </span>
+              <span>전체 일정</span>
+              <strong>{events.length}</strong>
+            </div>
+
+            <div className="admin-summary-card">
+              <span>공개 일정</span>
               <strong>
-                {events.length}
+                {events.filter((event) => event.is_published).length}
               </strong>
             </div>
+
             <div className="admin-summary-card">
-              <span>
-                공개 일정
-              </span>
-              <strong>
-                {
-                  events.filter(
-                    (event) =>
-                      event.is_published
-                  ).length
-                }
-              </strong>
-            </div>
-            <div className="admin-summary-card">
-              <span>
-                이번 주 일정
-              </span>
-              <strong>
-                {getThisWeekCount()}
-              </strong>
+              <span>이번 주 일정</span>
+              <strong>{getThisWeekCount()}</strong>
             </div>
           </section>
+
           {/* 등록된 일정 */}
           <section className="admin-list-section">
             <div className="admin-list-heading">
               <div>
-                <h2>
-                  등록된 일정
-                </h2>
-                <p>
-                  SUWON PLAY에 등록된 일정을 관리합니다.
-                </p>
+                <h2>등록된 일정</h2>
+                <p>SUWON PLAY에 등록된 일정을 관리합니다.</p>
               </div>
             </div>
-            {/* 다중 선택 */}
+
             {events.length > 0 && (
               <div className="admin-bulk-toolbar">
                 <div className="admin-bulk-left">
@@ -913,73 +789,61 @@ function Admin() {
                       checked={allSelected}
                       onChange={handleSelectAll}
                     />
-                    <span>
-                      전체 선택
-                    </span>
+                    <span>전체 선택</span>
                   </label>
+
                   {selectedEventIds.length > 0 && (
                     <span className="admin-selected-count">
                       {selectedEventIds.length}개 선택됨
                     </span>
                   )}
                 </div>
+
                 <button
                   type="button"
                   className="admin-bulk-delete-button"
-                  disabled={
-                    selectedEventIds.length === 0
-                  }
+                  disabled={selectedEventIds.length === 0}
                   onClick={handleDeleteSelected}
                 >
                   선택 삭제
                 </button>
               </div>
             )}
-            {/* 일정 목록 */}
+
             {eventsLoading ? (
               <div className="admin-empty">
-                <h3>
-                  일정을 불러오고 있습니다.
-                </h3>
+                <h3>일정을 불러오고 있습니다.</h3>
               </div>
             ) : events.length === 0 ? (
               <div className="admin-empty">
-                <h3>
-                  등록된 일정이 없습니다.
-                </h3>
-                <p>
-                  새 일정 등록 버튼을 눌러 첫 일정을 등록해보세요.
-                </p>
+                <h3>등록된 일정이 없습니다.</h3>
+                <p>새 일정 등록 버튼을 눌러주세요.</p>
               </div>
             ) : (
               <div className="admin-event-list">
                 {events.map((event) => {
                   const isSelected =
-                    selectedEventIds.includes(
-                      event.id
-                    );
+                    selectedEventIds.includes(event.id);
+
                   return (
                     <div
+                      key={event.id}
                       className={
                         isSelected
                           ? "admin-event-item admin-event-item-selected"
                           : "admin-event-item"
                       }
-                      key={event.id}
                     >
-                      {/* 체크박스 */}
                       <label className="admin-event-checkbox">
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={() =>
-                            handleSelectEvent(
-                              event.id
-                            )
+                            handleSelectEvent(event.id)
                           }
                         />
                       </label>
-                      {/* 이미지 */}
+
                       {event.image_url && (
                         <div
                           className="admin-event-thumbnail"
@@ -989,71 +853,58 @@ function Admin() {
                           }}
                         />
                       )}
-                      {/* 정보 */}
+
                       <div className="admin-event-main">
                         <div className="admin-event-meta">
                           <span className="admin-event-category">
-                            {getCategoryName(
-                              event.category
-                            )}
+                            {getCategoryName(event.category)}
                           </span>
+
                           <span>
                             {event.event_type === "long"
                               ? "장기 일정"
                               : "단기 일정"}
                           </span>
+
                           <span>
                             {event.is_published
                               ? "공개"
                               : "비공개"}
                           </span>
                         </div>
-                        <h3>
-                          {event.title}
-                        </h3>
+
+                        <h3>{event.title}</h3>
+
                         <p>
+                          {formatEventDate(event.event_date)}
                           {event.event_type === "long" &&
-                          event.end_date ? (
-                            <>
-                              {formatEventDate(
-                                event.event_date
-                              )}
-                              {" ~ "}
-                              {formatEventDate(
-                                event.end_date
-                              )}
-                            </>
-                          ) : (
-                            formatEventDate(
-                              event.event_date
-                            )
-                          )}
+                            event.end_date &&
+                            ` ~ ${formatEventDate(event.end_date)}`}
                           {event.event_time &&
-                            ` · ${event.event_time.slice(
-                              0,
-                              5
-                            )}`}
-                          {event.place &&
-                            ` · ${event.place}`}
+                            ` · ${event.event_time.slice(0, 5)}`}
+                          {event.place && ` · ${event.place}`}
                         </p>
+
+                        {event.home_team && event.away_team && (
+                          <p>
+                            {event.home_team} VS {event.away_team}
+                          </p>
+                        )}
                       </div>
-                      {/* 버튼 */}
+
                       <div className="admin-event-actions">
                         <button
                           type="button"
                           className="admin-edit-button"
-                          onClick={() =>
-                            handleEditEvent(event)
-                          }
+                          onClick={() => handleEditEvent(event)}
                         >
                           수정
                         </button>
+
                         <button
                           type="button"
                           className="admin-delete-button"
-                          onClick={() =>
-                            handleDeleteEvent(event)
-                          }
+                          onClick={() => handleDeleteEvent(event)}
                         >
                           삭제
                         </button>
@@ -1066,9 +917,8 @@ function Admin() {
           </section>
         </div>
       </main>
-      {/* ========================================
-          등록 / 수정 모달
-      ======================================== */}
+
+      {/* 등록 / 수정 모달 */}
       {isModalOpen && (
         <div
           className="admin-modal-overlay"
@@ -1076,9 +926,7 @@ function Admin() {
         >
           <div
             className="admin-modal"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="admin-modal-header">
               <div>
@@ -1087,12 +935,14 @@ function Admin() {
                     ? "EDIT EVENT"
                     : "NEW EVENT"}
                 </span>
+
                 <h2>
                   {editingEventId !== null
                     ? "일정 수정"
                     : "새 일정 등록"}
                 </h2>
               </div>
+
               <button
                 type="button"
                 className="admin-modal-close"
@@ -1102,305 +952,361 @@ function Admin() {
                 ×
               </button>
             </div>
+
             <div className="admin-form">
               {/* 제목 */}
               <div className="admin-form-group admin-form-full">
-                <label>
-                  일정 제목 *
-                </label>
+                <label>일정 제목 *</label>
                 <input
                   type="text"
-                  placeholder="예: 수원FC 홈경기"
+                  placeholder="예: 수원 KT vs 창원 LG"
                   value={title}
-                  onChange={(e) =>
-                    setTitle(e.target.value)
-                  }
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
+
               {/* 카테고리 */}
               <div className="admin-form-group">
-                <label>
-                  카테고리 *
-                </label>
+                <label>카테고리 *</label>
                 <select
                   value={category}
                   onChange={(e) => {
-                    const newCategory = e.target.value;
-                    setCategory(newCategory);
-                    if (newCategory !== "sports") {
+                    const value = e.target.value;
+                    setCategory(value);
+
+                    if (value !== "sports") {
                       setSportType("");
+                      setHomeTeam("");
+                      setAwayTeam("");
                     }
                   }}
                 >
-                  <option value="sports">
-                    스포츠
-                  </option>
-                  <option value="performance">
-                    공연
-                  </option>
-                  <option value="festival">
-                    축제
-                  </option>
-                  <option value="popup">
-                    팝업
-                  </option>
+                  {CATEGORY_OPTIONS.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
-              {/* 스포츠 종목 */}
+
+              {/* 종목 */}
               {category === "sports" && (
                 <div className="admin-form-group">
-                  <label>
-                    스포츠 종목 *
-                  </label>
+                  <label>스포츠 종목 *</label>
                   <select
                     value={sportType}
-                    onChange={(e) =>
-                      setSportType(e.target.value)
-                    }
+                    onChange={(e) => {
+                      setSportType(e.target.value);
+                      setHomeTeam("");
+                      setAwayTeam("");
+                    }}
                   >
-                    <option value="">
-                      종목 선택
-                    </option>
-                    <option value="soccer">
-                      ⚽ 축구
-                    </option>
-                    <option value="baseball">
-                      ⚾ 야구
-                    </option>
-                    <option value="basketball">
-                      🏀 농구
-                    </option>
-                    <option value="volleyball">
-                      🏐 배구
-                    </option>
-                    <option value="running">
-                      🏃 러닝
-                    </option>
-                    <option value="badminton">
-                      🏸 배드민턴
-                    </option>
-                    <option value="tennis">
-                      🎾 테니스
-                    </option>
-                    <option value="golf">
-                      ⛳ 골프
-                    </option>
-                    <option value="etc">
-                      🏅 기타
-                    </option>
+                    <option value="">종목 선택</option>
+
+                    {SPORT_OPTIONS.map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}
+
+              {/* 홈팀 / 원정팀 */}
+              {isMatchSport && (
+                <>
+                  <div className="admin-form-group">
+                    <label>홈팀 선택</label>
+                    <select
+                      value={homeTeam}
+                      onChange={(e) =>
+                        setHomeTeam(e.target.value)
+                      }
+                    >
+                      <option value="">홈팀 선택</option>
+
+                      {availableTeams.map((team) => (
+                        <option key={team.name} value={team.name}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label>원정팀 선택</label>
+                    <select
+                      value={awayTeam}
+                      onChange={(e) =>
+                        setAwayTeam(e.target.value)
+                      }
+                    >
+                      <option value="">원정팀 선택</option>
+
+                      {availableTeams.map((team) => (
+                        <option key={team.name} value={team.name}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* 로고 미리보기 */}
+                  {(homeLogo || awayLogo) && (
+                    <div className="admin-form-group admin-form-full">
+                      <label>경기 로고 미리보기</label>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: "20px",
+                          padding: "16px",
+                          borderRadius: "12px",
+                          background: "#15233d",
+                        }}
+                      >
+                        {[homeLogo, awayLogo].map((logo, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                            }}
+                          >
+                            {index === 1 && (
+                              <strong style={{ color: "white" }}>
+                                VS
+                              </strong>
+                            )}
+
+                            <div
+                              style={{
+                                width: "90px",
+                                height: "90px",
+                                background: "white",
+                                borderRadius: "10px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                overflow: "hidden",
+                                padding: "8px",
+                                boxSizing: "border-box",
+                              }}
+                            >
+                              {logo && (
+                                <img
+                                  src={logo}
+                                  alt={index === 0 ? "홈팀 로고" : "원정팀 로고"}
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 카드 문구 */}
+                  <div className="admin-form-group admin-form-full">
+                    <label>경기 카드 첫 번째 문구</label>
+                    <input
+                      type="text"
+                      placeholder="예: 수원 KT와 창원 LG"
+                      value={cardLine1}
+                      onChange={(e) =>
+                        setCardLine1(e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="admin-form-group admin-form-full">
+                    <label>경기 카드 두 번째 문구</label>
+                    <input
+                      type="text"
+                      placeholder="예: 승리를 가져갈 팀은?"
+                      value={cardLine2}
+                      onChange={(e) =>
+                        setCardLine2(e.target.value)
+                      }
+                    />
+
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "#888",
+                        marginTop: "6px",
+                      }}
+                    >
+                      두 줄 합계 {cardLine1.length + cardLine2.length}/29자
+                      (공백 포함)
+                    </p>
+                  </div>
+                </>
+              )}
+
               {/* 일정 유형 */}
               <div className="admin-form-group">
-                <label>
-                  일정 유형 *
-                </label>
+                <label>일정 유형 *</label>
                 <select
                   value={eventType}
                   onChange={(e) => {
-                    const type =
-                      e.target.value as
-                        | "short"
-                        | "long";
-                    setEventType(type);
-                    if (type === "short") {
-                      setEndDate("");
-                    }
+                    const value =
+                      e.target.value as "short" | "long";
+                    setEventType(value);
+
+                    if (value === "short") setEndDate("");
                   }}
                 >
-                  <option value="short">
-                    단기 일정
-                  </option>
-                  <option value="long">
-                    장기 일정
-                  </option>
+                  <option value="short">단기 일정</option>
+                  <option value="long">장기 일정</option>
                 </select>
               </div>
-              {/* 날짜 / 시작일 */}
+
+              {/* 날짜 */}
               <div className="admin-form-group">
                 <label>
-                  {eventType === "long"
-                    ? "시작일 *"
-                    : "날짜 *"}
+                  {eventType === "long" ? "시작일 *" : "날짜 *"}
                 </label>
                 <input
                   type="date"
                   value={eventDate}
                   onChange={(e) => {
-                    const newDate =
-                      e.target.value;
-                    setEventDate(newDate);
-                    if (
-                      endDate &&
-                      endDate < newDate
-                    ) {
+                    setEventDate(e.target.value);
+
+                    if (endDate && endDate < e.target.value) {
                       setEndDate("");
                     }
                   }}
                 />
               </div>
-              {/* 장기 일정 종료일 */}
+
               {eventType === "long" && (
                 <div className="admin-form-group">
-                  <label>
-                    종료일 *
-                  </label>
+                  <label>종료일 *</label>
                   <input
                     type="date"
                     value={endDate}
                     min={eventDate || undefined}
                     onChange={(e) =>
-                      setEndDate(
-                        e.target.value
-                      )
+                      setEndDate(e.target.value)
                     }
                   />
                 </div>
               )}
+
               {/* 시간 */}
               <div className="admin-form-group">
-                <label>
-                  시작 시간
-                </label>
+                <label>시작 시간</label>
                 <input
                   type="time"
                   value={eventTime}
                   onChange={(e) =>
-                    setEventTime(
-                      e.target.value
-                    )
+                    setEventTime(e.target.value)
                   }
                 />
               </div>
+
               {/* 장소 */}
               <div className="admin-form-group">
-                <label>
-                  장소
-                </label>
+                <label>장소</label>
                 <input
                   type="text"
-                  placeholder="예: 수원월드컵경기장"
+                  placeholder="예: 수원 KT 소닉붐 아레나"
                   value={place}
-                  onChange={(e) =>
-                    setPlace(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => setPlace(e.target.value)}
                 />
               </div>
-              {/* 이미지 */}
+
+              {/* 대표 이미지 */}
               <div className="admin-form-group admin-form-full">
-                <label>
-                  대표 이미지
-                </label>
-                {editingEventId !== null &&
-                  existingImageUrl && (
-                    <div className="admin-current-image">
-                      <img
-                        src={existingImageUrl}
-                        alt="현재 대표 이미지"
-                      />
-                      <p>
-                        현재 등록된 이미지
-                      </p>
-                    </div>
-                  )}
+                <label>대표 이미지</label>
+
+                {editingEventId !== null && existingImageUrl && (
+                  <div className="admin-current-image">
+                    <img
+                      src={existingImageUrl}
+                      alt="현재 대표 이미지"
+                    />
+                    <p>현재 등록된 이미지</p>
+                  </div>
+                )}
+
                 <input
                   type="file"
                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                  onChange={(e) => {
-                    const file =
-                      e.target.files?.[0] ??
-                      null;
-                    setImageFile(file);
-                  }}
+                  onChange={(e) =>
+                    setImageFile(e.target.files?.[0] ?? null)
+                  }
                 />
+
                 {imageFile && (
-                  <p
-                    style={{
-                      marginTop: "8px",
-                      fontSize: "13px",
-                      color: "#555",
-                    }}
-                  >
+                  <p style={{ marginTop: "8px", fontSize: "13px" }}>
                     새 이미지: {imageFile.name}
                   </p>
                 )}
+
                 <p
                   style={{
                     marginTop: "7px",
                     fontSize: "12px",
                     color: "#999",
-                    lineHeight: "1.5",
                   }}
                 >
-                  인스타그램용 1080×1350 이미지를 그대로 사용할 수 있습니다.
+                  경기 카드는 팀 로고를 활용할 수 있으므로
+                  대표 이미지 없이 등록해도 됩니다.
+                  공연·축제·팝업은 기존처럼 이미지를 업로드하세요.
                   JPG, PNG, WebP · 최대 5MB
                 </p>
-                {editingEventId !== null &&
-                  existingImageUrl &&
-                  !imageFile && (
-                    <p
-                      style={{
-                        marginTop: "3px",
-                        fontSize: "12px",
-                        color: "#777",
-                      }}
-                    >
-                      새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.
-                    </p>
-                  )}
               </div>
+
               {/* 설명 */}
               <div className="admin-form-group admin-form-full">
-                <label>
-                  상세 설명
-                </label>
+                <label>상세 설명</label>
                 <textarea
                   placeholder="일정에 대한 설명을 입력하세요."
                   rows={4}
                   value={description}
                   onChange={(e) =>
-                    setDescription(
-                      e.target.value
-                    )
+                    setDescription(e.target.value)
                   }
                 />
               </div>
+
               {/* 링크 */}
               <div className="admin-form-group admin-form-full">
-                <label>
-                  예매 / 공식 링크
-                </label>
+                <label>예매 / 공식 링크</label>
                 <input
                   type="url"
                   placeholder="https://..."
                   value={ticketUrl}
                   onChange={(e) =>
-                    setTicketUrl(
-                      e.target.value
-                    )
+                    setTicketUrl(e.target.value)
                   }
                 />
               </div>
-              {/* 공개 */}
+
+              {/* 공개 여부 */}
               <div className="admin-form-full admin-publish">
                 <label>
                   <input
                     type="checkbox"
                     checked={isPublished}
                     onChange={(e) =>
-                      setIsPublished(
-                        e.target.checked
-                      )
+                      setIsPublished(e.target.checked)
                     }
                   />
-                  <span>
-                    웹사이트에 공개하기
-                  </span>
+                  <span>웹사이트에 공개하기</span>
                 </label>
               </div>
+
               {submitError && (
                 <div className="admin-form-full">
                   <p className="admin-login-error">
@@ -1409,6 +1315,8 @@ function Admin() {
                 </div>
               )}
             </div>
+
+            {/* 저장 버튼 */}
             <div className="admin-modal-footer">
               <button
                 type="button"
@@ -1418,6 +1326,7 @@ function Admin() {
               >
                 취소
               </button>
+
               <button
                 type="button"
                 className="admin-submit-button"
@@ -1434,9 +1343,8 @@ function Admin() {
           </div>
         </div>
       )}
-      {/* ========================================
-          삭제 확인 모달
-      ======================================== */}
+
+      {/* 삭제 확인 모달 */}
       {deleteMode && (
         <div
           className="delete-modal-overlay"
@@ -1444,27 +1352,23 @@ function Admin() {
         >
           <div
             className="delete-modal"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="delete-modal-icon">
-              !
-            </div>
+            <div className="delete-modal-icon">!</div>
+
             <h2>
               {deleteMode === "multiple"
                 ? "선택 일정 삭제"
                 : "일정 삭제"}
             </h2>
-            {deleteMode === "single" &&
-              deleteTarget && (
-                <p className="delete-modal-description">
-                  <strong>
-                    {deleteTarget.title}
-                  </strong>
-                  {" "}일정을 정말 삭제하시겠습니까?
-                </p>
-              )}
+
+            {deleteMode === "single" && deleteTarget && (
+              <p className="delete-modal-description">
+                <strong>{deleteTarget.title}</strong>
+                {" "}일정을 정말 삭제하시겠습니까?
+              </p>
+            )}
+
             {deleteMode === "multiple" && (
               <p className="delete-modal-description">
                 선택한{" "}
@@ -1474,14 +1378,17 @@ function Admin() {
                 을 모두 삭제하시겠습니까?
               </p>
             )}
+
             <p className="delete-modal-warning">
               삭제한 일정은 복구할 수 없습니다.
             </p>
+
             {deleteError && (
               <p className="delete-modal-error">
                 {deleteError}
               </p>
             )}
+
             <div className="delete-modal-buttons">
               <button
                 type="button"
@@ -1491,6 +1398,7 @@ function Admin() {
               >
                 취소
               </button>
+
               <button
                 type="button"
                 className="delete-confirm-button"
@@ -1510,4 +1418,5 @@ function Admin() {
     </>
   );
 }
+
 export default Admin;

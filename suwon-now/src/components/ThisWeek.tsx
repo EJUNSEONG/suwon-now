@@ -1,10 +1,17 @@
+
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { teams } from "../teams";
 
 type EventItem = {
   id: number;
   title: string;
   category: string;
+  sport_type: string | null;
+  home_team: string | null;
+  away_team: string | null;
+  card_line1: string | null;
+  card_line2: string | null;
 
   event_type: "short" | "long";
   event_date: string;
@@ -322,6 +329,43 @@ function ThisWeek() {
   };
 
   // ========================================
+  // 스포츠 경기 로고 확인
+  //
+  // 홈팀과 원정팀 정보가 있고
+  // teams.ts에서 로고를 찾을 수 있으면
+  // 스포츠 전용 카드 표시
+  // ========================================
+
+  const getMatchLogos = (event: EventItem) => {
+    if (
+      event.category !== "sports" ||
+      !event.sport_type ||
+      !event.home_team ||
+      !event.away_team
+    ) {
+      return null;
+    }
+
+    const home = teams.find(
+      (team) =>
+        team.sport === event.sport_type &&
+        team.name === event.home_team
+    );
+
+    const away = teams.find(
+      (team) =>
+        team.sport === event.sport_type &&
+        team.name === event.away_team
+    );
+
+    if (!home?.logo || !away?.logo) {
+      return null;
+    }
+
+    return { home, away };
+  };
+
+  // ========================================
   // 화면
   // ========================================
 
@@ -415,28 +459,140 @@ function ThisWeek() {
                   >
 
                     {/* ========================
-                        이미지
+                        이미지 / 스포츠 경기 카드
                     ======================== */}
 
-                    <div
-                      className="event-image"
-                      style={
-                        event.image_url
-                          ? {
-                              backgroundImage:
-                                `url(${event.image_url})`,
-                            }
-                          : {}
-                      }
-                    >
+                    {(() => {
+                      const match =
+                        getMatchLogos(event);
 
-                      <span className="event-category">
-                        {getCategoryName(
-                          event.category
-                        )}
-                      </span>
+                      return match ? (
 
-                    </div>
+                        // ======================
+                        // 스포츠 경기 전용 카드
+                        // ======================
+
+                        <div className="event-image match-card-image">
+
+                          <span className="event-category">
+                            SPORTS
+                          </span>
+
+                          <div className="match-card-content">
+
+                            {/* 홈팀 / VS / 원정팀 */}
+
+                            <div className="match-card-teams">
+
+                              <div className="match-card-team">
+
+                                <div className="match-card-logo-box">
+                                  <img
+                                    src={match.home.logo}
+                                    alt={`${match.home.name} 로고`}
+                                  />
+                                </div>
+
+                                <span>
+                                  {match.home.name}
+                                </span>
+
+                              </div>
+
+                              <strong className="match-card-vs">
+                                VS
+                              </strong>
+
+                              <div className="match-card-team">
+
+                                <div className="match-card-logo-box">
+                                  <img
+                                    src={match.away.logo}
+                                    alt={`${match.away.name} 로고`}
+                                  />
+                                </div>
+
+                                <span>
+                                  {match.away.name}
+                                </span>
+
+                              </div>
+
+                            </div>
+
+                            {/* 두 줄 문구 */}
+
+                            {(event.card_line1 ||
+                              event.card_line2) && (
+
+                              <div className="match-card-copy">
+
+                                {event.card_line1 && (
+                                  <div>
+                                    {event.card_line1}
+                                  </div>
+                                )}
+
+                                {event.card_line2 && (
+                                  <div>
+                                    {event.card_line2}
+                                  </div>
+                                )}
+
+                              </div>
+
+                            )}
+
+                            {/* 경기 날짜 / 시간 / 장소 */}
+
+                            <div className="match-card-meta">
+
+                              <div>
+                                {getEventDateText(event)}
+                                {event.event_time
+                                  ? ` · ${formatTime(event.event_time)}`
+                                  : ""}
+                              </div>
+
+                              {event.place && (
+                                <div>
+                                  {event.place}
+                                </div>
+                              )}
+
+                            </div>
+
+                          </div>
+
+                        </div>
+
+                      ) : (
+
+                        // ======================
+                        // 기존 이미지 카드
+                        // 공연 / 축제 / 팝업 등
+                        // ======================
+
+                        <div
+                          className="event-image"
+                          style={
+                            event.image_url
+                              ? {
+                                  backgroundImage:
+                                    `url(${event.image_url})`,
+                                }
+                              : {}
+                          }
+                        >
+
+                          <span className="event-category">
+                            {getCategoryName(event.category)}
+                          </span>
+
+                        </div>
+
+                      );
+                    })()}
 
                     {/* ========================
                         일정 정보
@@ -472,12 +628,12 @@ function ThisWeek() {
                         </p>
                       )}
 
-                     <a
-  href={`/event/${event.id}`}
-  className="event-detail-button"
->
-  자세히 보기
-</a>
+                      <a
+                        href={`/event/${event.id}`}
+                        className="event-detail-button"
+                      >
+                        자세히 보기
+                      </a>
 
                     </div>
 
