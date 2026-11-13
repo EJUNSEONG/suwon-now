@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import Header from "../components/Header";
+import CommunityAdmin from "./CommunityAdmin";
 import { supabase } from "../lib/supabase";
 import { teams } from "../teams";
 
@@ -28,11 +29,8 @@ type EventItem = {
 };
 
 const MATCH_SPORTS = [
-  "soccer",
-  "baseball",
-  "wk-league",
-  "basketball",
-  "volleyball",
+  "soccer", "baseball", "wk-league",
+  "basketball", "volleyball",
 ];
 
 const SPORT_OPTIONS = [
@@ -55,8 +53,10 @@ const CATEGORY_OPTIONS = [
   ["popup", "팝업"],
 ];
 
-function Admin() {
-  // 로그인
+export default function Admin() {
+  const [adminTab, setAdminTab] =
+    useState<"events" | "community">("events");
+
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [email, setEmail] = useState("");
@@ -65,12 +65,10 @@ function Admin() {
   const [loginError, setLoginError] = useState("");
   const [resetMessage, setResetMessage] = useState("");
 
-  // 일정 목록
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [selectedEventIds, setSelectedEventIds] = useState<number[]>([]);
 
-  // 등록 / 수정
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
 
@@ -86,21 +84,21 @@ function Admin() {
   const [ticketUrl, setTicketUrl] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] =
+    useState<string | null>(null);
 
-  // 경기 카드
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
   const [cardLine1, setCardLine1] = useState("");
   const [cardLine2, setCardLine2] = useState("");
 
-  // 저장 상태
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // 삭제
-  const [deleteMode, setDeleteMode] = useState<"single" | "multiple" | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<EventItem | null>(null);
+  const [deleteMode, setDeleteMode] =
+    useState<"single" | "multiple" | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<EventItem | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -119,7 +117,6 @@ function Admin() {
     (team) => team.name === awayTeam
   )?.logo;
 
-  // 로그인 상태 확인
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -127,7 +124,7 @@ function Admin() {
       setAuthLoading(false);
     };
 
-    checkSession();
+    void checkSession();
 
     const { data: { subscription } } =
       supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -137,7 +134,6 @@ function Admin() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 로그인 후 일정 불러오기
   useEffect(() => {
     if (session) {
       void fetchEvents();
@@ -164,7 +160,6 @@ function Admin() {
     setEventsLoading(false);
   };
 
-  // 로그인
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -186,7 +181,6 @@ function Admin() {
     setLoginLoading(false);
   };
 
-  // 비밀번호 재설정
   const handlePasswordReset = async () => {
     if (!email.trim()) {
       setLoginError("먼저 관리자 이메일을 입력해주세요.");
@@ -198,9 +192,7 @@ function Admin() {
 
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      {
-        redirectTo: `${window.location.origin}/reset-password`,
-      }
+      { redirectTo: `${window.location.origin}/reset-password` }
     );
 
     if (error) {
@@ -214,9 +206,9 @@ function Admin() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setAdminTab("events");
   };
 
-  // 입력 초기화
   const resetEventForm = () => {
     setTitle("");
     setCategory("sports");
@@ -233,7 +225,6 @@ function Admin() {
     setExistingImageUrl(null);
     setEditingEventId(null);
     setSubmitError("");
-
     setHomeTeam("");
     setAwayTeam("");
     setCardLine1("");
@@ -251,7 +242,6 @@ function Admin() {
     resetEventForm();
   };
 
-  // 기존 일정 수정
   const handleEditEvent = (event: EventItem) => {
     resetEventForm();
 
@@ -268,7 +258,6 @@ function Admin() {
     setTicketUrl(event.ticket_url ?? "");
     setIsPublished(event.is_published);
     setExistingImageUrl(event.image_url);
-
     setHomeTeam(event.home_team ?? "");
     setAwayTeam(event.away_team ?? "");
     setCardLine1(event.card_line1 ?? "");
@@ -277,7 +266,6 @@ function Admin() {
     setIsModalOpen(true);
   };
 
-  // Storage 이미지 경로 추출
   const getStorageFilePath = (imageUrl: string | null) => {
     if (!imageUrl) return null;
 
@@ -291,7 +279,6 @@ function Admin() {
     );
   };
 
-  // 일정 저장
   const handleSubmitEvent = async () => {
     if (!title.trim()) {
       setSubmitError("일정 제목을 입력해주세요.");
@@ -320,7 +307,6 @@ function Admin() {
       return;
     }
 
-    // 팀을 선택한 경우 양쪽 모두 선택해야 함
     if (isMatchSport && (homeTeam || awayTeam)) {
       if (!homeTeam || !awayTeam) {
         setSubmitError("홈팀과 원정팀을 모두 선택해주세요.");
@@ -341,10 +327,7 @@ function Admin() {
       }
     }
 
-    const totalCardLength =
-      (cardLine1 + cardLine2).length;
-
-    if (isMatchSport && totalCardLength >= 30) {
+    if (isMatchSport && (cardLine1 + cardLine2).length >= 30) {
       setSubmitError(
         "카드 문구는 두 줄 합쳐 공백 포함 30자 미만으로 작성해주세요."
       );
@@ -359,25 +342,20 @@ function Admin() {
     try {
       let imageUrl = existingImageUrl;
 
-      // 새 이미지 업로드
       if (imageFile) {
         const allowedTypes = [
-          "image/jpeg",
-          "image/png",
-          "image/webp",
+          "image/jpeg", "image/png", "image/webp",
         ];
 
         if (!allowedTypes.includes(imageFile.type)) {
           setSubmitError(
             "이미지는 JPG, PNG, WebP 형식만 업로드할 수 있습니다."
           );
-          setSubmitLoading(false);
           return;
         }
 
         if (imageFile.size > 5 * 1024 * 1024) {
           setSubmitError("이미지 용량은 5MB 이하로 업로드해주세요.");
-          setSubmitLoading(false);
           return;
         }
 
@@ -398,7 +376,6 @@ function Admin() {
           setSubmitError(
             "이미지 업로드에 실패했습니다: " + uploadError.message
           );
-          setSubmitLoading(false);
           return;
         }
 
@@ -424,33 +401,21 @@ function Admin() {
         image_url: imageUrl,
         ticket_url: ticketUrl.trim() || null,
         is_published: isPublished,
-
-        home_team:
-          isMatchSport ? homeTeam || null : null,
-        away_team:
-          isMatchSport ? awayTeam || null : null,
-        card_line1:
-          isMatchSport ? cardLine1.trim() || null : null,
-        card_line2:
-          isMatchSport ? cardLine2.trim() || null : null,
+        home_team: isMatchSport ? homeTeam || null : null,
+        away_team: isMatchSport ? awayTeam || null : null,
+        card_line1: isMatchSport ? cardLine1.trim() || null : null,
+        card_line2: isMatchSport ? cardLine2.trim() || null : null,
       };
 
-      let saveError = null;
-
-      if (editingEventId !== null) {
-        const { error } = await supabase
-          .from("events")
-          .update(eventData)
-          .eq("id", editingEventId);
-
-        saveError = error;
-      } else {
-        const { error } = await supabase
-          .from("events")
-          .insert([eventData]);
-
-        saveError = error;
-      }
+      const { error: saveError } =
+        editingEventId !== null
+          ? await supabase
+              .from("events")
+              .update(eventData)
+              .eq("id", editingEventId)
+          : await supabase
+              .from("events")
+              .insert([eventData]);
 
       if (saveError) {
         if (newUploadedFileName) {
@@ -465,7 +430,6 @@ function Admin() {
         return;
       }
 
-      // 이미지 교체 시 기존 이미지 정리
       if (
         editingEventId !== null &&
         imageFile &&
@@ -478,7 +442,9 @@ function Admin() {
             .from("event-images")
             .remove([oldPath]);
 
-          if (error) console.warn("기존 이미지 삭제 실패:", error);
+          if (error) {
+            console.warn("기존 이미지 삭제 실패:", error);
+          }
         }
       }
 
@@ -493,7 +459,6 @@ function Admin() {
     }
   };
 
-  // 체크박스 선택
   const handleSelectEvent = (id: number) => {
     setSelectedEventIds((prev) =>
       prev.includes(id)
@@ -510,7 +475,6 @@ function Admin() {
     }
   };
 
-  // 삭제 모달
   const handleDeleteEvent = (event: EventItem) => {
     setDeleteMode("single");
     setDeleteTarget(event);
@@ -519,7 +483,6 @@ function Admin() {
 
   const handleDeleteSelected = () => {
     if (selectedEventIds.length === 0) return;
-
     setDeleteMode("multiple");
     setDeleteTarget(null);
     setDeleteError("");
@@ -527,13 +490,11 @@ function Admin() {
 
   const closeDeleteModal = () => {
     if (deleteLoading) return;
-
     setDeleteMode(null);
     setDeleteTarget(null);
     setDeleteError("");
   };
 
-  // 삭제 실행
   const confirmDeleteEvent = async () => {
     if (!deleteMode) return;
 
@@ -558,11 +519,12 @@ function Admin() {
         .in("id", targetIds);
 
       if (error) {
-        setDeleteError("일정 삭제에 실패했습니다: " + error.message);
+        setDeleteError(
+          "일정 삭제에 실패했습니다: " + error.message
+        );
         return;
       }
 
-      // 연결된 Storage 이미지 삭제
       const imagePaths = targetEvents
         .map((event) => getStorageFilePath(event.image_url))
         .filter((path): path is string => path !== null);
@@ -582,7 +544,6 @@ function Admin() {
       );
 
       await fetchEvents();
-
       setDeleteMode(null);
       setDeleteTarget(null);
     } catch (error) {
@@ -593,7 +554,6 @@ function Admin() {
     }
   };
 
-  // 이번 주 일정
   const getThisWeekCount = () => {
     const today = new Date();
     const day = today.getDay();
@@ -621,7 +581,6 @@ function Admin() {
   const formatEventDate = (value: string) =>
     value.replace(/-/g, ".");
 
-  // 로그인 확인
   if (authLoading) {
     return (
       <>
@@ -637,7 +596,6 @@ function Admin() {
     );
   }
 
-  // 로그인 화면
   if (!session) {
     return (
       <>
@@ -648,11 +606,9 @@ function Admin() {
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
-
               <h1>관리자 로그인</h1>
-
               <p className="admin-login-description">
-                일정 관리를 위해 관리자 계정으로 로그인해주세요.
+                관리자 계정으로 로그인해주세요.
               </p>
 
               <form
@@ -680,7 +636,9 @@ function Admin() {
                 </div>
 
                 {loginError && (
-                  <p className="admin-login-error">{loginError}</p>
+                  <p className="admin-login-error">
+                    {loginError}
+                  </p>
                 )}
 
                 {resetMessage && (
@@ -722,15 +680,22 @@ function Admin() {
 
       <main className="admin-page">
         <div className="admin-container">
-          {/* 상단 */}
           <section className="admin-top">
             <div>
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
-              <h1>일정 관리</h1>
+
+              <h1>
+                {adminTab === "events"
+                  ? "일정 관리"
+                  : "게시판 관리"}
+              </h1>
+
               <p>
-                경기·공연·축제·팝업 일정을 등록하고 관리할 수 있습니다.
+                {adminTab === "events"
+                  ? "경기·공연·축제·팝업 일정을 등록하고 관리할 수 있습니다."
+                  : "커뮤니티 게시글과 댓글을 관리할 수 있습니다."}
               </p>
             </div>
 
@@ -743,184 +708,241 @@ function Admin() {
                 로그아웃
               </button>
 
-              <button
-                type="button"
-                className="admin-add-button"
-                onClick={handleOpenNewEvent}
-              >
-                + 새 일정 등록
-              </button>
-            </div>
-          </section>
-
-          {/* 통계 */}
-          <section className="admin-summary">
-            <div className="admin-summary-card">
-              <span>전체 일정</span>
-              <strong>{events.length}</strong>
-            </div>
-
-            <div className="admin-summary-card">
-              <span>공개 일정</span>
-              <strong>
-                {events.filter((event) => event.is_published).length}
-              </strong>
-            </div>
-
-            <div className="admin-summary-card">
-              <span>이번 주 일정</span>
-              <strong>{getThisWeekCount()}</strong>
-            </div>
-          </section>
-
-          {/* 등록된 일정 */}
-          <section className="admin-list-section">
-            <div className="admin-list-heading">
-              <div>
-                <h2>등록된 일정</h2>
-                <p>SUWON PLAY에 등록된 일정을 관리합니다.</p>
-              </div>
-            </div>
-
-            {events.length > 0 && (
-              <div className="admin-bulk-toolbar">
-                <div className="admin-bulk-left">
-                  <label className="admin-select-all">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      onChange={handleSelectAll}
-                    />
-                    <span>전체 선택</span>
-                  </label>
-
-                  {selectedEventIds.length > 0 && (
-                    <span className="admin-selected-count">
-                      {selectedEventIds.length}개 선택됨
-                    </span>
-                  )}
-                </div>
-
+              {adminTab === "events" && (
                 <button
                   type="button"
-                  className="admin-bulk-delete-button"
-                  disabled={selectedEventIds.length === 0}
-                  onClick={handleDeleteSelected}
+                  className="admin-add-button"
+                  onClick={handleOpenNewEvent}
                 >
-                  선택 삭제
+                  + 새 일정 등록
                 </button>
-              </div>
-            )}
+              )}
+            </div>
+          </section>
 
-            {eventsLoading ? (
-              <div className="admin-empty">
-                <h3>일정을 불러오고 있습니다.</h3>
-              </div>
-            ) : events.length === 0 ? (
-              <div className="admin-empty">
-                <h3>등록된 일정이 없습니다.</h3>
-                <p>새 일정 등록 버튼을 눌러주세요.</p>
-              </div>
-            ) : (
-              <div className="admin-event-list">
-                {events.map((event) => {
-                  const isSelected =
-                    selectedEventIds.includes(event.id);
+          {/* 관리자 메뉴 */}
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              margin: "20px 0 28px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setAdminTab("events")}
+              style={{
+                padding: "12px 20px",
+                borderRadius: "8px",
+                border: "1px solid #d9e2ee",
+                cursor: "pointer",
+                background:
+                  adminTab === "events" ? "#075ec5" : "#fff",
+                color:
+                  adminTab === "events" ? "#fff" : "#264265",
+              }}
+            >
+              일정 관리
+            </button>
 
-                  return (
-                    <div
-                      key={event.id}
-                      className={
-                        isSelected
-                          ? "admin-event-item admin-event-item-selected"
-                          : "admin-event-item"
-                      }
-                    >
-                      <label className="admin-event-checkbox">
+            <button
+              type="button"
+              onClick={() => setAdminTab("community")}
+              style={{
+                padding: "12px 20px",
+                borderRadius: "8px",
+                border: "1px solid #d9e2ee",
+                cursor: "pointer",
+                background:
+                  adminTab === "community" ? "#075ec5" : "#fff",
+                color:
+                  adminTab === "community" ? "#fff" : "#264265",
+              }}
+            >
+              게시판 관리
+            </button>
+          </div>
+
+          {/* 게시판 관리 */}
+          {adminTab === "community" && <CommunityAdmin />}
+
+          {/* 기존 일정 관리 */}
+          {adminTab === "events" && (
+            <>
+              <section className="admin-summary">
+                <div className="admin-summary-card">
+                  <span>전체 일정</span>
+                  <strong>{events.length}</strong>
+                </div>
+
+                <div className="admin-summary-card">
+                  <span>공개 일정</span>
+                  <strong>
+                    {events.filter(
+                      (event) => event.is_published
+                    ).length}
+                  </strong>
+                </div>
+
+                <div className="admin-summary-card">
+                  <span>이번 주 일정</span>
+                  <strong>{getThisWeekCount()}</strong>
+                </div>
+              </section>
+
+              <section className="admin-list-section">
+                <div className="admin-list-heading">
+                  <div>
+                    <h2>등록된 일정</h2>
+                    <p>
+                      SUWON PLAY에 등록된 일정을 관리합니다.
+                    </p>
+                  </div>
+                </div>
+
+                {events.length > 0 && (
+                  <div className="admin-bulk-toolbar">
+                    <div className="admin-bulk-left">
+                      <label className="admin-select-all">
                         <input
                           type="checkbox"
-                          checked={isSelected}
-                          onChange={() =>
-                            handleSelectEvent(event.id)
-                          }
+                          checked={allSelected}
+                          onChange={handleSelectAll}
                         />
+                        <span>전체 선택</span>
                       </label>
 
-                      {event.image_url && (
-                        <div
-                          className="admin-event-thumbnail"
-                          style={{
-                            backgroundImage:
-                              `url(${event.image_url})`,
-                          }}
-                        />
+                      {selectedEventIds.length > 0 && (
+                        <span className="admin-selected-count">
+                          {selectedEventIds.length}개 선택됨
+                        </span>
                       )}
-
-                      <div className="admin-event-main">
-                        <div className="admin-event-meta">
-                          <span className="admin-event-category">
-                            {getCategoryName(event.category)}
-                          </span>
-
-                          <span>
-                            {event.event_type === "long"
-                              ? "장기 일정"
-                              : "단기 일정"}
-                          </span>
-
-                          <span>
-                            {event.is_published
-                              ? "공개"
-                              : "비공개"}
-                          </span>
-                        </div>
-
-                        <h3>{event.title}</h3>
-
-                        <p>
-                          {formatEventDate(event.event_date)}
-                          {event.event_type === "long" &&
-                            event.end_date &&
-                            ` ~ ${formatEventDate(event.end_date)}`}
-                          {event.event_time &&
-                            ` · ${event.event_time.slice(0, 5)}`}
-                          {event.place && ` · ${event.place}`}
-                        </p>
-
-                        {event.home_team && event.away_team && (
-                          <p>
-                            {event.home_team} VS {event.away_team}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="admin-event-actions">
-                        <button
-                          type="button"
-                          className="admin-edit-button"
-                          onClick={() => handleEditEvent(event)}
-                        >
-                          수정
-                        </button>
-
-                        <button
-                          type="button"
-                          className="admin-delete-button"
-                          onClick={() => handleDeleteEvent(event)}
-                        >
-                          삭제
-                        </button>
-                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+
+                    <button
+                      type="button"
+                      className="admin-bulk-delete-button"
+                      disabled={selectedEventIds.length === 0}
+                      onClick={handleDeleteSelected}
+                    >
+                      선택 삭제
+                    </button>
+                  </div>
+                )}
+
+                {eventsLoading ? (
+                  <div className="admin-empty">
+                    <h3>일정을 불러오고 있습니다.</h3>
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="admin-empty">
+                    <h3>등록된 일정이 없습니다.</h3>
+                    <p>새 일정 등록 버튼을 눌러주세요.</p>
+                  </div>
+                ) : (
+                  <div className="admin-event-list">
+                    {events.map((event) => {
+                      const isSelected =
+                        selectedEventIds.includes(event.id);
+
+                      return (
+                        <div
+                          key={event.id}
+                          className={
+                            isSelected
+                              ? "admin-event-item admin-event-item-selected"
+                              : "admin-event-item"
+                          }
+                        >
+                          <label className="admin-event-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() =>
+                                handleSelectEvent(event.id)
+                              }
+                            />
+                          </label>
+
+                          {event.image_url && (
+                            <div
+                              className="admin-event-thumbnail"
+                              style={{
+                                backgroundImage:
+                                  `url(${event.image_url})`,
+                              }}
+                            />
+                          )}
+
+                          <div className="admin-event-main">
+                            <div className="admin-event-meta">
+                              <span className="admin-event-category">
+                                {getCategoryName(event.category)}
+                              </span>
+                              <span>
+                                {event.event_type === "long"
+                                  ? "장기 일정"
+                                  : "단기 일정"}
+                              </span>
+                              <span>
+                                {event.is_published
+                                  ? "공개"
+                                  : "비공개"}
+                              </span>
+                            </div>
+
+                            <h3>{event.title}</h3>
+
+                            <p>
+                              {formatEventDate(event.event_date)}
+                              {event.event_type === "long" &&
+                                event.end_date &&
+                                ` ~ ${formatEventDate(event.end_date)}`}
+                              {event.event_time &&
+                                ` · ${event.event_time.slice(0, 5)}`}
+                              {event.place &&
+                                ` · ${event.place}`}
+                            </p>
+
+                            {event.home_team &&
+                              event.away_team && (
+                                <p>
+                                  {event.home_team} VS{" "}
+                                  {event.away_team}
+                                </p>
+                              )}
+                          </div>
+
+                          <div className="admin-event-actions">
+                            <button
+                              type="button"
+                              className="admin-edit-button"
+                              onClick={() => handleEditEvent(event)}
+                            >
+                              수정
+                            </button>
+
+                            <button
+                              type="button"
+                              className="admin-delete-button"
+                              onClick={() => handleDeleteEvent(event)}
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
         </div>
       </main>
 
-      {/* 등록 / 수정 모달 */}
+      {/* 일정 등록 및 수정 모달 */}
       {isModalOpen && (
         <div
           className="admin-modal-overlay"
@@ -956,7 +978,6 @@ function Admin() {
             </div>
 
             <div className="admin-form">
-              {/* 제목 */}
               <div className="admin-form-group admin-form-full">
                 <label>일정 제목 *</label>
                 <input
@@ -967,7 +988,6 @@ function Admin() {
                 />
               </div>
 
-              {/* 카테고리 */}
               <div className="admin-form-group">
                 <label>카테고리 *</label>
                 <select
@@ -991,7 +1011,6 @@ function Admin() {
                 </select>
               </div>
 
-              {/* 종목 */}
               {category === "sports" && (
                 <div className="admin-form-group">
                   <label>스포츠 종목 *</label>
@@ -1004,7 +1023,6 @@ function Admin() {
                     }}
                   >
                     <option value="">종목 선택</option>
-
                     {SPORT_OPTIONS.map(([value, label]) => (
                       <option key={value} value={value}>
                         {label}
@@ -1014,7 +1032,6 @@ function Admin() {
                 </div>
               )}
 
-              {/* 홈팀 / 원정팀 */}
               {isMatchSport && (
                 <>
                   <div className="admin-form-group">
@@ -1026,9 +1043,11 @@ function Admin() {
                       }
                     >
                       <option value="">홈팀 선택</option>
-
                       {availableTeams.map((team) => (
-                        <option key={team.name} value={team.name}>
+                        <option
+                          key={team.name}
+                          value={team.name}
+                        >
                           {team.name}
                         </option>
                       ))}
@@ -1044,16 +1063,17 @@ function Admin() {
                       }
                     >
                       <option value="">원정팀 선택</option>
-
                       {availableTeams.map((team) => (
-                        <option key={team.name} value={team.name}>
+                        <option
+                          key={team.name}
+                          value={team.name}
+                        >
                           {team.name}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  {/* 로고 미리보기 */}
                   {(homeLogo || awayLogo) && (
                     <div className="admin-form-group admin-form-full">
                       <label>경기 로고 미리보기</label>
@@ -1069,54 +1089,61 @@ function Admin() {
                           background: "#15233d",
                         }}
                       >
-                        {[homeLogo, awayLogo].map((logo, index) => (
-                          <div
-                            key={index}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                            }}
-                          >
-                            {index === 1 && (
-                              <strong style={{ color: "white" }}>
-                                VS
-                              </strong>
-                            )}
-
+                        {[homeLogo, awayLogo].map(
+                          (logo, index) => (
                             <div
+                              key={index}
                               style={{
-                                width: "90px",
-                                height: "90px",
-                                background: "white",
-                                borderRadius: "10px",
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "center",
-                                overflow: "hidden",
-                                padding: "8px",
-                                boxSizing: "border-box",
+                                gap: "12px",
                               }}
                             >
-                              {logo && (
-                                <img
-                                  src={logo}
-                                  alt={index === 0 ? "홈팀 로고" : "원정팀 로고"}
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
-                                  }}
-                                />
+                              {index === 1 && (
+                                <strong
+                                  style={{ color: "white" }}
+                                >
+                                  VS
+                                </strong>
                               )}
+
+                              <div
+                                style={{
+                                  width: "90px",
+                                  height: "90px",
+                                  background: "white",
+                                  borderRadius: "10px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  overflow: "hidden",
+                                  padding: "8px",
+                                  boxSizing: "border-box",
+                                }}
+                              >
+                                {logo && (
+                                  <img
+                                    src={logo}
+                                    alt={
+                                      index === 0
+                                        ? "홈팀 로고"
+                                        : "원정팀 로고"
+                                    }
+                                    style={{
+                                      maxWidth: "100%",
+                                      maxHeight: "100%",
+                                      objectFit: "contain",
+                                    }}
+                                  />
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {/* 카드 문구 */}
                   <div className="admin-form-group admin-form-full">
                     <label>경기 카드 첫 번째 문구</label>
                     <input
@@ -1147,14 +1174,14 @@ function Admin() {
                         marginTop: "6px",
                       }}
                     >
-                      두 줄 합계 {cardLine1.length + cardLine2.length}/29자
+                      두 줄 합계{" "}
+                      {cardLine1.length + cardLine2.length}/29자
                       (공백 포함)
                     </p>
                   </div>
                 </>
               )}
 
-              {/* 일정 유형 */}
               <div className="admin-form-group">
                 <label>일정 유형 *</label>
                 <select
@@ -1164,7 +1191,9 @@ function Admin() {
                       e.target.value as "short" | "long";
                     setEventType(value);
 
-                    if (value === "short") setEndDate("");
+                    if (value === "short") {
+                      setEndDate("");
+                    }
                   }}
                 >
                   <option value="short">단기 일정</option>
@@ -1172,10 +1201,11 @@ function Admin() {
                 </select>
               </div>
 
-              {/* 날짜 */}
               <div className="admin-form-group">
                 <label>
-                  {eventType === "long" ? "시작일 *" : "날짜 *"}
+                  {eventType === "long"
+                    ? "시작일 *"
+                    : "날짜 *"}
                 </label>
                 <input
                   type="date"
@@ -1183,7 +1213,10 @@ function Admin() {
                   onChange={(e) => {
                     setEventDate(e.target.value);
 
-                    if (endDate && endDate < e.target.value) {
+                    if (
+                      endDate &&
+                      endDate < e.target.value
+                    ) {
                       setEndDate("");
                     }
                   }}
@@ -1204,7 +1237,6 @@ function Admin() {
                 </div>
               )}
 
-              {/* 시간 */}
               <div className="admin-form-group">
                 <label>시작 시간</label>
                 <input
@@ -1216,7 +1248,6 @@ function Admin() {
                 />
               </div>
 
-              {/* 장소 */}
               <div className="admin-form-group">
                 <label>장소</label>
                 <input
@@ -1227,30 +1258,37 @@ function Admin() {
                 />
               </div>
 
-              {/* 대표 이미지 */}
               <div className="admin-form-group admin-form-full">
                 <label>대표 이미지</label>
 
-                {editingEventId !== null && existingImageUrl && (
-                  <div className="admin-current-image">
-                    <img
-                      src={existingImageUrl}
-                      alt="현재 대표 이미지"
-                    />
-                    <p>현재 등록된 이미지</p>
-                  </div>
-                )}
+                {editingEventId !== null &&
+                  existingImageUrl && (
+                    <div className="admin-current-image">
+                      <img
+                        src={existingImageUrl}
+                        alt="현재 대표 이미지"
+                      />
+                      <p>현재 등록된 이미지</p>
+                    </div>
+                  )}
 
                 <input
                   type="file"
                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                   onChange={(e) =>
-                    setImageFile(e.target.files?.[0] ?? null)
+                    setImageFile(
+                      e.target.files?.[0] ?? null
+                    )
                   }
                 />
 
                 {imageFile && (
-                  <p style={{ marginTop: "8px", fontSize: "13px" }}>
+                  <p
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "13px",
+                    }}
+                  >
                     새 이미지: {imageFile.name}
                   </p>
                 )}
@@ -1269,7 +1307,6 @@ function Admin() {
                 </p>
               </div>
 
-              {/* 설명 */}
               <div className="admin-form-group admin-form-full">
                 <label>상세 설명</label>
                 <textarea
@@ -1282,7 +1319,6 @@ function Admin() {
                 />
               </div>
 
-              {/* 링크 */}
               <div className="admin-form-group admin-form-full">
                 <label>예매 / 공식 링크</label>
                 <input
@@ -1295,7 +1331,6 @@ function Admin() {
                 />
               </div>
 
-              {/* 공개 여부 */}
               <div className="admin-form-full admin-publish">
                 <label>
                   <input
@@ -1318,7 +1353,6 @@ function Admin() {
               )}
             </div>
 
-            {/* 저장 버튼 */}
             <div className="admin-modal-footer">
               <button
                 type="button"
@@ -1346,7 +1380,7 @@ function Admin() {
         </div>
       )}
 
-      {/* 삭제 확인 모달 */}
+      {/* 일정 삭제 확인 모달 */}
       {deleteMode && (
         <div
           className="delete-modal-overlay"
@@ -1364,12 +1398,13 @@ function Admin() {
                 : "일정 삭제"}
             </h2>
 
-            {deleteMode === "single" && deleteTarget && (
-              <p className="delete-modal-description">
-                <strong>{deleteTarget.title}</strong>
-                {" "}일정을 정말 삭제하시겠습니까?
-              </p>
-            )}
+            {deleteMode === "single" &&
+              deleteTarget && (
+                <p className="delete-modal-description">
+                  <strong>{deleteTarget.title}</strong>
+                  {" "}일정을 정말 삭제하시겠습니까?
+                </p>
+              )}
 
             {deleteMode === "multiple" && (
               <p className="delete-modal-description">
@@ -1420,5 +1455,3 @@ function Admin() {
     </>
   );
 }
-
-export default Admin;

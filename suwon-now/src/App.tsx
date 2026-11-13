@@ -1,21 +1,20 @@
+
 import Home from "./pages/Home";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import EventDetail from "./pages/EventDetail";
 import Schedule from "./pages/Schedule";
+import Community from "./pages/Community";
 import "./App.css";
 
 function App() {
-  const path =
-    window.location.pathname;
+  const path = window.location.pathname;
 
   if (path === "/admin") {
     return <Admin />;
   }
 
-  if (
-    path === "/reset-password"
-  ) {
+  if (path === "/reset-password") {
     return <ResetPassword />;
   }
 
@@ -23,9 +22,11 @@ function App() {
     return <Schedule />;
   }
 
-  if (
-    path.startsWith("/event/")
-  ) {
+  if (path === "/community") {
+    return <Community />;
+  }
+
+  if (path.startsWith("/event/")) {
     return <EventDetail />;
   }
 

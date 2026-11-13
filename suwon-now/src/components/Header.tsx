@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 function Header() {
@@ -13,9 +14,7 @@ function Header() {
           </a>
         </div>
 
-        {/* =========================
-            PC 메뉴
-        ========================= */}
+        {/* PC 메뉴 */}
         <nav className="desktop-nav">
           <a href="/">홈</a>
           <a href="/schedule">전체 일정</a>
@@ -24,11 +23,10 @@ function Header() {
           <a href="/schedule?category=festival">축제</a>
           <a href="/schedule?category=popup">팝업</a>
           <a href="/nearby">주변 맛집</a>
+          <a href="/community">커뮤니티</a>
         </nav>
 
-        {/* =========================
-            모바일 상단 메뉴
-        ========================= */}
+        {/* 모바일 상단 메뉴 */}
         <div className="mobile-nav">
           <a
             href="/schedule"
@@ -50,9 +48,7 @@ function Header() {
         </div>
       </header>
 
-      {/* =========================
-          모바일 메뉴 배경
-      ========================= */}
+      {/* 모바일 메뉴 배경 */}
       {menuOpen && (
         <div
           className="mobile-menu-overlay"
@@ -60,9 +56,7 @@ function Header() {
         />
       )}
 
-      {/* =========================
-          모바일 전체 메뉴
-      ========================= */}
+      {/* 모바일 전체 메뉴 */}
       <aside
         className={`mobile-menu ${
           menuOpen ? "open" : ""
@@ -85,34 +79,19 @@ function Header() {
         <div className="mobile-menu-section">
           <h3>일정</h3>
 
-          <a href="/schedule">
-            전체 일정
-          </a>
-
-          <a href="/schedule?category=sports">
-            스포츠
-          </a>
-
-          <a href="/schedule?category=performance">
-            공연
-          </a>
-
-          <a href="/schedule?category=festival">
-            축제
-          </a>
-
-          <a href="/schedule?category=popup">
-            팝업
-          </a>
+          <a href="/schedule">전체 일정</a>
+          <a href="/schedule?category=sports">스포츠</a>
+          <a href="/schedule?category=performance">공연</a>
+          <a href="/schedule?category=festival">축제</a>
+          <a href="/schedule?category=popup">팝업</a>
         </div>
 
         {/* 주변 정보 */}
         <div className="mobile-menu-section">
           <h3>둘러보기</h3>
 
-          <a href="/nearby">
-            주변 맛집
-          </a>
+          <a href="/nearby">주변 맛집</a>
+          <a href="/community">커뮤니티</a>
         </div>
       </aside>
     </>
