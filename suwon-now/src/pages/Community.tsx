@@ -67,7 +67,10 @@ async function getErrorMessage(
   fallback: string
 ): Promise<string> {
   if (error && typeof error === "object") {
-    if ("context" in error && error.context instanceof Response) {
+    if (
+      "context" in error &&
+      error.context instanceof Response
+    ) {
       try {
         const result = await error.context.clone().json();
 
@@ -83,7 +86,10 @@ async function getErrorMessage(
       }
     }
 
-    if ("message" in error && typeof error.message === "string") {
+    if (
+      "message" in error &&
+      typeof error.message === "string"
+    ) {
       return error.message;
     }
   }
@@ -93,12 +99,14 @@ async function getErrorMessage(
 
 function Community() {
   const [category, setCategory] = useState<Category>("all");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("latest");
+  const [sortOrder, setSortOrder] =
+    useState<SortOrder>("latest");
   const [view, setView] = useState<View>("list");
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPost, setSelectedPost] =
+    useState<Post | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -122,8 +130,10 @@ function Community() {
   // 댓글 수정
   const [editingCommentId, setEditingCommentId] =
     useState<number | null>(null);
-  const [editCommentContent, setEditCommentContent] = useState("");
-  const [editCommentPassword, setEditCommentPassword] = useState("");
+  const [editCommentContent, setEditCommentContent] =
+    useState("");
+  const [editCommentPassword, setEditCommentPassword] =
+    useState("");
 
   // 삭제
   const [deleteTarget, setDeleteTarget] =
@@ -218,6 +228,7 @@ function Community() {
     setErrorMessage("");
   };
 
+  // 게시글 상세 화면 + 조회수 증가
   const openPost = async (post: Post) => {
     setSelectedPost(post);
     setView("detail");
@@ -225,10 +236,47 @@ function Community() {
     setDetailLoading(true);
     setEditingCommentId(null);
     setDeleteTarget(null);
+    setErrorMessage("");
 
     setCommentAuthor("");
     setCommentPassword("");
     setCommentContent("");
+
+    // Supabase 조회수 증가 함수 호출
+    try {
+      const { error } = await supabase.rpc(
+        "increment_community_post_view",
+        { p_post_id: post.id }
+      );
+
+      if (error) {
+        console.error("조회수 증가 실패:", error);
+      } else {
+        // 상세 화면 조회수 반영
+        setSelectedPost((prev) =>
+          prev && prev.id === post.id
+            ? {
+                ...prev,
+                view_count: (prev.view_count ?? 0) + 1,
+              }
+            : prev
+        );
+
+        // 게시글 목록 조회수 반영
+        setPosts((prev) =>
+          prev.map((item) =>
+            item.id === post.id
+              ? {
+                  ...item,
+                  view_count: (item.view_count ?? 0) + 1,
+                }
+              : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error("조회수 처리 오류:", error);
+    }
 
     await fetchComments(post.id);
     setDetailLoading(false);
@@ -721,7 +769,6 @@ function Community() {
                         void openPost(post)
                       }
                     >
-                      {/* DB ID가 아닌 화면 순서 */}
                       <span className="community-post-number">
                         {filteredPosts.length - index}
                       </span>
@@ -893,8 +940,8 @@ function Community() {
                     {busy
                       ? "처리 중..."
                       : editingPost
-                      ? "수정 완료"
-                      : "등록하기"}
+                        ? "수정 완료"
+                        : "등록하기"}
                   </button>
                 </div>
               </form>
