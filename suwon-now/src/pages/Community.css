@@ -624,3 +624,87 @@
     padding: 22px;
   }
 }
+
+/* 게시글 정렬 버튼 */
+.community-sort {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 12px;
+}
+
+.community-sort button {
+  padding: 9px 13px;
+  border: 1px solid #d8e1ed;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.community-sort button.active {
+  background: #eaf2ff;
+  color: #075ec5;
+  border-color: #bcd5fa;
+  font-weight: 600;
+}
+
+.community-sort button:hover {
+  background: #f1f6ff;
+}
+
+@media (max-width: 768px) {
+  .community-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .community-sort {
+    margin-left: 0;
+    margin-right: auto;
+  }
+}
+
+/* 게시판 정렬 버튼 */
+.community-sort-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.community-sort-buttons button {
+  padding: 11px 18px;
+  min-height: 42px;
+  background: #ffffff;
+  color: #25436a;
+  border: 1px solid #d6e0ed;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.community-sort-buttons button.active {
+  background: #0865cb;
+  border-color: #0865cb;
+  color: #ffffff;
+}
+
+.community-sort-buttons button:hover:not(.active) {
+  background: #f0f5fc;
+}
+
+@media (max-width: 768px) {
+  .community-sort-buttons button {
+    padding: 9px 12px;
+    min-height: 38px;
+    font-size: 12px;
+  }
+}
+
+
