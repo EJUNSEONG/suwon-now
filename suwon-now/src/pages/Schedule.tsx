@@ -106,49 +106,20 @@ function Schedule() {
   };
 
   // ========================================
-  // 날짜 문자열 → Date 변환
+  // 날짜 및 시간 정렬용 함수
   // ========================================
 
-  const getDate = (dateString: string) => {
-    const [year, month, day] = dateString
-      .split("-")
-      .map(Number);
+  const getEventDateTime = (event: EventItem) => {
+    const date = event.event_date;
 
-    return new Date(year, month - 1, day);
-  };
+    const time = event.event_time
+      ? event.event_time.slice(0, 8)
+      : "00:00:00";
 
-  // ========================================
-  // 일정 상태 구분
-  //
-  // 0 = 현재 진행 중
-  // 1 = 다가오는 일정
-  // 2 = 지난 일정
-  // ========================================
+    const normalizedTime =
+      time.length === 5 ? `${time}:00` : time;
 
-  const getEventGroup = (
-    event: EventItem,
-    today: Date
-  ) => {
-    const startDate = getDate(event.event_date);
-
-    const endDate =
-      event.event_type === "long" &&
-      event.end_date
-        ? getDate(event.end_date)
-        : startDate;
-
-    if (
-      startDate <= today &&
-      endDate >= today
-    ) {
-      return 0;
-    }
-
-    if (startDate > today) {
-      return 1;
-    }
-
-    return 2;
+    return `${date}T${normalizedTime}`;
   };
 
   // ========================================
@@ -156,6 +127,8 @@ function Schedule() {
   // ========================================
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchEvents = async () => {
       setLoading(true);
 
@@ -167,10 +140,7 @@ function Schedule() {
       // 카테고리 필터
 
       if (category !== "all") {
-        query = query.eq(
-          "category",
-          category
-        );
+        query = query.eq("category", category);
       }
 
       // 조회순 정렬
@@ -181,11 +151,13 @@ function Schedule() {
             ascending: false,
           })
           .order("event_date", {
-            ascending: false,
+            ascending: true,
           });
       }
 
       const { data, error } = await query;
+
+      if (cancelled) return;
 
       if (error) {
         console.error(
@@ -195,55 +167,21 @@ function Schedule() {
 
         setEvents([]);
       } else {
-        const eventList =
-          (data ?? []) as EventItem[];
+        const eventList = (data ?? []) as EventItem[];
 
+        // ========================================
         // 날짜순 정렬
-        // 진행 중 → 다가오는 일정 → 지난 일정
+        //
+        // 과거 → 미래 순서
+        // 같은 날짜는 시간이 빠른 순서
+        // ========================================
 
         if (sortType === "latest") {
-          const today = new Date();
-
-          today.setHours(0, 0, 0, 0);
-
           eventList.sort((a, b) => {
-            const groupA = getEventGroup(
-              a,
-              today
-            );
+            const dateA = getEventDateTime(a);
+            const dateB = getEventDateTime(b);
 
-            const groupB = getEventGroup(
-              b,
-              today
-            );
-
-            if (groupA !== groupB) {
-              return groupA - groupB;
-            }
-
-            const startA = getDate(
-              a.event_date
-            ).getTime();
-
-            const startB = getDate(
-              b.event_date
-            ).getTime();
-
-            // 진행 중: 최근 시작한 일정부터
-
-            if (groupA === 0) {
-              return startB - startA;
-            }
-
-            // 다가오는 일정: 가까운 일정부터
-
-            if (groupA === 1) {
-              return startA - startB;
-            }
-
-            // 지난 일정: 최근 일정부터
-
-            return startB - startA;
+            return dateA.localeCompare(dateB);
           });
         }
 
@@ -254,6 +192,10 @@ function Schedule() {
     };
 
     fetchEvents();
+
+    return () => {
+      cancelled = true;
+    };
   }, [category, sortType]);
 
   // ========================================
@@ -310,6 +252,7 @@ function Schedule() {
 
   // ========================================
   // 스포츠 경기 로고 가져오기
+  // WK리그 포함
   // ========================================
 
   const getMatchLogos = (
@@ -492,6 +435,7 @@ function Schedule() {
                     className="schedule-card"
                     key={event.id}
                   >
+
                     {/* 카드 이미지 영역 */}
 
                     <div
@@ -501,10 +445,15 @@ function Schedule() {
                           : ""
                       }`}
                     >
+
                       {match ? (
+
                         /* 스포츠 경기 카드 */
 
                         <div className="schedule-match-content">
+
+                          {/* 팀 로고 */}
+
                           <div className="schedule-match-teams">
 
                             {/* 홈팀 */}
@@ -549,6 +498,7 @@ function Schedule() {
                           {(event.card_line1 ||
                             event.card_line2) && (
                             <div className="schedule-match-copy">
+
                               {event.card_line1 && (
                                 <div>
                                   {event.card_line1}
@@ -560,6 +510,7 @@ function Schedule() {
                                   {event.card_line2}
                                 </div>
                               )}
+
                             </div>
                           )}
 
@@ -581,20 +532,26 @@ function Schedule() {
                               </div>
                             )}
                           </div>
+
                         </div>
+
                       ) : event.image_url ? (
+
                         /* 기존 포스터 이미지 */
 
                         <img
                           src={event.image_url}
                           alt={event.title}
                         />
+
                       ) : (
+
                         /* 이미지 없는 일반 일정 */
 
                         <div className="schedule-card-no-image">
                           SUWON PLAY
                         </div>
+
                       )}
 
                       {/* 카테고리 표시 */}
@@ -606,11 +563,13 @@ function Schedule() {
                           event.category
                         )}
                       </span>
+
                     </div>
 
                     {/* 일정 정보 */}
 
                     <div className="schedule-card-info">
+
                       <div className="schedule-card-date">
                         <span>
                           {getEventDateText(event)}
@@ -640,12 +599,14 @@ function Schedule() {
                           자세히 보기 →
                         </span>
                       </div>
+
                     </div>
                   </a>
                 );
               })}
             </div>
           )}
+
         </div>
       </main>
     </>
