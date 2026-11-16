@@ -688,3 +688,42 @@
   }
 }
 
+/* 가게 소개 글 가독성 개선 */
+.nearby-info-description {
+  font-size: 15px;
+  line-height: 1.9;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* 지도 아래 가게 이름과 주소 */
+.nearby-info-main > strong {
+  font-size: 17px;
+}
+
+.nearby-info-main > p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 모바일에서도 같은 글자 크기 유지 */
+@media (max-width: 768px) {
+  .nearby-info-description {
+    font-size: 15px;
+    line-height: 1.9;
+  }
+
+  .nearby-info-main > strong {
+    font-size: 17px;
+  }
+
+  .nearby-info-main > p {
+    font-size: 14px;
+  }
+}
+/* 모바일 맛집 사진 높이 확대 */
+@media (max-width: 768px) {
+  .nearby-place-card-simple .nearby-place-photo {
+    height: 250px;
+  }
+}
