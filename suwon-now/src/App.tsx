@@ -32,9 +32,9 @@ function App() {
   }
 
   // 주변 맛집 · 카페 지도
-  if (path === "/nearby") {
+   if (path === "/nearby") {
     return <NearbyPlaces />;
-  }
+  }//
 
   // 일정 상세 페이지
   if (path.startsWith("/event/")) {
