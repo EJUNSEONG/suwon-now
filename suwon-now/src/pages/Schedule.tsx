@@ -31,9 +31,104 @@ type EventItem = {
 
 type SortType = "latest" | "views";
 
+// ========================================
+// 날짜 정렬용 함수
+// ========================================
+
+// YYYY-MM-DD를 한국 시간 기준 날짜로 변환
+const parseEventDate = (dateString: string) => {
+  const [year, month, day] = dateString
+    .slice(0, 10)
+    .split("-")
+    .map(Number);
+
+  return new Date(year, month - 1, day).getTime();
+};
+
+// 일정 시작 날짜 + 시간
+const getEventDateTime = (event: EventItem) => {
+  const date = event.event_date;
+
+  const time = event.event_time
+    ? event.event_time.slice(0, 8)
+    : "00:00:00";
+
+  const normalizedTime =
+    time.length === 5 ? `${time}:00` : time;
+
+  return `${date}T${normalizedTime}`;
+};
+
+// 일정이 종료되는 날짜
+const getEventEndDate = (event: EventItem) => {
+  if (
+    event.event_type === "long" &&
+    event.end_date
+  ) {
+    return parseEventDate(event.end_date);
+  }
+
+  return parseEventDate(event.event_date);
+};
+
+// 다가오는 일정 먼저, 지난 일정 나중에 정렬
+const sortEventsByUpcoming = (
+  eventList: EventItem[]
+): EventItem[] => {
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  const todayTime = today.getTime();
+
+  return [...eventList].sort((a, b) => {
+    const startA = parseEventDate(a.event_date);
+    const startB = parseEventDate(b.event_date);
+
+    const endA = getEventEndDate(a);
+    const endB = getEventEndDate(b);
+
+    // 종료일이 오늘 이후면 다가오는 일정
+    const isUpcomingA = endA >= todayTime;
+    const isUpcomingB = endB >= todayTime;
+
+    // 다가오는 일정을 먼저 표시
+    if (isUpcomingA !== isUpcomingB) {
+      return isUpcomingA ? -1 : 1;
+    }
+
+    // 다가오는 일정끼리는 가까운 날짜순
+    if (isUpcomingA && isUpcomingB) {
+      // 진행 중인 장기 일정은 오늘 날짜로 취급
+      const orderA = Math.max(startA, todayTime);
+      const orderB = Math.max(startB, todayTime);
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      // 같은 날짜라면 시간이 빠른 순서
+      return getEventDateTime(a).localeCompare(
+        getEventDateTime(b)
+      );
+    }
+
+    // 지난 일정은 가장 최근에 끝난 순서
+    if (endA !== endB) {
+      return endB - endA;
+    }
+
+    // 종료 날짜가 같으면 최근 시작한 일정 먼저
+    return getEventDateTime(b).localeCompare(
+      getEventDateTime(a)
+    );
+  });
+};
+
 function Schedule() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [sortType, setSortType] =
     useState<SortType>("latest");
 
@@ -106,23 +201,6 @@ function Schedule() {
   };
 
   // ========================================
-  // 날짜 및 시간 정렬용 함수
-  // ========================================
-
-  const getEventDateTime = (event: EventItem) => {
-    const date = event.event_date;
-
-    const time = event.event_time
-      ? event.event_time.slice(0, 8)
-      : "00:00:00";
-
-    const normalizedTime =
-      time.length === 5 ? `${time}:00` : time;
-
-    return `${date}T${normalizedTime}`;
-  };
-
-  // ========================================
   // 일정 불러오기
   // ========================================
 
@@ -138,13 +216,11 @@ function Schedule() {
         .eq("is_published", true);
 
       // 카테고리 필터
-
       if (category !== "all") {
         query = query.eq("category", category);
       }
 
       // 조회순 정렬
-
       if (sortType === "views") {
         query = query
           .order("view_count", {
@@ -172,26 +248,26 @@ function Schedule() {
         // ========================================
         // 날짜순 정렬
         //
-        // 과거 → 미래 순서
-        // 같은 날짜는 시간이 빠른 순서
+        // 1. 다가오는 일정 먼저
+        // 2. 가까운 날짜부터
+        // 3. 지난 일정은 최근 종료된 순서
         // ========================================
 
         if (sortType === "latest") {
-          eventList.sort((a, b) => {
-            const dateA = getEventDateTime(a);
-            const dateB = getEventDateTime(b);
+          const sortedEvents =
+            sortEventsByUpcoming(eventList);
 
-            return dateA.localeCompare(dateB);
-          });
+          setEvents(sortedEvents);
+        } else {
+          // 조회순은 Supabase 정렬 결과 유지
+          setEvents(eventList);
         }
-
-        setEvents(eventList);
       }
 
       setLoading(false);
     };
 
-    fetchEvents();
+    void fetchEvents();
 
     return () => {
       cancelled = true;
