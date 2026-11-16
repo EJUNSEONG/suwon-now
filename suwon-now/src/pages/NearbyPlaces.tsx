@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -25,6 +25,7 @@ type Place = {
   latitude: number;
   longitude: number;
   description: string | null;
+  image_url: string | null;
   kakao_url: string | null;
   created_at: string;
 };
@@ -51,13 +52,7 @@ const stadiums: Stadium[] = [
   },
 ];
 
-// Leaflet 기본 마커 아이콘 경로 설정
-//delete (
-  //L.Icon.Default.prototype as L.Icon.Default & {
-    //_getIconUrl?: () => string;
-  //}
-//)._getIconUrl;
-
+// Leaflet 기본 마커 설정
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -67,6 +62,7 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+// 맛집·카페 마커
 function createPlaceIcon(category: PlaceCategory) {
   const color =
     category === "restaurant" ? "#f97316" : "#2563eb";
@@ -103,23 +99,25 @@ function createPlaceIcon(category: PlaceCategory) {
 const restaurantIcon = createPlaceIcon("restaurant");
 const cafeIcon = createPlaceIcon("cafe");
 
+// 경기장 마커
 const stadiumIcon = L.divIcon({
   className: "nearby-stadium-marker",
-  html: `
-    <div class="nearby-stadium-pin">🏟️</div>
-  `,
+  html: `<div class="nearby-stadium-pin">🏟️</div>`,
   iconSize: [44, 44],
   iconAnchor: [22, 22],
 });
 
+// 지도 중심 이동
 function MapController({
   lat,
   lng,
-  zoom = 15,
+  zoom,
+  selectionKey,
 }: {
   lat: number;
   lng: number;
-  zoom?: number;
+  zoom: number;
+  selectionKey: number;
 }) {
   const map = useMap();
 
@@ -127,37 +125,54 @@ function MapController({
     map.flyTo([lat, lng], zoom, {
       duration: 0.8,
     });
-  }, [map, lat, lng, zoom]);
+  }, [map, lat, lng, zoom, selectionKey]);
 
   return null;
 }
 
 function NearbyPlaces() {
+  // 경기장 선택
   const [selectedStadium, setSelectedStadium] =
-    useState(stadiums[0]);
+    useState<Stadium>(stadiums[0]);
 
+  // 카테고리 필터
   const [category, setCategory] =
     useState<FilterCategory>("all");
 
+  // 검색
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // 장소 목록
   const [places, setPlaces] = useState<Place[]>([]);
+
+  // 선택한 장소
   const [selectedPlace, setSelectedPlace] =
     useState<Place | null>(null);
 
+  // 같은 장소 재선택 시에도 지도 이동
+  const [selectionKey, setSelectionKey] = useState(0);
+
+  // 가게 소개 펼치기
+  const [showPlaceInfo, setShowPlaceInfo] = useState(false);
+
+  // 로딩 및 오류
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Supabase에서 장소 조회
   useEffect(() => {
     let cancelled = false;
 
-    const fetchPlaces = async () => {
+    async function fetchPlaces() {
       setLoading(true);
       setErrorMessage("");
 
       const { data, error } = await supabase
         .from("nearby_places")
         .select(
-          "id, stadium, name, category, address, latitude, longitude, description, kakao_url, created_at"
+          "id, stadium, name, category, address, latitude, longitude, description, image_url, kakao_url, created_at"
         )
+        .eq("is_published", true)
         .order("created_at", { ascending: false });
 
       if (cancelled) return;
@@ -165,7 +180,7 @@ function NearbyPlaces() {
       if (error) {
         console.error("맛집 조회 오류:", error);
         setErrorMessage(
-          "맛집 정보를 불러오지 못했습니다."
+          `맛집 정보를 불러오지 못했습니다: ${error.message}`
         );
         setPlaces([]);
       } else {
@@ -173,7 +188,7 @@ function NearbyPlaces() {
       }
 
       setLoading(false);
-    };
+    }
 
     void fetchPlaces();
 
@@ -182,47 +197,86 @@ function NearbyPlaces() {
     };
   }, []);
 
-  const filteredPlaces = places.filter((place) => {
-    const matchesStadium =
-      place.stadium === selectedStadium.name;
+  // 경기장·카테고리·검색어 필터
+  const filteredPlaces = useMemo(() => {
+    const keyword = searchQuery
+      .trim()
+      .toLocaleLowerCase();
 
-    const matchesCategory =
-      category === "all" || place.category === category;
+    return places.filter((place) => {
+      const matchesStadium =
+        place.stadium === selectedStadium.name;
 
-    return matchesStadium && matchesCategory;
-  });
+      const matchesCategory =
+        category === "all" ||
+        place.category === category;
 
-  const mapCenter = selectedPlace
+      const matchesSearch =
+        !keyword ||
+        place.name
+          .toLocaleLowerCase()
+          .includes(keyword) ||
+        place.address
+          .toLocaleLowerCase()
+          .includes(keyword);
+
+      return (
+        matchesStadium &&
+        matchesCategory &&
+        matchesSearch
+      );
+    });
+  }, [places, selectedStadium, category, searchQuery]);
+
+  // 필터 결과에 포함된 선택 장소만 표시
+  const visibleSelectedPlace =
+    filteredPlaces.find(
+      (place) => place.id === selectedPlace?.id
+    ) ?? null;
+
+  // 지도 중심
+  const mapCenter = visibleSelectedPlace
     ? {
-        lat: selectedPlace.latitude,
-        lng: selectedPlace.longitude,
+        lat: visibleSelectedPlace.latitude,
+        lng: visibleSelectedPlace.longitude,
       }
     : {
         lat: selectedStadium.lat,
         lng: selectedStadium.lng,
       };
 
+  // 경기장 변경
   const selectStadium = (stadium: Stadium) => {
     setSelectedStadium(stadium);
     setSelectedPlace(null);
+    setSearchQuery("");
+    setShowPlaceInfo(false);
+    setSelectionKey((prev) => prev + 1);
   };
 
-  const openKakaoMap = (place: Place) => {
-    if (place.kakao_url) {
-      window.open(
-        place.kakao_url,
-        "_blank",
-        "noopener,noreferrer"
-      );
-      return;
+  // 장소 선택
+  const selectPlace = (place: Place) => {
+    setSelectedPlace(place);
+    setShowPlaceInfo(false);
+    setSelectionKey((prev) => prev + 1);
+  };
+
+  // 외부 지도 앱 열기
+  const openMapLink = (place: Place) => {
+    let url = place.kakao_url?.trim();
+
+    if (!url || !/^https?:\/\//i.test(url)) {
+      url =
+        `https://map.kakao.com/link/to/` +
+        `${encodeURIComponent(place.name)},` +
+        `${place.latitude},${place.longitude}`;
     }
 
-    const url =
-      `https://map.kakao.com/link/to/` +
-      `${encodeURIComponent(place.name)},` +
-      `${place.latitude},${place.longitude}`;
-
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   return (
@@ -231,6 +285,7 @@ function NearbyPlaces() {
 
       <main className="nearby-page">
         <div className="nearby-container">
+          {/* 페이지 제목 */}
           <div className="nearby-heading">
             <span className="section-label">
               SUWON PLAY GUIDE
@@ -244,6 +299,7 @@ function NearbyPlaces() {
             </p>
           </div>
 
+          {/* 경기장 선택 */}
           <div className="nearby-stadium-section">
             <h2>경기장 선택</h2>
 
@@ -265,6 +321,40 @@ function NearbyPlaces() {
             </div>
           </div>
 
+          {/* 검색창 */}
+          <div className="nearby-search-section">
+            <div className="nearby-search-box">
+              <span
+                className="nearby-search-icon"
+                aria-hidden="true"
+              >
+                🔍
+              </span>
+
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) =>
+                  setSearchQuery(event.target.value)
+                }
+                placeholder="가게 이름 또는 주소 검색"
+                aria-label="맛집과 카페 검색"
+              />
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="nearby-search-clear"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="검색어 지우기"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 카테고리 필터 */}
           <div className="nearby-filter-bar">
             <div className="nearby-category-tabs">
               <button
@@ -308,6 +398,7 @@ function NearbyPlaces() {
           </div>
 
           <div className="nearby-content">
+            {/* 왼쪽: 장소 목록 */}
             <div className="nearby-list">
               <div className="nearby-list-heading">
                 <h2>{selectedStadium.name}</h2>
@@ -324,11 +415,18 @@ function NearbyPlaces() {
                 </div>
               ) : filteredPlaces.length === 0 ? (
                 <div className="nearby-empty">
-                  <span>📍</span>
-                  <strong>등록된 장소가 없습니다.</strong>
+                  <span>🔍</span>
+
+                  <strong>
+                    {searchQuery.trim()
+                      ? "검색 결과가 없습니다."
+                      : "등록된 장소가 없습니다."}
+                  </strong>
+
                   <p>
-                    추천 맛집과 카페가 등록되면
-                    이곳에 표시됩니다.
+                    {searchQuery.trim()
+                      ? "다른 가게 이름이나 주소로 검색해보세요."
+                      : "추천 맛집과 카페가 등록되면 이곳에 표시됩니다."}
                   </p>
                 </div>
               ) : (
@@ -336,45 +434,46 @@ function NearbyPlaces() {
                   <button
                     type="button"
                     key={place.id}
-                    className={`nearby-place-card ${
-                      selectedPlace?.id === place.id
+                    className={`nearby-place-card nearby-place-card-simple ${
+                      visibleSelectedPlace?.id === place.id
                         ? "selected"
                         : ""
                     }`}
-                    onClick={() =>
-                      setSelectedPlace(place)
-                    }
+                    onClick={() => selectPlace(place)}
                   >
-                    <div className="nearby-place-top">
-                      <span
-                        className={`nearby-place-category ${place.category}`}
-                      >
-                        {place.category === "restaurant"
-                          ? "맛집"
-                          : "카페"}
-                      </span>
+                    {/* 가게 대표 사진 */}
+                    <div className="nearby-place-photo">
+                      {place.image_url ? (
+                        <img
+                          src={place.image_url}
+                          alt={`${place.name} 대표 사진`}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="nearby-photo-empty">
+                          <span>🍽️</span>
+                          <small>사진 준비 중</small>
+                        </div>
+                      )}
                     </div>
 
-                    <h3>{place.name}</h3>
+                    {/* 가게 이름과 주소 */}
+                    <div className="nearby-place-details">
+                      <h3>{place.name}</h3>
 
-                    <p className="nearby-place-address">
-                      📍 {place.address}
-                    </p>
-
-                    {place.description && (
-                      <p className="nearby-place-description">
-                        {place.description}
+                      <p className="nearby-place-address">
+                        <span aria-hidden="true">
+                          📍
+                        </span>
+                        {place.address}
                       </p>
-                    )}
-
-                    <span className="nearby-place-view">
-                      지도에서 보기 →
-                    </span>
+                    </div>
                   </button>
                 ))
               )}
             </div>
 
+            {/* 오른쪽: 지도 */}
             <div className="nearby-map-section">
               <MapContainer
                 center={[
@@ -393,9 +492,11 @@ function NearbyPlaces() {
                 <MapController
                   lat={mapCenter.lat}
                   lng={mapCenter.lng}
-                  zoom={selectedPlace ? 17 : 15}
+                  zoom={visibleSelectedPlace ? 17 : 15}
+                  selectionKey={selectionKey}
                 />
 
+                {/* 경기장 마커 */}
                 <Marker
                   position={[
                     selectedStadium.lat,
@@ -410,6 +511,7 @@ function NearbyPlaces() {
                   </Popup>
                 </Marker>
 
+                {/* 맛집·카페 마커 */}
                 {filteredPlaces.map((place) => (
                   <Marker
                     key={place.id}
@@ -423,27 +525,30 @@ function NearbyPlaces() {
                         : cafeIcon
                     }
                     eventHandlers={{
-                      click: () =>
-                        setSelectedPlace(place),
+                      click: () => selectPlace(place),
                     }}
                   >
                     <Popup>
                       <div className="nearby-popup">
+                        {place.image_url && (
+                          <img
+                            src={place.image_url}
+                            alt={place.name}
+                            className="nearby-popup-image"
+                          />
+                        )}
+
                         <strong>{place.name}</strong>
 
                         <p>{place.address}</p>
 
-                        {place.description && (
-                          <p>{place.description}</p>
-                        )}
-
                         <button
                           type="button"
                           onClick={() =>
-                            openKakaoMap(place)
+                            openMapLink(place)
                           }
                         >
-                          카카오맵 길찾기 →
+                          지도 앱에서 보기 →
                         </button>
                       </div>
                     </Popup>
@@ -451,28 +556,58 @@ function NearbyPlaces() {
                 ))}
               </MapContainer>
 
-              {selectedPlace && (
-                <div className="nearby-selected-info">
-                  <div>
+              {/* 지도 아래 선택된 가게 정보 */}
+              {visibleSelectedPlace && (
+                <div className="nearby-selected-info nearby-info-panel">
+                  <div className="nearby-info-main">
                     <strong>
-                      {selectedPlace.name}
+                      {visibleSelectedPlace.name}
                     </strong>
-                    <p>{selectedPlace.address}</p>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openKakaoMap(selectedPlace)
-                    }
-                  >
-                    길찾기 →
-                  </button>
+                    <p>
+                      {visibleSelectedPlace.address}
+                    </p>
+
+                    {/* 버튼 2개 */}
+                    <div className="nearby-info-actions">
+                      <button
+                        type="button"
+                        className="nearby-info-button"
+                        onClick={() =>
+                          setShowPlaceInfo((prev) => !prev)
+                        }
+                        aria-expanded={showPlaceInfo}
+                      >
+                        {showPlaceInfo
+                          ? "가게 정보 접기"
+                          : "가게 정보 보기"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="nearby-app-button"
+                        onClick={() =>
+                          openMapLink(visibleSelectedPlace)
+                        }
+                      >
+                        지도 앱에서 보기 →
+                      </button>
+                    </div>
+
+                    {/* 가게 소개 펼치기 */}
+                    {showPlaceInfo && (
+                      <div className="nearby-info-description">
+                        {visibleSelectedPlace.description?.trim() ||
+                          "등록된 가게 소개가 없습니다."}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
+          {/* 하단 안내 */}
           <p className="nearby-map-notice">
             지도 데이터 © OpenStreetMap contributors.
             장소 정보는 SUWON PLAY에서 직접 등록한

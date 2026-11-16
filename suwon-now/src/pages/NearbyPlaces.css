@@ -384,3 +384,307 @@
     padding: 15px;
   }
 }
+
+/* 검색창 */
+.nearby-search-section {
+  margin: 20px 0 16px;
+}
+
+.nearby-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0 14px;
+  border: 1px solid #d9e0e9;
+  border-radius: 12px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.nearby-search-box:focus-within {
+  border-color: #2563eb;
+}
+
+.nearby-search-icon {
+  font-size: 17px;
+}
+
+.nearby-search-box input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #111827;
+}
+
+.nearby-search-clear {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* 간결한 맛집 카드 */
+.nearby-place-card.nearby-place-card-simple {
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.nearby-place-card-simple.selected {
+  border-color: #2563eb;
+}
+
+.nearby-place-photo {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.nearby-place-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nearby-photo-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  color: #94a3b8;
+}
+
+.nearby-photo-empty span {
+  font-size: 28px;
+}
+
+.nearby-place-details {
+  padding: 14px;
+}
+
+.nearby-place-card-simple .nearby-place-details h3 {
+  margin: 0 0 7px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.nearby-place-card-simple .nearby-place-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+  overflow-wrap: anywhere;
+}
+
+/* 지도 팝업 사진 */
+.nearby-popup-image {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 110px;
+  margin-bottom: 10px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* 모바일 */
+@media (max-width: 768px) {
+  .nearby-search-section {
+    margin: 14px 0;
+  }
+
+  .nearby-place-photo {
+    height: 130px;
+  }
+
+  .nearby-place-details {
+    padding: 12px;
+  }
+
+  .nearby-place-card-simple .nearby-place-details h3 {
+    font-size: 15px;
+  }
+}
+
+/* 지도 아래 가게 정보 영역 */
+.nearby-selected-info.nearby-info-panel {
+  display: block;
+  padding: 18px 20px;
+}
+
+.nearby-info-main {
+  width: 100%;
+  min-width: 0;
+}
+
+.nearby-info-main > strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.nearby-info-main > p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* 가게 정보 / 지도 앱 버튼 */
+.nearby-info-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.nearby-info-actions button {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.nearby-info-actions .nearby-info-button {
+  background: #fff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.nearby-info-actions .nearby-app-button {
+  background: #1d4ed8;
+  color: #fff;
+  border: 1px solid #1d4ed8;
+}
+
+/* 펼쳐지는 가게 소개 */
+.nearby-info-description {
+  margin-top: 14px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #334155;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .nearby-selected-info.nearby-info-panel {
+    padding: 15px;
+  }
+
+  .nearby-info-actions {
+    gap: 8px;
+  }
+
+  .nearby-info-actions button {
+    padding: 11px 8px;
+    font-size: 12px;
+  }
+}
+
+/* 지도 아래 가게 정보 */
+.nearby-selected-info.nearby-info-panel {
+  display: block;
+  padding: 18px 20px;
+}
+
+.nearby-info-main {
+  width: 100%;
+  min-width: 0;
+}
+
+.nearby-info-main > strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.nearby-info-main > p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.nearby-info-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.nearby-info-actions button {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.nearby-info-actions .nearby-info-button {
+  background: #fff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.nearby-info-actions .nearby-app-button {
+  background: #1d4ed8;
+  color: #fff;
+  border: 1px solid #1d4ed8;
+}
+
+.nearby-info-description {
+  margin-top: 14px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #334155;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .nearby-selected-info.nearby-info-panel {
+    padding: 15px;
+  }
+
+  .nearby-info-actions {
+    gap: 8px;
+  }
+
+  .nearby-info-actions button {
+    padding: 11px 8px;
+    font-size: 12px;
+  }
+}
+

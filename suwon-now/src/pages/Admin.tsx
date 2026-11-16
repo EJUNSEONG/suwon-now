@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import Header from "../components/Header";
 import CommunityAdmin from "./CommunityAdmin";
+import NearbyAdmin from "./NearbyAdmin";
 import { supabase } from "../lib/supabase";
 import { teams } from "../teams";
 
@@ -28,9 +29,14 @@ type EventItem = {
   card_line2: string | null;
 };
 
+type AdminTab = "events" | "community" | "nearby";
+
 const MATCH_SPORTS = [
-  "soccer", "baseball", "wk-league",
-  "basketball", "volleyball",
+  "soccer",
+  "baseball",
+  "wk-league",
+  "basketball",
+  "volleyball",
 ];
 
 const SPORT_OPTIONS = [
@@ -53,11 +59,42 @@ const CATEGORY_OPTIONS = [
   ["popup", "팝업"],
 ];
 
+const ADMIN_TABS: {
+  key: AdminTab;
+  label: string;
+  title: string;
+  description: string;
+}[] = [
+  {
+    key: "events",
+    label: "일정 관리",
+    title: "일정 관리",
+    description:
+      "경기·공연·축제·팝업 일정을 등록하고 관리할 수 있습니다.",
+  },
+  {
+    key: "community",
+    label: "게시판 관리",
+    title: "게시판 관리",
+    description:
+      "커뮤니티 게시글과 댓글을 관리할 수 있습니다.",
+  },
+  {
+    key: "nearby",
+    label: "주변 맛집 관리",
+    title: "주변 맛집 관리",
+    description:
+      "경기장 주변 맛집과 카페를 등록하고 관리할 수 있습니다.",
+  },
+];
+
 export default function Admin() {
   const [adminTab, setAdminTab] =
-    useState<"events" | "community">("events");
+    useState<AdminTab>("events");
 
-  const [session, setSession] = useState<Session | null>(null);
+  // 관리자 로그인
+  const [session, setSession] =
+    useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,17 +102,22 @@ export default function Admin() {
   const [loginError, setLoginError] = useState("");
   const [resetMessage, setResetMessage] = useState("");
 
+  // 일정 목록
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
-  const [selectedEventIds, setSelectedEventIds] = useState<number[]>([]);
+  const [selectedEventIds, setSelectedEventIds] =
+    useState<number[]>([]);
 
+  // 일정 등록 및 수정
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+  const [editingEventId, setEditingEventId] =
+    useState<number | null>(null);
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("sports");
   const [sportType, setSportType] = useState("");
-  const [eventType, setEventType] = useState<"short" | "long">("short");
+  const [eventType, setEventType] =
+    useState<"short" | "long">("short");
   const [eventDate, setEventDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [eventTime, setEventTime] = useState("");
@@ -83,7 +125,9 @@ export default function Admin() {
   const [description, setDescription] = useState("");
   const [ticketUrl, setTicketUrl] = useState("");
   const [isPublished, setIsPublished] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const [imageFile, setImageFile] =
+    useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] =
     useState<string | null>(null);
 
@@ -95,6 +139,7 @@ export default function Admin() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
+  // 일정 삭제
   const [deleteMode, setDeleteMode] =
     useState<"single" | "multiple" | null>(null);
   const [deleteTarget, setDeleteTarget] =
@@ -103,7 +148,8 @@ export default function Admin() {
   const [deleteError, setDeleteError] = useState("");
 
   const isMatchSport =
-    category === "sports" && MATCH_SPORTS.includes(sportType);
+    category === "sports" &&
+    MATCH_SPORTS.includes(sportType);
 
   const availableTeams = teams.filter(
     (team) => team.sport === sportType
@@ -117,6 +163,11 @@ export default function Admin() {
     (team) => team.name === awayTeam
   )?.logo;
 
+  const currentTab =
+    ADMIN_TABS.find((tab) => tab.key === adminTab) ??
+    ADMIN_TABS[0];
+
+  // 로그인 상태 확인
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -126,14 +177,18 @@ export default function Admin() {
 
     void checkSession();
 
-    const { data: { subscription } } =
-      supabase.auth.onAuthStateChange((_event, currentSession) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, currentSession) => {
         setSession(currentSession);
-      });
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // 로그인 후 일정 조회
   useEffect(() => {
     if (session) {
       void fetchEvents();
@@ -160,7 +215,10 @@ export default function Admin() {
     setEventsLoading(false);
   };
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+  // 로그인
+  const handleLogin = async (
+    e: FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     if (!email.trim() || !password) {
@@ -177,10 +235,14 @@ export default function Admin() {
       password,
     });
 
-    if (error) setLoginError(error.message);
+    if (error) {
+      setLoginError(error.message);
+    }
+
     setLoginLoading(false);
   };
 
+  // 비밀번호 재설정
   const handlePasswordReset = async () => {
     if (!email.trim()) {
       setLoginError("먼저 관리자 이메일을 입력해주세요.");
@@ -190,10 +252,14 @@ export default function Admin() {
     setLoginError("");
     setResetMessage("");
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      { redirectTo: `${window.location.origin}/reset-password` }
-    );
+    const { error } =
+      await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo:
+            `${window.location.origin}/reset-password`,
+        }
+      );
 
     if (error) {
       setLoginError(error.message);
@@ -204,11 +270,13 @@ export default function Admin() {
     }
   };
 
+  // 로그아웃
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setAdminTab("events");
   };
 
+  // 일정 입력 초기화
   const resetEventForm = () => {
     setTitle("");
     setCategory("sports");
@@ -242,6 +310,7 @@ export default function Admin() {
     resetEventForm();
   };
 
+  // 기존 일정 수정
   const handleEditEvent = (event: EventItem) => {
     resetEventForm();
 
@@ -266,19 +335,27 @@ export default function Admin() {
     setIsModalOpen(true);
   };
 
-  const getStorageFilePath = (imageUrl: string | null) => {
+  // 이미지 저장 경로
+  const getStorageFilePath = (
+    imageUrl: string | null
+  ) => {
     if (!imageUrl) return null;
 
-    const marker = "/storage/v1/object/public/event-images/";
+    const marker =
+      "/storage/v1/object/public/event-images/";
+
     const index = imageUrl.indexOf(marker);
 
     if (index === -1) return null;
 
     return decodeURIComponent(
-      imageUrl.substring(index + marker.length).split("?")[0]
+      imageUrl
+        .substring(index + marker.length)
+        .split("?")[0]
     );
   };
 
+  // 일정 등록 및 수정 저장
   const handleSubmitEvent = async () => {
     if (!title.trim()) {
       setSubmitError("일정 제목을 입력해주세요.");
@@ -296,11 +373,16 @@ export default function Admin() {
     }
 
     if (eventType === "long" && !endDate) {
-      setSubmitError("장기 일정은 종료일을 선택해주세요.");
+      setSubmitError(
+        "장기 일정은 종료일을 선택해주세요."
+      );
       return;
     }
 
-    if (eventType === "long" && endDate < eventDate) {
+    if (
+      eventType === "long" &&
+      endDate < eventDate
+    ) {
       setSubmitError(
         "종료일은 시작일과 같거나 이후로 설정해주세요."
       );
@@ -309,29 +391,64 @@ export default function Admin() {
 
     if (isMatchSport && (homeTeam || awayTeam)) {
       if (!homeTeam || !awayTeam) {
-        setSubmitError("홈팀과 원정팀을 모두 선택해주세요.");
+        setSubmitError(
+          "홈팀과 원정팀을 모두 선택해주세요."
+        );
         return;
       }
 
       if (homeTeam === awayTeam) {
-        setSubmitError("홈팀과 원정팀은 서로 달라야 합니다.");
+        setSubmitError(
+          "홈팀과 원정팀은 서로 달라야 합니다."
+        );
         return;
       }
 
       if (
-        !availableTeams.some((team) => team.name === homeTeam) ||
-        !availableTeams.some((team) => team.name === awayTeam)
+        !availableTeams.some(
+          (team) => team.name === homeTeam
+        ) ||
+        !availableTeams.some(
+          (team) => team.name === awayTeam
+        )
       ) {
-        setSubmitError("선택한 종목에 맞는 팀을 선택해주세요.");
+        setSubmitError(
+          "선택한 종목에 맞는 팀을 선택해주세요."
+        );
         return;
       }
     }
 
-    if (isMatchSport && (cardLine1 + cardLine2).length >= 30) {
+    if (
+      isMatchSport &&
+      (cardLine1 + cardLine2).length >= 30
+    ) {
       setSubmitError(
         "카드 문구는 두 줄 합쳐 공백 포함 30자 미만으로 작성해주세요."
       );
       return;
+    }
+
+    if (imageFile) {
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+      ];
+
+      if (!allowedTypes.includes(imageFile.type)) {
+        setSubmitError(
+          "이미지는 JPG, PNG, WebP 형식만 업로드할 수 있습니다."
+        );
+        return;
+      }
+
+      if (imageFile.size > 5 * 1024 * 1024) {
+        setSubmitError(
+          "이미지 용량은 5MB 이하로 업로드해주세요."
+        );
+        return;
+      }
     }
 
     setSubmitLoading(true);
@@ -343,38 +460,27 @@ export default function Admin() {
       let imageUrl = existingImageUrl;
 
       if (imageFile) {
-        const allowedTypes = [
-          "image/jpeg", "image/png", "image/webp",
-        ];
-
-        if (!allowedTypes.includes(imageFile.type)) {
-          setSubmitError(
-            "이미지는 JPG, PNG, WebP 형식만 업로드할 수 있습니다."
-          );
-          return;
-        }
-
-        if (imageFile.size > 5 * 1024 * 1024) {
-          setSubmitError("이미지 용량은 5MB 이하로 업로드해주세요.");
-          return;
-        }
-
         const extension =
-          imageFile.name.split(".").pop()?.toLowerCase() ?? "png";
+          imageFile.name
+            .split(".")
+            .pop()
+            ?.toLowerCase() ?? "png";
 
         const fileName =
           `${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("event-images")
-          .upload(fileName, imageFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+        const { error: uploadError } =
+          await supabase.storage
+            .from("event-images")
+            .upload(fileName, imageFile, {
+              cacheControl: "3600",
+              upsert: false,
+            });
 
         if (uploadError) {
           setSubmitError(
-            "이미지 업로드에 실패했습니다: " + uploadError.message
+            "이미지 업로드에 실패했습니다: " +
+              uploadError.message
           );
           return;
         }
@@ -391,20 +497,31 @@ export default function Admin() {
       const eventData = {
         title: title.trim(),
         category,
-        sport_type: category === "sports" ? sportType : null,
+        sport_type:
+          category === "sports" ? sportType : null,
         event_type: eventType,
         event_date: eventDate,
-        end_date: eventType === "long" ? endDate : null,
+        end_date:
+          eventType === "long" ? endDate : null,
         event_time: eventTime || null,
         place: place.trim() || null,
-        description: description.trim() || null,
+        description:
+          description.trim() || null,
         image_url: imageUrl,
         ticket_url: ticketUrl.trim() || null,
         is_published: isPublished,
-        home_team: isMatchSport ? homeTeam || null : null,
-        away_team: isMatchSport ? awayTeam || null : null,
-        card_line1: isMatchSport ? cardLine1.trim() || null : null,
-        card_line2: isMatchSport ? cardLine2.trim() || null : null,
+        home_team:
+          isMatchSport ? homeTeam || null : null,
+        away_team:
+          isMatchSport ? awayTeam || null : null,
+        card_line1:
+          isMatchSport
+            ? cardLine1.trim() || null
+            : null,
+        card_line2:
+          isMatchSport
+            ? cardLine2.trim() || null
+            : null,
       };
 
       const { error: saveError } =
@@ -425,7 +542,8 @@ export default function Admin() {
         }
 
         setSubmitError(
-          "일정 저장에 실패했습니다: " + saveError.message
+          "일정 저장에 실패했습니다: " +
+            saveError.message
         );
         return;
       }
@@ -435,15 +553,20 @@ export default function Admin() {
         imageFile &&
         existingImageUrl
       ) {
-        const oldPath = getStorageFilePath(existingImageUrl);
+        const oldPath =
+          getStorageFilePath(existingImageUrl);
 
         if (oldPath) {
-          const { error } = await supabase.storage
-            .from("event-images")
-            .remove([oldPath]);
+          const { error } =
+            await supabase.storage
+              .from("event-images")
+              .remove([oldPath]);
 
           if (error) {
-            console.warn("기존 이미지 삭제 실패:", error);
+            console.warn(
+              "기존 이미지 삭제 실패:",
+              error
+            );
           }
         }
       }
@@ -453,12 +576,15 @@ export default function Admin() {
       resetEventForm();
     } catch (error) {
       console.error("일정 저장 오류:", error);
-      setSubmitError("일정을 저장하는 중 오류가 발생했습니다.");
+      setSubmitError(
+        "일정을 저장하는 중 오류가 발생했습니다."
+      );
     } finally {
       setSubmitLoading(false);
     }
   };
 
+  // 일정 선택
   const handleSelectEvent = (id: number) => {
     setSelectedEventIds((prev) =>
       prev.includes(id)
@@ -468,14 +594,21 @@ export default function Admin() {
   };
 
   const handleSelectAll = () => {
-    if (selectedEventIds.length === events.length) {
+    if (
+      selectedEventIds.length === events.length
+    ) {
       setSelectedEventIds([]);
     } else {
-      setSelectedEventIds(events.map((event) => event.id));
+      setSelectedEventIds(
+        events.map((event) => event.id)
+      );
     }
   };
 
-  const handleDeleteEvent = (event: EventItem) => {
+  // 일정 삭제
+  const handleDeleteEvent = (
+    event: EventItem
+  ) => {
     setDeleteMode("single");
     setDeleteTarget(event);
     setDeleteError("");
@@ -483,6 +616,7 @@ export default function Admin() {
 
   const handleDeleteSelected = () => {
     if (selectedEventIds.length === 0) return;
+
     setDeleteMode("multiple");
     setDeleteTarget(null);
     setDeleteError("");
@@ -490,6 +624,7 @@ export default function Admin() {
 
   const closeDeleteModal = () => {
     if (deleteLoading) return;
+
     setDeleteMode(null);
     setDeleteTarget(null);
     setDeleteError("");
@@ -500,7 +635,9 @@ export default function Admin() {
 
     const targetIds =
       deleteMode === "single"
-        ? deleteTarget ? [deleteTarget.id] : []
+        ? deleteTarget
+          ? [deleteTarget.id]
+          : []
         : selectedEventIds;
 
     if (targetIds.length === 0) return;
@@ -509,8 +646,8 @@ export default function Admin() {
     setDeleteError("");
 
     try {
-      const targetEvents = events.filter((event) =>
-        targetIds.includes(event.id)
+      const targetEvents = events.filter(
+        (event) => targetIds.includes(event.id)
       );
 
       const { error } = await supabase
@@ -520,40 +657,56 @@ export default function Admin() {
 
       if (error) {
         setDeleteError(
-          "일정 삭제에 실패했습니다: " + error.message
+          "일정 삭제에 실패했습니다: " +
+            error.message
         );
         return;
       }
 
       const imagePaths = targetEvents
-        .map((event) => getStorageFilePath(event.image_url))
-        .filter((path): path is string => path !== null);
+        .map((event) =>
+          getStorageFilePath(event.image_url)
+        )
+        .filter(
+          (path): path is string =>
+            path !== null
+        );
 
       if (imagePaths.length > 0) {
-        const { error: storageError } = await supabase.storage
-          .from("event-images")
-          .remove(imagePaths);
+        const { error: storageError } =
+          await supabase.storage
+            .from("event-images")
+            .remove(imagePaths);
 
         if (storageError) {
-          console.warn("이미지 삭제 오류:", storageError);
+          console.warn(
+            "이미지 삭제 오류:",
+            storageError
+          );
         }
       }
 
       setSelectedEventIds((prev) =>
-        prev.filter((id) => !targetIds.includes(id))
+        prev.filter(
+          (id) => !targetIds.includes(id)
+        )
       );
 
       await fetchEvents();
+
       setDeleteMode(null);
       setDeleteTarget(null);
     } catch (error) {
       console.error("일정 삭제 오류:", error);
-      setDeleteError("삭제 중 오류가 발생했습니다.");
+      setDeleteError(
+        "삭제 중 오류가 발생했습니다."
+      );
     } finally {
       setDeleteLoading(false);
     }
   };
 
+  // 이번 주 일정
   const getThisWeekCount = () => {
     const today = new Date();
     const day = today.getDay();
@@ -568,27 +721,38 @@ export default function Admin() {
     end.setHours(23, 59, 59, 999);
 
     return events.filter((event) => {
-      if (event.event_type === "long") return false;
+      if (event.event_type === "long") {
+        return false;
+      }
 
-      const date = new Date(`${event.event_date}T00:00:00`);
+      const date = new Date(
+        `${event.event_date}T00:00:00`
+      );
+
       return date >= start && date <= end;
     }).length;
   };
 
   const getCategoryName = (value: string) =>
-    CATEGORY_OPTIONS.find(([key]) => key === value)?.[1] ?? value;
+    CATEGORY_OPTIONS.find(
+      ([key]) => key === value
+    )?.[1] ?? value;
 
   const formatEventDate = (value: string) =>
     value.replace(/-/g, ".");
 
+  // 관리자 로그인 확인 중
   if (authLoading) {
     return (
       <>
         <Header />
+
         <main className="admin-page">
           <div className="admin-container">
             <div className="admin-empty">
-              <h3>관리자 정보를 확인하고 있습니다.</h3>
+              <h3>
+                관리자 정보를 확인하고 있습니다.
+              </h3>
             </div>
           </div>
         </main>
@@ -596,17 +760,21 @@ export default function Admin() {
     );
   }
 
+  // 관리자 로그인 화면
   if (!session) {
     return (
       <>
         <Header />
+
         <main className="admin-page">
           <div className="admin-login-container">
             <div className="admin-login-card">
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
+
               <h1>관리자 로그인</h1>
+
               <p className="admin-login-description">
                 관리자 계정으로 로그인해주세요.
               </p>
@@ -617,21 +785,27 @@ export default function Admin() {
               >
                 <div className="admin-form-group">
                   <label>이메일</label>
+
                   <input
                     type="email"
                     placeholder="관리자 이메일"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) =>
+                      setEmail(e.target.value)
+                    }
                   />
                 </div>
 
                 <div className="admin-form-group">
                   <label>비밀번호</label>
+
                   <input
                     type="password"
                     placeholder="비밀번호"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) =>
+                      setPassword(e.target.value)
+                    }
                   />
                 </div>
 
@@ -652,7 +826,9 @@ export default function Admin() {
                   className="admin-login-button"
                   disabled={loginLoading}
                 >
-                  {loginLoading ? "로그인 중..." : "로그인"}
+                  {loginLoading
+                    ? "로그인 중..."
+                    : "로그인"}
                 </button>
 
                 <button
@@ -674,29 +850,23 @@ export default function Admin() {
     events.length > 0 &&
     selectedEventIds.length === events.length;
 
+  // 관리자 메인 화면
   return (
     <>
       <Header />
 
       <main className="admin-page">
         <div className="admin-container">
+          {/* 상단 제목 */}
           <section className="admin-top">
             <div>
               <span className="admin-label">
                 SUWON PLAY ADMIN
               </span>
 
-              <h1>
-                {adminTab === "events"
-                  ? "일정 관리"
-                  : "게시판 관리"}
-              </h1>
+              <h1>{currentTab.title}</h1>
 
-              <p>
-                {adminTab === "events"
-                  ? "경기·공연·축제·팝업 일정을 등록하고 관리할 수 있습니다."
-                  : "커뮤니티 게시글과 댓글을 관리할 수 있습니다."}
-              </p>
+              <p>{currentTab.description}</p>
             </div>
 
             <div className="admin-top-buttons">
@@ -729,43 +899,43 @@ export default function Admin() {
               flexWrap: "wrap",
             }}
           >
-            <button
-              type="button"
-              onClick={() => setAdminTab("events")}
-              style={{
-                padding: "12px 20px",
-                borderRadius: "8px",
-                border: "1px solid #d9e2ee",
-                cursor: "pointer",
-                background:
-                  adminTab === "events" ? "#075ec5" : "#fff",
-                color:
-                  adminTab === "events" ? "#fff" : "#264265",
-              }}
-            >
-              일정 관리
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setAdminTab("community")}
-              style={{
-                padding: "12px 20px",
-                borderRadius: "8px",
-                border: "1px solid #d9e2ee",
-                cursor: "pointer",
-                background:
-                  adminTab === "community" ? "#075ec5" : "#fff",
-                color:
-                  adminTab === "community" ? "#fff" : "#264265",
-              }}
-            >
-              게시판 관리
-            </button>
+            {ADMIN_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() =>
+                  setAdminTab(tab.key)
+                }
+                style={{
+                  padding: "12px 20px",
+                  borderRadius: "8px",
+                  border:
+                    "1px solid #d9e2ee",
+                  cursor: "pointer",
+                  background:
+                    adminTab === tab.key
+                      ? "#075ec5"
+                      : "#fff",
+                  color:
+                    adminTab === tab.key
+                      ? "#fff"
+                      : "#264265",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           {/* 게시판 관리 */}
-          {adminTab === "community" && <CommunityAdmin />}
+          {adminTab === "community" && (
+            <CommunityAdmin />
+          )}
+
+          {/* 주변 맛집 관리 */}
+          {adminTab === "nearby" && (
+            <NearbyAdmin />
+          )}
 
           {/* 기존 일정 관리 */}
           {adminTab === "events" && (
@@ -779,15 +949,20 @@ export default function Admin() {
                 <div className="admin-summary-card">
                   <span>공개 일정</span>
                   <strong>
-                    {events.filter(
-                      (event) => event.is_published
-                    ).length}
+                    {
+                      events.filter(
+                        (event) =>
+                          event.is_published
+                      ).length
+                    }
                   </strong>
                 </div>
 
                 <div className="admin-summary-card">
                   <span>이번 주 일정</span>
-                  <strong>{getThisWeekCount()}</strong>
+                  <strong>
+                    {getThisWeekCount()}
+                  </strong>
                 </div>
               </section>
 
@@ -796,7 +971,8 @@ export default function Admin() {
                   <div>
                     <h2>등록된 일정</h2>
                     <p>
-                      SUWON PLAY에 등록된 일정을 관리합니다.
+                      SUWON PLAY에 등록된 일정을
+                      관리합니다.
                     </p>
                   </div>
                 </div>
@@ -815,7 +991,8 @@ export default function Admin() {
 
                       {selectedEventIds.length > 0 && (
                         <span className="admin-selected-count">
-                          {selectedEventIds.length}개 선택됨
+                          {selectedEventIds.length}
+                          개 선택됨
                         </span>
                       )}
                     </div>
@@ -823,7 +1000,9 @@ export default function Admin() {
                     <button
                       type="button"
                       className="admin-bulk-delete-button"
-                      disabled={selectedEventIds.length === 0}
+                      disabled={
+                        selectedEventIds.length === 0
+                      }
                       onClick={handleDeleteSelected}
                     >
                       선택 삭제
@@ -833,18 +1012,26 @@ export default function Admin() {
 
                 {eventsLoading ? (
                   <div className="admin-empty">
-                    <h3>일정을 불러오고 있습니다.</h3>
+                    <h3>
+                      일정을 불러오고 있습니다.
+                    </h3>
                   </div>
                 ) : events.length === 0 ? (
                   <div className="admin-empty">
-                    <h3>등록된 일정이 없습니다.</h3>
-                    <p>새 일정 등록 버튼을 눌러주세요.</p>
+                    <h3>
+                      등록된 일정이 없습니다.
+                    </h3>
+                    <p>
+                      새 일정 등록 버튼을 눌러주세요.
+                    </p>
                   </div>
                 ) : (
                   <div className="admin-event-list">
                     {events.map((event) => {
                       const isSelected =
-                        selectedEventIds.includes(event.id);
+                        selectedEventIds.includes(
+                          event.id
+                        );
 
                       return (
                         <div
@@ -860,7 +1047,9 @@ export default function Admin() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() =>
-                                handleSelectEvent(event.id)
+                                handleSelectEvent(
+                                  event.id
+                                )
                               }
                             />
                           </label>
@@ -878,13 +1067,18 @@ export default function Admin() {
                           <div className="admin-event-main">
                             <div className="admin-event-meta">
                               <span className="admin-event-category">
-                                {getCategoryName(event.category)}
+                                {getCategoryName(
+                                  event.category
+                                )}
                               </span>
+
                               <span>
-                                {event.event_type === "long"
+                                {event.event_type ===
+                                "long"
                                   ? "장기 일정"
                                   : "단기 일정"}
                               </span>
+
                               <span>
                                 {event.is_published
                                   ? "공개"
@@ -895,12 +1089,23 @@ export default function Admin() {
                             <h3>{event.title}</h3>
 
                             <p>
-                              {formatEventDate(event.event_date)}
-                              {event.event_type === "long" &&
+                              {formatEventDate(
+                                event.event_date
+                              )}
+
+                              {event.event_type ===
+                                "long" &&
                                 event.end_date &&
-                                ` ~ ${formatEventDate(event.end_date)}`}
+                                ` ~ ${formatEventDate(
+                                  event.end_date
+                                )}`}
+
                               {event.event_time &&
-                                ` · ${event.event_time.slice(0, 5)}`}
+                                ` · ${event.event_time.slice(
+                                  0,
+                                  5
+                                )}`}
+
                               {event.place &&
                                 ` · ${event.place}`}
                             </p>
@@ -908,7 +1113,8 @@ export default function Admin() {
                             {event.home_team &&
                               event.away_team && (
                                 <p>
-                                  {event.home_team} VS{" "}
+                                  {event.home_team}
+                                  {" VS "}
                                   {event.away_team}
                                 </p>
                               )}
@@ -918,7 +1124,9 @@ export default function Admin() {
                             <button
                               type="button"
                               className="admin-edit-button"
-                              onClick={() => handleEditEvent(event)}
+                              onClick={() =>
+                                handleEditEvent(event)
+                              }
                             >
                               수정
                             </button>
@@ -926,7 +1134,11 @@ export default function Admin() {
                             <button
                               type="button"
                               className="admin-delete-button"
-                              onClick={() => handleDeleteEvent(event)}
+                              onClick={() =>
+                                handleDeleteEvent(
+                                  event
+                                )
+                              }
                             >
                               삭제
                             </button>
@@ -950,7 +1162,9 @@ export default function Admin() {
         >
           <div
             className="admin-modal"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) =>
+              e.stopPropagation()
+            }
           >
             <div className="admin-modal-header">
               <div>
@@ -984,7 +1198,9 @@ export default function Admin() {
                   type="text"
                   placeholder="예: 수원 KT vs 창원 LG"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) =>
+                    setTitle(e.target.value)
+                  }
                 />
               </div>
 
@@ -993,7 +1209,9 @@ export default function Admin() {
                 <select
                   value={category}
                   onChange={(e) => {
-                    const value = e.target.value;
+                    const value =
+                      e.target.value;
+
                     setCategory(value);
 
                     if (value !== "sports") {
@@ -1003,31 +1221,47 @@ export default function Admin() {
                     }
                   }}
                 >
-                  {CATEGORY_OPTIONS.map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
+                  {CATEGORY_OPTIONS.map(
+                    ([value, label]) => (
+                      <option
+                        key={value}
+                        value={value}
+                      >
+                        {label}
+                      </option>
+                    )
+                  )}
                 </select>
               </div>
 
               {category === "sports" && (
                 <div className="admin-form-group">
                   <label>스포츠 종목 *</label>
+
                   <select
                     value={sportType}
                     onChange={(e) => {
-                      setSportType(e.target.value);
+                      setSportType(
+                        e.target.value
+                      );
                       setHomeTeam("");
                       setAwayTeam("");
                     }}
                   >
-                    <option value="">종목 선택</option>
-                    {SPORT_OPTIONS.map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
+                    <option value="">
+                      종목 선택
+                    </option>
+
+                    {SPORT_OPTIONS.map(
+                      ([value, label]) => (
+                        <option
+                          key={value}
+                          value={value}
+                        >
+                          {label}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
               )}
@@ -1036,47 +1270,65 @@ export default function Admin() {
                 <>
                   <div className="admin-form-group">
                     <label>홈팀 선택</label>
+
                     <select
                       value={homeTeam}
                       onChange={(e) =>
-                        setHomeTeam(e.target.value)
+                        setHomeTeam(
+                          e.target.value
+                        )
                       }
                     >
-                      <option value="">홈팀 선택</option>
-                      {availableTeams.map((team) => (
-                        <option
-                          key={team.name}
-                          value={team.name}
-                        >
-                          {team.name}
-                        </option>
-                      ))}
+                      <option value="">
+                        홈팀 선택
+                      </option>
+
+                      {availableTeams.map(
+                        (team) => (
+                          <option
+                            key={team.name}
+                            value={team.name}
+                          >
+                            {team.name}
+                          </option>
+                        )
+                      )}
                     </select>
                   </div>
 
                   <div className="admin-form-group">
                     <label>원정팀 선택</label>
+
                     <select
                       value={awayTeam}
                       onChange={(e) =>
-                        setAwayTeam(e.target.value)
+                        setAwayTeam(
+                          e.target.value
+                        )
                       }
                     >
-                      <option value="">원정팀 선택</option>
-                      {availableTeams.map((team) => (
-                        <option
-                          key={team.name}
-                          value={team.name}
-                        >
-                          {team.name}
-                        </option>
-                      ))}
+                      <option value="">
+                        원정팀 선택
+                      </option>
+
+                      {availableTeams.map(
+                        (team) => (
+                          <option
+                            key={team.name}
+                            value={team.name}
+                          >
+                            {team.name}
+                          </option>
+                        )
+                      )}
                     </select>
                   </div>
 
                   {(homeLogo || awayLogo) && (
                     <div className="admin-form-group admin-form-full">
-                      <label>경기 로고 미리보기</label>
+                      <label>
+                        경기 로고 미리보기
+                      </label>
 
                       <div
                         style={{
@@ -1089,81 +1341,99 @@ export default function Admin() {
                           background: "#15233d",
                         }}
                       >
-                        {[homeLogo, awayLogo].map(
-                          (logo, index) => (
-                            <div
-                              key={index}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "12px",
-                              }}
-                            >
-                              {index === 1 && (
-                                <strong
-                                  style={{ color: "white" }}
-                                >
-                                  VS
-                                </strong>
-                              )}
-
-                              <div
+                        {[
+                          homeLogo,
+                          awayLogo,
+                        ].map((logo, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                            }}
+                          >
+                            {index === 1 && (
+                              <strong
                                 style={{
-                                  width: "90px",
-                                  height: "90px",
-                                  background: "white",
-                                  borderRadius: "10px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  overflow: "hidden",
-                                  padding: "8px",
-                                  boxSizing: "border-box",
+                                  color: "white",
                                 }}
                               >
-                                {logo && (
-                                  <img
-                                    src={logo}
-                                    alt={
-                                      index === 0
-                                        ? "홈팀 로고"
-                                        : "원정팀 로고"
-                                    }
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "100%",
-                                      objectFit: "contain",
-                                    }}
-                                  />
-                                )}
-                              </div>
+                                VS
+                              </strong>
+                            )}
+
+                            <div
+                              style={{
+                                width: "90px",
+                                height: "90px",
+                                background: "white",
+                                borderRadius: "10px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent:
+                                  "center",
+                                overflow: "hidden",
+                                padding: "8px",
+                                boxSizing:
+                                  "border-box",
+                              }}
+                            >
+                              {logo && (
+                                <img
+                                  src={logo}
+                                  alt={
+                                    index === 0
+                                      ? "홈팀 로고"
+                                      : "원정팀 로고"
+                                  }
+                                  style={{
+                                    maxWidth:
+                                      "100%",
+                                    maxHeight:
+                                      "100%",
+                                    objectFit:
+                                      "contain",
+                                  }}
+                                />
+                              )}
                             </div>
-                          )
-                        )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
 
                   <div className="admin-form-group admin-form-full">
-                    <label>경기 카드 첫 번째 문구</label>
+                    <label>
+                      경기 카드 첫 번째 문구
+                    </label>
+
                     <input
                       type="text"
                       placeholder="예: 수원 KT와 창원 LG"
                       value={cardLine1}
                       onChange={(e) =>
-                        setCardLine1(e.target.value)
+                        setCardLine1(
+                          e.target.value
+                        )
                       }
                     />
                   </div>
 
                   <div className="admin-form-group admin-form-full">
-                    <label>경기 카드 두 번째 문구</label>
+                    <label>
+                      경기 카드 두 번째 문구
+                    </label>
+
                     <input
                       type="text"
                       placeholder="예: 승리를 가져갈 팀은?"
                       value={cardLine2}
                       onChange={(e) =>
-                        setCardLine2(e.target.value)
+                        setCardLine2(
+                          e.target.value
+                        )
                       }
                     />
 
@@ -1175,8 +1445,9 @@ export default function Admin() {
                       }}
                     >
                       두 줄 합계{" "}
-                      {cardLine1.length + cardLine2.length}/29자
-                      (공백 포함)
+                      {cardLine1.length +
+                        cardLine2.length}
+                      /29자 (공백 포함)
                     </p>
                   </div>
                 </>
@@ -1184,11 +1455,15 @@ export default function Admin() {
 
               <div className="admin-form-group">
                 <label>일정 유형 *</label>
+
                 <select
                   value={eventType}
                   onChange={(e) => {
                     const value =
-                      e.target.value as "short" | "long";
+                      e.target.value as
+                        | "short"
+                        | "long";
+
                     setEventType(value);
 
                     if (value === "short") {
@@ -1196,8 +1471,13 @@ export default function Admin() {
                     }
                   }}
                 >
-                  <option value="short">단기 일정</option>
-                  <option value="long">장기 일정</option>
+                  <option value="short">
+                    단기 일정
+                  </option>
+
+                  <option value="long">
+                    장기 일정
+                  </option>
                 </select>
               </div>
 
@@ -1207,11 +1487,14 @@ export default function Admin() {
                     ? "시작일 *"
                     : "날짜 *"}
                 </label>
+
                 <input
                   type="date"
                   value={eventDate}
                   onChange={(e) => {
-                    setEventDate(e.target.value);
+                    setEventDate(
+                      e.target.value
+                    );
 
                     if (
                       endDate &&
@@ -1226,12 +1509,17 @@ export default function Admin() {
               {eventType === "long" && (
                 <div className="admin-form-group">
                   <label>종료일 *</label>
+
                   <input
                     type="date"
                     value={endDate}
-                    min={eventDate || undefined}
+                    min={
+                      eventDate || undefined
+                    }
                     onChange={(e) =>
-                      setEndDate(e.target.value)
+                      setEndDate(
+                        e.target.value
+                      )
                     }
                   />
                 </div>
@@ -1239,22 +1527,28 @@ export default function Admin() {
 
               <div className="admin-form-group">
                 <label>시작 시간</label>
+
                 <input
                   type="time"
                   value={eventTime}
                   onChange={(e) =>
-                    setEventTime(e.target.value)
+                    setEventTime(
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="admin-form-group">
                 <label>장소</label>
+
                 <input
                   type="text"
                   placeholder="예: 수원 KT 소닉붐 아레나"
                   value={place}
-                  onChange={(e) => setPlace(e.target.value)}
+                  onChange={(e) =>
+                    setPlace(e.target.value)
+                  }
                 />
               </div>
 
@@ -1265,10 +1559,14 @@ export default function Admin() {
                   existingImageUrl && (
                     <div className="admin-current-image">
                       <img
-                        src={existingImageUrl}
+                        src={
+                          existingImageUrl
+                        }
                         alt="현재 대표 이미지"
                       />
-                      <p>현재 등록된 이미지</p>
+                      <p>
+                        현재 등록된 이미지
+                      </p>
                     </div>
                   )}
 
@@ -1277,7 +1575,8 @@ export default function Admin() {
                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                   onChange={(e) =>
                     setImageFile(
-                      e.target.files?.[0] ?? null
+                      e.target.files?.[0] ??
+                        null
                     )
                   }
                 />
@@ -1289,7 +1588,8 @@ export default function Admin() {
                       fontSize: "13px",
                     }}
                   >
-                    새 이미지: {imageFile.name}
+                    새 이미지:{" "}
+                    {imageFile.name}
                   </p>
                 )}
 
@@ -1300,33 +1600,43 @@ export default function Admin() {
                     color: "#999",
                   }}
                 >
-                  경기 카드는 팀 로고를 활용할 수 있으므로
-                  대표 이미지 없이 등록해도 됩니다.
-                  공연·축제·팝업은 기존처럼 이미지를 업로드하세요.
+                  경기 카드는 팀 로고를 활용할
+                  수 있으므로 대표 이미지 없이
+                  등록해도 됩니다.
+                  공연·축제·팝업은 기존처럼
+                  이미지를 업로드하세요.
                   JPG, PNG, WebP · 최대 5MB
                 </p>
               </div>
 
               <div className="admin-form-group admin-form-full">
                 <label>상세 설명</label>
+
                 <textarea
                   placeholder="일정에 대한 설명을 입력하세요."
                   rows={4}
                   value={description}
                   onChange={(e) =>
-                    setDescription(e.target.value)
+                    setDescription(
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="admin-form-group admin-form-full">
-                <label>예매 / 공식 링크</label>
+                <label>
+                  예매 / 공식 링크
+                </label>
+
                 <input
                   type="url"
                   placeholder="https://..."
                   value={ticketUrl}
                   onChange={(e) =>
-                    setTicketUrl(e.target.value)
+                    setTicketUrl(
+                      e.target.value
+                    )
                   }
                 />
               </div>
@@ -1337,10 +1647,15 @@ export default function Admin() {
                     type="checkbox"
                     checked={isPublished}
                     onChange={(e) =>
-                      setIsPublished(e.target.checked)
+                      setIsPublished(
+                        e.target.checked
+                      )
                     }
                   />
-                  <span>웹사이트에 공개하기</span>
+
+                  <span>
+                    웹사이트에 공개하기
+                  </span>
                 </label>
               </div>
 
@@ -1388,9 +1703,13 @@ export default function Admin() {
         >
           <div
             className="delete-modal"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) =>
+              e.stopPropagation()
+            }
           >
-            <div className="delete-modal-icon">!</div>
+            <div className="delete-modal-icon">
+              !
+            </div>
 
             <h2>
               {deleteMode === "multiple"
@@ -1401,8 +1720,11 @@ export default function Admin() {
             {deleteMode === "single" &&
               deleteTarget && (
                 <p className="delete-modal-description">
-                  <strong>{deleteTarget.title}</strong>
-                  {" "}일정을 정말 삭제하시겠습니까?
+                  <strong>
+                    {deleteTarget.title}
+                  </strong>
+                  {" "}일정을 정말
+                  삭제하시겠습니까?
                 </p>
               )}
 
@@ -1410,7 +1732,8 @@ export default function Admin() {
               <p className="delete-modal-description">
                 선택한{" "}
                 <strong>
-                  {selectedEventIds.length}개의 일정
+                  {selectedEventIds.length}
+                  개의 일정
                 </strong>
                 을 모두 삭제하시겠습니까?
               </p>
@@ -1440,7 +1763,9 @@ export default function Admin() {
                 type="button"
                 className="delete-confirm-button"
                 disabled={deleteLoading}
-                onClick={confirmDeleteEvent}
+                onClick={
+                  confirmDeleteEvent
+                }
               >
                 {deleteLoading
                   ? "삭제 중..."
