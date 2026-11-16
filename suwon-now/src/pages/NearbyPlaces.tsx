@@ -291,7 +291,7 @@ function NearbyPlaces() {
               SUWON PLAY GUIDE
             </span>
 
-            <h1>NEARBY PLACES</h1>
+            <h1>주변 맛집</h1>
 
             <p>
               경기 전후에 방문하기 좋은 수원의
