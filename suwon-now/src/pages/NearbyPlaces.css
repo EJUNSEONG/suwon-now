@@ -1,0 +1,386 @@
+
+.nearby-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #172033;
+}
+
+.nearby-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 52px 24px 80px;
+}
+
+.nearby-heading {
+  margin-bottom: 38px;
+}
+
+.nearby-heading h1 {
+  margin: 10px 0 12px;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -1.4px;
+  color: #142b4b;
+}
+
+.nearby-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.nearby-stadium-section {
+  margin-bottom: 28px;
+}
+
+.nearby-stadium-section h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.nearby-stadium-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nearby-stadium-tabs button {
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nearby-stadium-tabs button:hover {
+  border-color: #2563eb;
+}
+
+.nearby-stadium-tabs button.active {
+  background: #174a9c;
+  border-color: #174a9c;
+  color: #fff;
+}
+
+.nearby-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.nearby-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nearby-category-tabs button {
+  padding: 9px 16px;
+  border-radius: 100px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nearby-category-tabs button.active {
+  color: #fff;
+  background: #172b4d;
+  border-color: #172b4d;
+}
+
+.nearby-count {
+  color: #64748b;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.nearby-content {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.nearby-list {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  max-height: 650px;
+  overflow-y: auto;
+}
+
+.nearby-list-heading {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 14px;
+}
+
+.nearby-list-heading h2 {
+  margin: 0 0 5px;
+  font-size: 19px;
+  color: #172b4d;
+}
+
+.nearby-list-heading p {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.nearby-place-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nearby-place-card:hover,
+.nearby-place-card.selected {
+  border-color: #2563eb;
+  background: #f7faff;
+}
+
+.nearby-place-top {
+  margin-bottom: 10px;
+}
+
+.nearby-place-category {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.nearby-place-category.restaurant {
+  color: #c2410c;
+  background: #fff1e6;
+}
+
+.nearby-place-category.cafe {
+  color: #1d4ed8;
+  background: #eaf2ff;
+}
+
+.nearby-place-card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #172b4d;
+}
+
+.nearby-place-address {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0 0 8px;
+}
+
+.nearby-place-description {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+
+.nearby-place-view {
+  font-size: 12px;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.nearby-empty {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.nearby-empty span {
+  font-size: 30px;
+}
+
+.nearby-empty strong {
+  color: #334155;
+}
+
+.nearby-empty p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.nearby-map-section {
+  position: relative;
+  min-width: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.nearby-map {
+  height: 650px;
+  width: 100%;
+  z-index: 0;
+}
+
+.nearby-custom-marker,
+.nearby-stadium-marker {
+  background: transparent;
+  border: none;
+}
+
+.nearby-stadium-pin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: #172b4d;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  font-size: 23px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+}
+
+.nearby-popup {
+  min-width: 180px;
+}
+
+.nearby-popup strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.nearby-popup p {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 6px 0;
+}
+
+.nearby-popup button {
+  margin-top: 10px;
+  background: #174a9c;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.nearby-selected-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.nearby-selected-info strong {
+  font-size: 14px;
+  color: #172b4d;
+}
+
+.nearby-selected-info p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.nearby-selected-info button {
+  flex-shrink: 0;
+  padding: 10px 15px;
+  background: #174a9c;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nearby-map-notice {
+  margin-top: 18px;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 800px) {
+  .nearby-container {
+    padding: 30px 16px 60px;
+  }
+
+  .nearby-heading {
+    margin-bottom: 28px;
+  }
+
+  .nearby-content {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .nearby-map-section {
+    grid-row: 1;
+  }
+
+  .nearby-map {
+    height: 360px;
+  }
+
+  .nearby-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .nearby-filter-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .nearby-stadium-tabs button {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+
+  .nearby-map {
+    height: 320px;
+  }
+
+  .nearby-selected-info {
+    padding: 12px;
+  }
+
+  .nearby-place-card {
+    padding: 15px;
+  }
+}
